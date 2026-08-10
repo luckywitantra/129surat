@@ -1,367 +1,208 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arsip Surat & Manajemen Pro</title>
-    
-    <meta name="theme-color" content="#1d4ed8">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
-                        danger: { 50: '#fef2f2', 100: '#fee2e2', 500: '#ef4444' },
-                        success: { 50: '#f0fdf4', 500: '#22c55e' },
-                        warning: { 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b' },
-                        surface: '#f4f7fe',
-                    },
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
-                }
-            }
-        }
-    </script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Sistem Manajemen Surat, SPPK & PK</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f7fe; }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        [x-cloak] { display: none !important; }
-        .fade-enter { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .upload-zone { background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23CBD5E1FF' stroke-width='2' stroke-dasharray='8%2c 8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e"); border-radius: 12px; }
-    </style>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
-
-<body x-data="appData()" class="text-slate-800 h-screen flex overflow-hidden selection:bg-brand-500 selection:text-white">
-
-    <div x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 bg-slate-900/40 z-30 md:hidden backdrop-blur-sm" x-cloak></div>
-
-    <aside class="w-64 bg-white flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40 fixed md:relative h-full transition-transform duration-300" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
-        <div class="h-20 flex items-center px-6 gap-3">
-            <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-sm"><i class="fa-solid fa-layer-group"></i></div>
-            <div>
-                <h1 class="font-bold text-brand-600 text-lg leading-tight">Arsip Surat</h1>
-                <p class="text-[10px] text-slate-400 font-medium tracking-wide">Management Pro</p>
-            </div>
-            <button @click="sidebarOpen = false" class="ml-auto md:hidden text-slate-400 hover:text-slate-600"><i class="fa-solid fa-times text-xl"></i></button>
+<body>
+    <!-- Custom Modern Alert -->
+    <div id="custom-alert" class="modal-overlay hidden">
+        <div class="modal-card alert-card">
+            <div id="alert-icon" class="alert-icon"></div>
+            <h3 id="alert-title">Title</h3>
+            <p id="alert-message">Message</p>
+            <button class="btn btn-primary" onclick="closeAlert()">Tutup</button>
         </div>
+    </div>
 
-        <div class="px-5 mb-6">
-            <button @click="currentView = 'input_surat'" class="w-full bg-brand-400 hover:bg-brand-500 text-white rounded-xl py-3 text-sm font-semibold transition-colors shadow-sm flex items-center justify-center gap-2">
-                <i class="fa-solid fa-plus"></i> New Application
-            </button>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fa-solid fa-paper-plane fa-3x text-primary"></i>
+                <h2>Selamat Datang</h2>
+                <p>Sistem Manajemen Surat, SPPK & PK</p>
+            </div>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" required placeholder="Masukkan username...">
+                </div>
+                <div class="input-group">
+                    <label>Role Demo</label>
+                    <select id="login-role">
+                        <option value="Admin">Admin</option>
+                        <option value="Pejabat">Pejabat</option>
+                        <option value="Staf">Staf</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Masuk Aplikasi <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
         </div>
+    </div>
 
-        <nav class="flex-1 overflow-y-auto px-3 custom-scrollbar space-y-1.5">
-            <template x-for="item in menuItems" :key="item.id">
-                <button @click="switchMenu(item.id)" :class="{'bg-brand-600 text-white shadow-md shadow-brand-500/20': currentView === item.id, 'text-slate-500 hover:bg-slate-50 hover:text-slate-800': currentView !== item.id}" class="w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 group">
-                    <i :class="item.icon" class="w-5 text-center mr-3 text-lg" :class="{'text-white': currentView === item.id, 'text-slate-400 group-hover:text-brand-500': currentView !== item.id}"></i>
-                    <span class="font-semibold text-sm" x-text="item.label"></span>
-                </button>
-            </template>
-        </nav>
-    </aside>
-
-    <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-surface">
-        <header class="h-20 px-6 lg:px-10 flex items-center justify-between z-10 shrink-0">
-            <div class="flex items-center gap-4">
-                <button @click="sidebarOpen = true" class="md:hidden text-slate-500 hover:text-brand-600"><i class="fa-solid fa-bars text-xl"></i></button>
-                <div x-show="currentView !== 'dashboard'" class="hidden md:block"><h2 class="text-2xl font-bold text-brand-600" x-text="getMenuLabel()"></h2></div>
+    <!-- Main Application -->
+    <div id="main-screen" class="screen-container hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fa-solid fa-envelope-open-text"></i> SuratApp</h3>
+                <button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-times"></i></button>
             </div>
-            
-            <div class="flex items-center gap-4 sm:gap-6">
-                <div class="relative hidden sm:block">
-                    <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" placeholder="Search..." class="pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-400 w-64 transition-all shadow-sm">
-                </div>
-                <div class="flex items-center gap-3">
-                    <button class="relative p-2 text-slate-400 hover:text-slate-700 transition">
-                        <i class="fa-regular fa-bell text-xl"></i>
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-danger-500 rounded-full border-2 border-surface"></span>
-                    </button>
-                    <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden ml-2 cursor-pointer">
-                        <!-- Placeholder Avatar -->
-                        <div class="w-full h-full bg-brand-500 text-white flex items-center justify-center font-bold">AD</div>
-                    </div>
+            <div class="sidebar-user">
+                <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
+                <div class="user-info">
+                    <h4 id="user-name">User Name</h4>
+                    <span class="badge badge-primary" id="user-role">Role</span>
                 </div>
             </div>
-        </header>
-
-        <div class="flex-1 overflow-y-auto px-4 lg:px-10 pb-10 custom-scrollbar relative">
-            
-            <!-- Loader Overlay Global -->
-            <div x-show="isLoading" class="absolute inset-0 bg-surface/50 backdrop-blur-sm z-50 flex items-center justify-center" x-cloak>
-                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-brand-500"></i>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="navigate('dashboard')"><i class="fa-solid fa-home"></i> Dashboard</a>
+                <a href="#" class="nav-item" onclick="navigate('surat-masuk')"><i class="fa-solid fa-inbox"></i> Surat Masuk</a>
+                <a href="#" class="nav-item" onclick="navigate('surat-keluar')"><i class="fa-solid fa-paper-plane"></i> Surat Keluar</a>
+                <a href="#" class="nav-item" onclick="navigate('disposisi')"><i class="fa-solid fa-share-nodes"></i> Disposisi <span class="badge badge-danger">3</span></a>
+                <div class="nav-divider">SPPK & PK</div>
+                <a href="#" class="nav-item" onclick="navigate('sppk')"><i class="fa-solid fa-file-contract"></i> Data SPPK</a>
+                <a href="#" class="nav-item" onclick="navigate('pk')"><i class="fa-solid fa-file-signature"></i> Data PK</a>
+                <div class="nav-divider">Sistem</div>
+                <a href="#" class="nav-item" onclick="navigate('arsip')"><i class="fa-solid fa-box-archive"></i> Arsip</a>
+                <a href="#" class="nav-item admin-only" onclick="navigate('laporan')"><i class="fa-solid fa-chart-pie"></i> Laporan</a>
+                <a href="#" class="nav-item admin-only" onclick="navigate('pengaturan')"><i class="fa-solid fa-gear"></i> Konfigurasi</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-outline w-100" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
             </div>
+        </aside>
 
-            <!-- DASHBOARD -->
-            <div x-show="currentView === 'dashboard'" x-transition:enter="fade-enter" x-cloak class="space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-2">
-                    <div>
-                        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Dashboard Overview</h1>
-                        <p class="text-slate-500 mt-1">Welcome back, here's what's happening today.</p>
-                    </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                <h2 id="page-title" class="page-title">Dashboard</h2>
+                <div class="topbar-actions">
+                    <button class="btn-icon" onclick="toggleTheme()" title="Ubah Tema"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+                    <button class="btn-icon notification-btn" title="Notifikasi"><i class="fa-regular fa-bell"></i><span class="indicator"></span></button>
                 </div>
+            </header>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-2xl p-6 shadow-soft flex flex-col relative overflow-hidden group">
-                        <div class="flex justify-between items-start mb-4 relative z-10">
-                            <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-lg"><i class="fa-solid fa-envelope"></i></div><span class="font-bold text-slate-700">Total Mail</span></div>
+            <!-- Content Area -->
+            <div class="content-area" id="content-area">
+                <!-- Dashboard View -->
+                <div id="view-dashboard" class="view-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card playful-card blue">
+                            <div class="stat-icon"><i class="fa-solid fa-inbox"></i></div>
+                            <div class="stat-details"><h3>124</h3><p>Surat Masuk</p></div>
                         </div>
-                        <h3 class="text-4xl font-extrabold text-slate-900 mb-3 relative z-10" x-text="stats.suratMasuk">0</h3>
-                    </div>
-                    <div class="bg-white rounded-2xl p-6 shadow-soft flex flex-col relative overflow-hidden group">
-                        <div class="flex justify-between items-start mb-4 relative z-10">
-                            <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-wallet"></i></div><span class="font-bold text-slate-700">Surat Keluar</span></div>
+                        <div class="stat-card playful-card green">
+                            <div class="stat-icon"><i class="fa-solid fa-paper-plane"></i></div>
+                            <div class="stat-details"><h3>89</h3><p>Surat Keluar</p></div>
                         </div>
-                        <h3 class="text-4xl font-extrabold text-slate-900 mb-3 relative z-10" x-text="stats.suratKeluar">0</h3>
-                    </div>
-                    <div class="bg-white rounded-2xl p-6 shadow-soft flex flex-col relative overflow-hidden group">
-                        <div class="flex justify-between items-start mb-4 relative z-10">
-                            <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-success-50 text-success-500 flex items-center justify-center text-lg"><i class="fa-solid fa-clipboard-list"></i></div><span class="font-bold text-slate-700">Total Kredit (PK)</span></div>
+                        <div class="stat-card playful-card purple">
+                            <div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div>
+                            <div class="stat-details"><h3>45</h3><p>Total SPPK</p></div>
                         </div>
-                        <h3 class="text-4xl font-extrabold text-slate-900 mb-3 relative z-10" x-text="stats.totalPK">0</h3>
+                        <div class="stat-card playful-card orange">
+                            <div class="stat-icon"><i class="fa-solid fa-file-signature"></i></div>
+                            <div class="stat-details"><h3>42</h3><p>Total PK</p></div>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Chart -->
-                <div class="bg-white rounded-2xl p-6 shadow-soft">
-                    <div class="flex justify-between items-start mb-6">
-                        <div><h3 class="text-xl font-bold text-slate-900">Volume Overview</h3><p class="text-sm text-slate-500">Masuk vs Keluar (Monthly)</p></div>
-                    </div>
-                    <div class="h-64 relative w-full"><canvas id="mainChart"></canvas></div>
-                </div>
-            </div>
-
-            <!-- INPUT SURAT MASUK -->
-            <div x-show="currentView === 'input_surat'" x-transition:enter="fade-enter" x-cloak class="max-w-4xl mx-auto space-y-6 pt-4">
-                <div>
-                    <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">Input Surat Masuk</h1>
-                    <p class="text-slate-500">Silakan isi formulir di bawah ini dengan detail surat yang diterima.</p>
-                </div>
-
-                <div class="bg-white rounded-3xl p-8 shadow-soft">
-                    <form @submit.prevent="submitForm()" class="space-y-8">
-                        <div>
-                            <h3 class="text-lg font-bold text-brand-600 flex items-center gap-2 mb-4"><i class="fa-solid fa-building"></i> Informasi Pengirim</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <input type="text" x-model="formData.nomor" placeholder="Nomor Surat" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-200 focus:border-brand-500 outline-none transition" required>
-                                <div class="relative">
-                                    <input type="date" x-model="formData.tanggal" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-200 focus:border-brand-500 outline-none transition" required>
-                                    <span class="absolute top-1/2 left-4 transform -translate-y-1/2 text-xs text-brand-600 bg-white px-1 -mt-5 font-medium">Tanggal Surat</span>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <input type="text" x-model="formData.pengirim" placeholder="Nama Instansi / Pengirim" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-200 focus:border-brand-500 outline-none transition" required>
-                                </div>
+                    
+                    <div class="dashboard-widgets">
+                        <div class="card widget">
+                            <div class="card-header">
+                                <h3>Shortcut Cepat</h3>
+                            </div>
+                            <div class="card-body shortcut-grid">
+                                <button class="btn btn-primary-light" onclick="showAlert('Info', 'Fitur input form belum diimplementasi di demo ini', 'info')"><i class="fa-solid fa-plus"></i> Surat Masuk</button>
+                                <button class="btn btn-primary-light"><i class="fa-solid fa-plus"></i> Surat Keluar</button>
+                                <button class="btn btn-primary-light"><i class="fa-solid fa-plus"></i> Buat SPPK</button>
+                                <button class="btn btn-primary-light" onclick="copyWhatsAppSummary()"><i class="fa-brands fa-whatsapp"></i> Share Laporan</button>
                             </div>
                         </div>
-
-                        <div>
-                            <h3 class="text-lg font-bold text-brand-600 flex items-center gap-2 mb-4"><i class="fa-solid fa-file-lines"></i> Perihal Surat</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div class="md:col-span-2">
-                                    <input type="text" x-model="formData.perihal" placeholder="Perihal / Ringkasan" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-200 focus:border-brand-500 outline-none transition" required>
-                                </div>
+                        <div class="card widget">
+                            <div class="card-header">
+                                <h3>Aktivitas Terbaru</h3>
+                            </div>
+                            <div class="card-body">
+                                <ul class="activity-list">
+                                    <li><i class="fa-solid fa-check-circle text-success"></i> SPPK 067/SPPK/2026 telah dibuat PK.</li>
+                                    <li><i class="fa-solid fa-envelope text-primary"></i> Surat Masuk dari Instansi A diterima.</li>
+                                    <li><i class="fa-solid fa-share text-warning"></i> Disposisi baru dari Direktur.</li>
+                                </ul>
                             </div>
                         </div>
-
-                        <div class="flex items-center justify-end gap-4 pt-4 border-t border-slate-100">
-                            <button type="button" @click="currentView = 'dashboard'" class="px-6 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-sm hover:bg-slate-200 transition">Batal</button>
-                            <button type="submit" :disabled="isSubmitting" class="px-6 py-2.5 bg-brand-600 text-white font-bold rounded-xl text-sm hover:bg-brand-700 transition shadow-md flex items-center gap-2 disabled:opacity-50">
-                                <span x-text="isSubmitting ? 'Menyimpan...' : 'Simpan Data'"></span> <i class="fa-solid fa-arrow-right" x-show="!isSubmitting"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- LOANS (Tabel SPPK/PK) -->
-            <div x-show="currentView === 'loans'" x-transition:enter="fade-enter" x-cloak class="space-y-6 pt-2">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                    <div>
-                        <h1 class="text-4xl font-extrabold text-brand-600 tracking-tight">Arsip Kredit</h1>
-                        <p class="text-slate-500 mt-1">Manage and review SPPK & PK documents.</p>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl p-6 shadow-soft border border-slate-50">
-                    <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-left border-collapse min-w-[800px]">
-                            <thead>
-                                <tr>
-                                    <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase border-b-2 border-slate-100">ID Dokumen</th>
-                                    <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase border-b-2 border-slate-100">Nama Pemohon</th>
-                                    <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase border-b-2 border-slate-100">Nilai Plafon</th>
-                                    <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase border-b-2 border-slate-100">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-50">
-                                <template x-for="loan in loansData" :key="loan.id">
-                                    <tr class="hover:bg-slate-50/50 transition-colors group">
-                                        <td class="py-5 px-4 text-sm font-semibold text-slate-700" x-text="loan.nomor"></td>
-                                        <td class="py-5 px-4">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold" x-text="loan.inisial"></div>
-                                                <span class="text-sm font-medium text-slate-800" x-text="loan.debitur"></span>
-                                            </div>
-                                        </td>
-                                        <td class="py-5 px-4 text-sm font-medium text-slate-700" x-text="'Rp ' + loan.plafon"></td>
-                                        <td class="py-5 px-4">
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
-                                                :class="loan.status === 'Disetujui' || loan.status === 'Aktif' ? 'bg-success-50 text-success-500 border border-success-200' : 'bg-warning-50 text-warning-600 border border-warning-200'">
-                                                <span x-text="loan.status"></span>
-                                            </span>
+                <!-- SPPK View (Contoh Data Table) -->
+                <div id="view-sppk" class="view-section hidden">
+                    <div class="card table-card">
+                        <div class="card-header flex-between">
+                            <h3>Daftar SPPK</h3>
+                            <div class="actions">
+                                <input type="text" class="search-input" placeholder="Cari SPPK...">
+                                <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah SPPK</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>No. SPPK</th>
+                                        <th>Tanggal</th>
+                                        <th>Debitur</th>
+                                        <th>Plafon</th>
+                                        <th>Status PK</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>067/SPPK/2026</strong><br><small>Urut: 067</small></td>
+                                        <td>10 Aug 2026</td>
+                                        <td>PT. Maju Bersama</td>
+                                        <td>Rp 500.000.000</td>
+                                        <td><span class="badge badge-success">Sudah PK</span></td>
+                                        <td>
+                                            <button class="btn-icon" title="Lihat Detail"><i class="fa-solid fa-eye"></i></button>
                                         </td>
                                     </tr>
-                                </template>
-                                <tr x-show="loansData.length === 0"><td colspan="4" class="py-10 text-center text-slate-400">Data SPPK/PK kosong atau gagal dimuat.</td></tr>
-                            </tbody>
-                        </table>
+                                    <tr>
+                                        <td><strong>068/SPPK/2026</strong><br><small>Urut: 068</small></td>
+                                        <td>12 Aug 2026</td>
+                                        <td>CV. Jaya Abadi</td>
+                                        <td>Rp 150.000.000</td>
+                                        <td><span class="badge badge-warning">Belum PK</span></td>
+                                        <td>
+                                            <button class="btn-icon" title="Buat PK"><i class="fa-solid fa-file-signature text-primary"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Placeholder untuk modul lainnya -->
-            <div x-show="['analytics','clients','settings'].includes(currentView)" x-transition x-cloak class="flex items-center justify-center h-full min-h-[400px]">
-                <div class="text-center text-slate-400 space-y-4">
-                    <i class="fa-solid fa-person-digging text-6xl text-slate-200"></i>
-                    <h2 class="text-2xl font-bold">Modul <span x-text="currentView.toUpperCase()"></span></h2>
-                    <p>Antarmuka segera hadir untuk API Backend.</p>
+                
+                <!-- Blank State untuk view lainnya -->
+                <div id="view-blank" class="view-section hidden">
+                    <div class="empty-state">
+                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Empty" width="120">
+                        <h3>Modul dalam Pengembangan</h3>
+                        <p>Silakan gunakan navigasi untuk melihat Dashboard atau modul SPPK (Demo).</p>
+                    </div>
                 </div>
+
             </div>
+        </main>
+    </div>
 
-        </div>
-    </main>
-
-    <!-- SCRIPTS APLIKASI UTAMA (Menggantikan app.js yang terpisah) -->
-    <script>
-        // MASUKKAN URL DEPLOYMENT APPS SCRIPT ANDA DI SINI
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwmERQs7jhb2b9f0sWQTtTdnE_BepV0q2Sb9djIYdi5rJf50RFoV4ai71Q7xodJu75m/exec'; 
-
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('appData', () => ({
-                sidebarOpen: false,
-                currentView: 'dashboard',
-                isLoading: false,
-                isSubmitting: false,
-                
-                menuItems: [
-                    { id: 'dashboard', label: 'Dashboard', icon: 'fa-solid fa-border-all' },
-                    { id: 'input_surat', label: 'Surat Masuk', icon: 'fa-solid fa-envelope' },
-                    { id: 'analytics', label: 'Analytics', icon: 'fa-solid fa-chart-simple' },
-                    { id: 'loans', label: 'Loans (SPPK/PK)', icon: 'fa-solid fa-money-check-dollar' },
-                    { id: 'clients', label: 'Clients', icon: 'fa-solid fa-user-group' },
-                    { id: 'settings', label: 'Settings', icon: 'fa-solid fa-gear' }
-                ],
-                
-                stats: { suratMasuk: 0, suratKeluar: 0, totalPK: 0 },
-                loansData: [], 
-                formData: { nomor: '', tanggal: '', pengirim: '', perihal: '' },
-
-                getMenuLabel() { 
-                    return (this.menuItems.find(m => m.id === this.currentView) || {}).label || 'Menu'; 
-                },
-
-                switchMenu(menuId) {
-                    this.currentView = menuId;
-                    if (window.innerWidth < 768) this.sidebarOpen = false;
-                    
-                    if(menuId === 'dashboard') {
-                        this.fetchDashboard();
-                        setTimeout(() => this.renderChart(), 100);
-                    }
-                    if(menuId === 'loans') this.fetchLoans();
-                },
-
-                async fetchDashboard() {
-                    this.isLoading = true;
-                    try {
-                        const res = await fetch(`${API_URL}?action=getDashboard`, { method: 'GET', mode: 'cors' });
-                        const data = await res.json();
-                        this.stats = data;
-                    } catch (err) { console.error("Gagal get dashboard:", err); }
-                    this.isLoading = false;
-                },
-
-                async fetchLoans() {
-                    this.isLoading = true;
-                    try {
-                        const res = await fetch(`${API_URL}?action=getLoans`, { method: 'GET', mode: 'cors' });
-                        const data = await res.json();
-                        
-                        this.loansData = data.map(item => ({
-                            ...item,
-                            inisial: item.debitur ? item.debitur.charAt(0).toUpperCase() : '?'
-                        }));
-                    } catch (err) { console.error("Gagal get loans:", err); }
-                    this.isLoading = false;
-                },
-
-                async submitForm() {
-                    this.isSubmitting = true;
-                    try {
-                        const res = await fetch(API_URL, {
-                            method: 'POST',
-                            mode: 'cors',
-                            redirect: 'follow',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ action: 'saveSuratMasuk', data: this.formData })
-                        });
-                        
-                        const result = await res.json();
-                        if(result.success) {
-                            alert("Berhasil! Data surat tersimpan ke database.");
-                            this.formData = { nomor: '', tanggal: '', pengirim: '', perihal: '' };
-                            this.currentView = 'dashboard';
-                            this.fetchDashboard();
-                        } else {
-                            alert("Gagal menyimpan: " + result.error);
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        alert("Terjadi kesalahan jaringan.");
-                    }
-                    this.isSubmitting = false;
-                },
-
-                renderChart() {
-                    const ctx = document.getElementById('mainChart');
-                    if (!ctx) return;
-                    let chartStatus = Chart.getChart("mainChart");
-                    if (chartStatus != undefined) chartStatus.destroy();
-
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                            datasets: [
-                                { label: 'Masuk', data: [45, 60, 30, 75, 70], backgroundColor: '#2563eb', borderRadius: 4, barPercentage: 0.6, categoryPercentage: 0.8 },
-                                { label: 'Keluar', data: [25, 35, 50, 55, 25], backgroundColor: '#2b8a72', borderRadius: 4, barPercentage: 0.6, categoryPercentage: 0.8 }
-                            ]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, border: {display: false}, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
-                    });
-                },
-
-                init() {
-                    this.fetchDashboard();
-                    setTimeout(() => this.renderChart(), 300);
-                }
-            }));
-        });
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
