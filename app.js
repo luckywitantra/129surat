@@ -63,11 +63,14 @@ document.addEventListener('alpine:init', () => {
             if(this.stats.suratMasuk !== 0) return; // cache ringan
             this.isLoading = true;
             try {
-                const res = await fetch(`${API_URL}?action=getDashboard`);
+                const res = await fetch(`${API_URL}?action=getDashboard`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
                 const data = await res.json();
                 this.stats = data;
             } catch (err) {
-                console.error("Gagal mengambil data dashboard", err);
+                console.error("Gagal mengambil data dashboard:", err);
             }
             this.isLoading = false;
         },
@@ -75,11 +78,14 @@ document.addEventListener('alpine:init', () => {
         async fetchSuratMasuk() {
             this.isLoading = true;
             try {
-                const res = await fetch(`${API_URL}?action=getSuratMasuk`);
+                const res = await fetch(`${API_URL}?action=getSuratMasuk`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
                 const data = await res.json();
                 this.suratMasukData = data;
             } catch (err) {
-                console.error("Gagal mengambil data surat", err);
+                console.error("Gagal mengambil data surat:", err);
             }
             this.isLoading = false;
         },
@@ -89,9 +95,12 @@ document.addEventListener('alpine:init', () => {
             try {
                 const res = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Menghindari isu Preflight CORS
+                    mode: 'cors',
+                    redirect: 'follow', // Wajib untuk Google Apps Script (menangani 302 redirect)
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Wajib text/plain agar tidak memicu Preflight CORS yang ketat
                     body: JSON.stringify({ action: 'saveSuratMasuk', data: this.formData })
                 });
+                
                 const result = await res.json();
                 
                 if(result.success) {
@@ -99,9 +108,12 @@ document.addEventListener('alpine:init', () => {
                     this.formData = { nomor: '', pengirim: '', perihal: '' }; // reset
                     this.fetchSuratMasuk(); // Refresh tabel
                     alert("Data berhasil disimpan!");
+                } else {
+                    alert("Gagal menyimpan: " + (result.error || "Unknown error"));
                 }
             } catch (err) {
-                alert("Terjadi kesalahan saat menyimpan data.");
+                console.error(err);
+                alert("Terjadi kesalahan koneksi saat menyimpan data.");
             }
             this.isSubmitting = false;
         },
