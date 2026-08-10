@@ -163,3 +163,10 @@ p { color: var(--text-secondary); line-height: 1.6; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+/* --- Tambahan Modal Form --- */
+.modal-form { max-width: 700px !important; text-align: left; }
+.modal-form h3 { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); font-size: 1.5rem; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+.modal-form .form-grid { margin-bottom: 0; }
+.modal-form label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; }
