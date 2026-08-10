@@ -1,5 +1,3 @@
-// Konfigurasi API Google Apps Script 
-// PENTING: Ganti dengan URL Web App Deployment Anda yang baru
 const API_URL = 'https://script.google.com/macros/s/AKfycbwmERQs7jhb2b9f0sWQTtTdnE_BepV0q2Sb9djIYdi5rJf50RFoV4ai71Q7xodJu75m/exec';
 
 let currentUser = null;
@@ -13,8 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initSystem() {
     try {
-        // Fetch menggunakan method POST tanpa 'Content-Type: application/json' header 
-        // untuk menghindari CORS preflight block dari browser ke Google Script.
         const response = await fetch(API_URL, {
             method: 'POST',
             body: JSON.stringify({ action: 'initApp' }) 
@@ -23,21 +19,22 @@ async function initSystem() {
         const result = await response.json();
         
         if(result.status === 'success') {
-            console.log('Database Initialized:', result.data);
-            
-            // Transisi dari layar Loading ke Login
             setTimeout(() => {
                 document.getElementById('init-screen').classList.add('hidden');
                 document.getElementById('login-screen').classList.remove('hidden');
-            }, 800); // delay estetika
+            }, 800);
         } else {
             showAlert('Error Sistem', result.message || 'Gagal menyiapkan database.', 'error');
             document.getElementById('init-screen').innerHTML = `<h2 class="text-danger">Koneksi Database Gagal</h2><p>Periksa URL API Anda.</p>`;
         }
     } catch (error) {
         console.error("Init Error:", error);
-        showAlert('Koneksi Gagal', 'Tidak dapat terhubung ke server backend.', 'error');
-        document.getElementById('init-screen').innerHTML = `<h2 class="text-danger">Gagal Memuat</h2><p>Pastikan API URL sudah benar dan server aktif.</p>`;
+        // Fallback untuk keperluan demo UI jika API belum di-deploy:
+        setTimeout(() => {
+            document.getElementById('init-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            showAlert('Mode Offline', 'UI berjalan tanpa koneksi backend.', 'info');
+        }, 1000);
     }
 }
 
@@ -71,25 +68,42 @@ function closeAlert() {
     document.getElementById('custom-alert').classList.add('hidden');
 }
 
-// --- Navigation & Routing ---
+// --- Navigation & Routing Dinamis ---
 function navigate(page) {
     document.getElementById('sidebar').classList.remove('open');
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     event.currentTarget.classList.add('active');
     
-    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+    // Daftar semua view yang tersedia
+    const views = ['dashboard', 'surat-masuk', 'surat-keluar', 'disposisi', 'sppk', 'pk', 'arsip', 'laporan', 'pengaturan'];
     
-    const titleEl = document.getElementById('page-title');
-    if (page === 'dashboard') {
-        document.getElementById('view-dashboard').classList.remove('hidden');
-        titleEl.innerText = 'Dashboard';
-    } else if (page === 'sppk') {
-        document.getElementById('view-sppk').classList.remove('hidden');
-        titleEl.innerText = 'Data SPPK';
+    // Sembunyikan semua view
+    views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if(el) el.classList.add('hidden');
+    });
+    
+    // Tampilkan view target
+    const targetEl = document.getElementById(`view-${page}`);
+    if(targetEl) {
+        targetEl.classList.remove('hidden');
     } else {
         document.getElementById('view-blank').classList.remove('hidden');
-        titleEl.innerText = page.charAt(0).toUpperCase() + page.slice(1).replace('-', ' ');
     }
+    
+    // Ubah Judul Halaman
+    const titles = {
+        'dashboard': 'Dashboard Utama',
+        'surat-masuk': 'Manajemen Surat Masuk',
+        'surat-keluar': 'Manajemen Surat Keluar',
+        'disposisi': 'Tugas & Disposisi',
+        'sppk': 'Data SPPK',
+        'pk': 'Data PK',
+        'arsip': 'Arsip Dokumen Terpadu',
+        'laporan': 'Pusat Laporan',
+        'pengaturan': 'Konfigurasi Sistem'
+    };
+    document.getElementById('page-title').innerText = titles[page] || 'Aplikasi';
 }
 
 // --- Authentication ---
@@ -119,6 +133,9 @@ function handleLogout() {
     document.getElementById('main-screen').classList.add('hidden');
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('login-form').reset();
+    
+    // Kembalikan visibilitas menu admin
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
 }
 
 function copyWhatsAppSummary() {
