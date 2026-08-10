@@ -66,15 +66,25 @@ function navigate(page) {
     if(targetEl) targetEl.classList.remove('hidden');
 
     if (page === 'dashboard') loadDashboardStats();
-    else if (page === 'pengaturan') { loadDataTabel('jenis-surat'); loadDataTabel('user'); }
-    else if (['surat-masuk', 'surat-keluar', 'sppk', 'pk', 'disposisi', 'arsip'].includes(page)) loadDataTabel(page);
+    else if (page === 'pengaturan') { loadDataTabel('jenis-surat'); loadDataTabel('user'); loadConfig(); }
+    else if (page === 'pk') { loadDataTabel('pk'); populateSPPKSelect(); }
+    else if (['surat-masuk', 'surat-keluar', 'sppk', 'disposisi', 'arsip'].includes(page)) loadDataTabel(page);
     
-    const titles = {
-        'dashboard': 'Dashboard', 'surat-masuk': 'Surat Masuk', 'surat-keluar': 'Surat Keluar',
-        'disposisi': 'Disposisi', 'sppk': 'Data SPPK', 'pk': 'Data PK', 'arsip': 'Arsip Dokumen',
-        'laporan': 'Laporan', 'pengaturan': 'Pengaturan Sistem'
-    };
+    const titles = { 'dashboard': 'Dashboard', 'surat-masuk': 'Surat Masuk', 'surat-keluar': 'Surat Keluar', 'disposisi': 'Disposisi', 'sppk': 'Data SPPK', 'pk': 'Data PK', 'arsip': 'Arsip Dokumen', 'laporan': 'Laporan', 'pengaturan': 'Pengaturan Sistem' };
     document.getElementById('page-title').innerText = titles[page] || 'Aplikasi';
+}
+
+async function loadConfig() {
+    try {
+        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getConfig' }) });
+        const result = await response.json();
+        if (result.status === 'success') {
+            const form = document.getElementById('form-config');
+            for(let key in result.data) {
+                if(form.elements[key]) form.elements[key].value = result.data[key];
+            }
+        }
+    } catch (e) { console.error(e); }
 }
 
 async function loadDashboardStats() {
@@ -121,13 +131,17 @@ function renderHTMLTabel(jenis, dataArray, tbody) {
         return;
     }
     let html = '';
-    
     if(jenis === 'jenis-surat') globalDataJenisSurat = [...dataArray];
     if(jenis === 'user') globalDataUser = [...dataArray];
 
     dataArray.reverse().forEach(item => {
         let fileBtn = item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="btn-icon"><i class="fa-solid fa-file-pdf text-danger"></i></a>` : `-`;
-        
+        let s = (item.status || "").toLowerCase();
+        let badge = 'warning';
+        if(s.includes('selesai') || s.includes('terkirim') || s.includes('sudah') || s.includes('aktif')) badge = 'success';
+        if(s.includes('belum')) badge = 'danger';
+        let statusBadge = `<span class="badge badge-${badge}">${item.status || '-'}</span>`;
+
         if (jenis === 'jenis-surat') {
             html += `<tr><td><strong>${item.kode}</strong></td><td>${item.nama}</td><td>${item.uraian}</td>
                 <td><button class="btn-icon text-primary" onclick="editJenisSurat('${item.id}')"><i class="fa-solid fa-edit"></i></button>
@@ -136,11 +150,11 @@ function renderHTMLTabel(jenis, dataArray, tbody) {
             html += `<tr><td><strong>${item.username}</strong></td><td>${item.nama}</td><td>${item.role}</td><td>${item.jabatan}</td>
                 <td><button class="btn-icon text-primary" onclick="editUser('${item.id}')"><i class="fa-solid fa-edit"></i></button>
                 <button class="btn-icon text-danger" onclick="deleteData('deleteUser', '${item.id}', 'user')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
-        } else if (jenis === 'surat-masuk') html += `<tr><td><strong>${item.nomor}</strong></td><td>${item.tanggal}</td><td>${item.pengirim}</td><td>${item.perihal}</td><td>${item.status}</td><td>${fileBtn}</td></tr>`;
-        else if (jenis === 'surat-keluar') html += `<tr><td><strong>${item.tujuan}</strong></td><td>${item.tanggal}</td><td>${item.perihal}</td><td>${item.penandatangan}</td><td>${item.status}</td><td>${fileBtn}</td></tr>`;
-        else if (jenis === 'sppk') html += `<tr><td><strong>${item.nomorAplikasi}</strong></td><td>${item.tanggal}</td><td>${item.debitur}</td><td>Rp ${parseFloat(item.plafon).toLocaleString('id-ID')}</td><td>${item.status}</td><td>${fileBtn}</td></tr>`;
-        else if (jenis === 'pk') html += `<tr><td><strong>${item.nomorPK||'-'}</strong></td><td>${item.sppkInduk}</td><td>${item.tanggal}</td><td>${item.debitur}</td><td>Rp ${parseFloat(item.plafon).toLocaleString('id-ID')}</td><td>${item.status}</td><td>${fileBtn}</td></tr>`;
-        else if (jenis === 'disposisi') html += `<tr><td><strong>${item.suratSumber}</strong></td><td>${item.dari}</td><td>${item.instruksi}</td><td>${item.batas}</td><td>${item.status}</td><td><button class="btn btn-primary-light btn-sm">Follow Up</button></td></tr>`;
+        } else if (jenis === 'surat-masuk') html += `<tr><td><strong>${item.nomor}</strong></td><td>${item.tanggal}</td><td>${item.pengirim}</td><td>${item.perihal}</td><td>${statusBadge}</td><td>${fileBtn}</td></tr>`;
+        else if (jenis === 'surat-keluar') html += `<tr><td><strong>${item.nomor}</strong><br><small>${item.tujuan}</small></td><td>${item.tanggal}</td><td>${item.perihal}</td><td>${item.penandatangan}</td><td>${statusBadge}</td><td>${fileBtn}</td></tr>`;
+        else if (jenis === 'sppk') html += `<tr><td><strong>${item.nomorSPPK}</strong><br><small>App: ${item.nomorAplikasi}</small></td><td>${item.tanggal}</td><td>${item.debitur}</td><td>Rp ${parseFloat(item.plafon).toLocaleString('id-ID')}</td><td>${statusBadge}</td><td>${fileBtn}</td></tr>`;
+        else if (jenis === 'pk') html += `<tr><td><strong>${item.nomorPK}</strong></td><td>${item.sppkInduk}</td><td>${item.tanggal}</td><td>${item.debitur}</td><td>Rp ${parseFloat(item.plafon).toLocaleString('id-ID')}</td><td>${statusBadge}</td><td>${fileBtn}</td></tr>`;
+        else if (jenis === 'disposisi') html += `<tr><td><strong>${item.suratSumber}</strong></td><td>${item.dari}</td><td>${item.instruksi}</td><td>${item.batas}</td><td>${statusBadge}</td><td><button class="btn btn-primary-light btn-sm">Follow Up</button></td></tr>`;
         else if (jenis === 'arsip') html += `<tr><td><span class="badge badge-primary">${item.kategori}</span></td><td><strong>${item.nomor||'-'}</strong></td><td>${item.tanggal}</td><td>${item.deskripsi}</td><td>${fileBtn}</td></tr>`;
     });
     tbody.innerHTML = html;
@@ -148,10 +162,8 @@ function renderHTMLTabel(jenis, dataArray, tbody) {
 
 // ==== MASTER DATA FORM HANDLERS ====
 function openModalJenisSurat() {
-    document.getElementById('idJenisSurat').value = '';
-    document.getElementById('kodeJenis').value = '';
-    document.getElementById('namaJenis').value = '';
-    document.getElementById('uraianJenis').value = '';
+    document.getElementById('idJenisSurat').value = ''; document.getElementById('kodeJenis').value = '';
+    document.getElementById('namaJenis').value = ''; document.getElementById('uraianJenis').value = '';
     document.getElementById('title-jenis-surat').innerHTML = '<i class="fa-solid fa-tags text-primary"></i> Tambah Jenis Surat';
     openModal('modal-jenis-surat');
 }
@@ -159,20 +171,16 @@ function openModalJenisSurat() {
 function editJenisSurat(id) {
     const data = globalDataJenisSurat.find(d => d.id === id);
     if(data) {
-        document.getElementById('idJenisSurat').value = data.id;
-        document.getElementById('kodeJenis').value = data.kode;
-        document.getElementById('namaJenis').value = data.nama;
-        document.getElementById('uraianJenis').value = data.uraian;
+        document.getElementById('idJenisSurat').value = data.id; document.getElementById('kodeJenis').value = data.kode;
+        document.getElementById('namaJenis').value = data.nama; document.getElementById('uraianJenis').value = data.uraian;
         document.getElementById('title-jenis-surat').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Jenis Surat';
         openModal('modal-jenis-surat');
     }
 }
 
 function openModalUser() {
-    document.getElementById('idUser').value = '';
-    document.getElementById('namaLengkap').value = '';
-    document.getElementById('usernameLogin').value = '';
-    document.getElementById('jabatanUser').value = '';
+    document.getElementById('idUser').value = ''; document.getElementById('namaLengkap').value = '';
+    document.getElementById('usernameLogin').value = ''; document.getElementById('jabatanUser').value = '';
     document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-user-plus text-primary"></i> Tambah User';
     openModal('modal-user');
 }
@@ -180,10 +188,8 @@ function openModalUser() {
 function editUser(id) {
     const data = globalDataUser.find(d => d.id === id);
     if(data) {
-        document.getElementById('idUser').value = data.id;
-        document.getElementById('namaLengkap').value = data.nama;
-        document.getElementById('usernameLogin').value = data.username;
-        document.getElementById('roleUser').value = data.role;
+        document.getElementById('idUser').value = data.id; document.getElementById('namaLengkap').value = data.nama;
+        document.getElementById('usernameLogin').value = data.username; document.getElementById('roleUser').value = data.role;
         document.getElementById('jabatanUser').value = data.jabatan;
         document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit User';
         openModal('modal-user');
@@ -195,23 +201,37 @@ async function deleteData(actionName, id, tableRef) {
     try {
         const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: actionName, payload: { id: id } }) });
         const result = await response.json();
-        if (result.status === 'success') {
-            showAlert('Dihapus', 'Data berhasil dihapus.', 'success');
-            loadDataTabel(tableRef);
-        } else showAlert('Gagal', result.message, 'error');
+        if (result.status === 'success') { showAlert('Dihapus', 'Data berhasil dihapus.', 'success'); loadDataTabel(tableRef); } 
+        else showAlert('Gagal', result.message, 'error');
     } catch (e) { showAlert('Error', 'Gagal koneksi.', 'error'); }
 }
 
 async function submitJenisSurat(e) {
-    e.preventDefault();
-    const f = e.target;
+    e.preventDefault(); const f = e.target;
     sendFormData('saveJenisSurat', { id: f.elements['idJenisSurat'].value, kode: f.elements['kodeJenis'].value, nama: f.elements['namaJenis'].value, uraian: f.elements['uraianJenis'].value }, f, 'modal-jenis-surat', 'jenis-surat');
 }
 
 async function submitUser(e) {
-    e.preventDefault();
-    const f = e.target;
+    e.preventDefault(); const f = e.target;
     sendFormData('saveUser', { id: f.elements['idUser'].value, nama: f.elements['namaLengkap'].value, username: f.elements['usernameLogin'].value, role: f.elements['roleUser'].value, jabatan: f.elements['jabatanUser'].value }, f, 'modal-user', 'user');
+}
+
+async function submitConfig(e) {
+    e.preventDefault(); const form = e.target; const payload = {};
+    Array.from(form.elements).forEach(el => { if(el.name) payload[el.name] = el.value; });
+    sendFormData('saveConfig', payload, form, null, null);
+    setTimeout(loadConfig, 1000); // Reload config agar inputan ter-refresh
+}
+
+function populateSPPKSelect() {
+    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getSPPK' }) })
+        .then(res => res.json()).then(result => {
+            if(result.status === 'success') {
+                let options = '<option value="">Pilih SPPK yang Disetujui...</option>';
+                result.data.forEach(j => { if(j.status !== "Sudah PK") options += `<option value="${j.nomorSPPK}">${j.nomorSPPK} - ${j.debitur}</option>`; });
+                document.getElementById('select-sppk-induk').innerHTML = options;
+            }
+        });
 }
 
 // ==== UNIVERSAL FORM SENDER ====
@@ -233,11 +253,11 @@ async function sendFormData(action, payload, formEl, modalId, jenisMenuRef) {
         const result = await response.json();
 
         if (result.status === 'success') {
-            closeModal(modalId);
+            if(modalId) closeModal(modalId);
             showAlert('Berhasil', result.message, 'success');
-            formEl.reset(); 
+            if(modalId) formEl.reset(); 
             if(jenisMenuRef) loadDataTabel(jenisMenuRef);
-            if(jenisMenuRef !== 'user' && jenisMenuRef !== 'jenis-surat') loadDashboardStats();
+            if(jenisMenuRef && jenisMenuRef !== 'user' && jenisMenuRef !== 'jenis-surat') loadDashboardStats();
         } else {
             showAlert('Gagal', result.message, 'error');
         }
@@ -246,33 +266,30 @@ async function sendFormData(action, payload, formEl, modalId, jenisMenuRef) {
 }
 
 // Transaction Forms
-async function submitSuratMasuk(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; sendFormData('insertSuratMasuk', { nomorSurat: f.elements['nomorSurat'].value, tanggalSurat: f.elements['tanggalSurat'].value, pengirim: f.elements['pengirim'].value, sifatSurat: f.elements['sifatSurat'].value, perihal: f.elements['perihal'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-masuk', 'surat-masuk'); }
+async function submitSuratMasuk(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; sendFormData('insertSuratMasuk', { jenisSurat: f.elements['jenisSurat'].value, tanggalSurat: f.elements['tanggalSurat'].value, pengirim: f.elements['pengirim'].value, sifatSurat: f.elements['sifatSurat'].value, perihal: f.elements['perihal'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-masuk', 'surat-masuk'); }
 async function submitSuratKeluar(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; sendFormData('insertSuratKeluar', { jenisSurat: f.elements['jenisSurat'].value, tujuan: f.elements['tujuan'].value, perihal: f.elements['perihal'].value, penandatangan: f.elements['penandatangan'].value, sifat: f.elements['sifat'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-keluar', 'surat-keluar'); }
 async function submitSPPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; sendFormData('insertSPPK', { nomorAplikasi: f.elements['nomorAplikasi'].value, tanggalSPPK: f.elements['tanggalSPPK'].value, namaDebitur: f.elements['namaDebitur'].value, jenisKredit: f.elements['jenisKredit'].value, plafon: f.elements['plafon'].value, jangkaWaktu: f.elements['jangkaWaktu'].value, tujuanKredit: f.elements['tujuanKredit'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-sppk', 'sppk'); }
 async function submitDisposisi(e) { e.preventDefault(); const f = e.target; sendFormData('insertDisposisi', { suratSumber: f.elements['suratSumber'].value, kepada: f.elements['kepada'].value, instruksi: f.elements['instruksi'].value, batasWaktu: f.elements['batasWaktu'].value, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-disposisi', 'disposisi'); }
 async function submitPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; sendFormData('insertPK', { nomorSPPK: f.elements['nomorSPPK'].value, tanggalPK: f.elements['tanggalPK'].value, namaDebitur: f.elements['namaDebitur'].value, plafon: f.elements['plafon'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-pk', 'pk'); }
 
-// Login / Misc
 function handleLogin(e) {
     e.preventDefault();
     currentUser = { username: document.getElementById('login-username').value, role: document.getElementById('login-role').value };
-    document.getElementById('user-name').innerText = currentUser.username;
-    document.getElementById('user-role').innerText = currentUser.role;
+    document.getElementById('user-name').innerText = currentUser.username; document.getElementById('user-role').innerText = currentUser.role;
     if(currentUser.role !== 'Admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('main-screen').classList.remove('hidden');
+    document.getElementById('login-screen').classList.add('hidden'); document.getElementById('main-screen').classList.remove('hidden');
     loadDashboardStats();
     
-    // Auto load jenis surat ke combobox Form Surat Keluar
+    // Auto load jenis surat ke form SM & SK
     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getJenisSurat' }) })
         .then(res => res.json()).then(result => {
             if(result.status === 'success') {
-                let options = '<option value="">Pilih Jenis...</option>';
+                let options = '<option value="">Pilih Jenis Surat...</option>';
                 result.data.forEach(j => options += `<option value="${j.kode}">${j.kode} - ${j.nama}</option>`);
-                document.getElementById('select-jenis-surat').innerHTML = options;
+                if(document.getElementById('select-jenis-sm')) document.getElementById('select-jenis-sm').innerHTML = options;
+                if(document.getElementById('select-jenis-sk')) document.getElementById('select-jenis-sk').innerHTML = options;
             }
         });
 }
 function handleLogout() { currentUser = null; document.getElementById('main-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); document.getElementById('login-form').reset(); document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex'); }
-function copyWhatsAppSummary() { navigator.clipboard.writeText("Laporan SPPK...").then(()=>showAlert('Sukses', 'Disalin!', 'success')); }
 window.onload = () => { if (document.getElementById('theme-icon')) document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; };
