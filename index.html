@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-SURAT PRO (SPPK/PK)</title>
     
-    <!-- PWA Setup -->
+    <!-- PWA Setup (Pastikan manifest.json & sw.js ada di root yang sama nantinya) -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0ea5e9">
     
@@ -26,16 +26,33 @@
         }
     </script>
 
-    <!-- FontAwesome & CSS -->
+    <!-- FontAwesome & Custom Internal CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.7); }
 
-    <!-- Alpine.js & Chart.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        [x-cloak] { display: none !important; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <!-- Chart.js & Alpine.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Core App Logic -->
-    <script src="app.js" defer></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body x-data="appData()" :class="{ 'dark': isDark }" class="antialiased h-screen flex overflow-hidden transition-colors duration-300 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
@@ -111,7 +128,7 @@
                 </div>
             </div>
 
-            <!-- Surat Masuk View (Data Table) -->
+            <!-- Surat Masuk View -->
             <div x-show="currentView === 'surat_masuk'" x-transition x-cloak class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 h-full flex flex-col transition-colors">
                 <div class="p-4 md:p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <button @click="openModal = true" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-lg flex items-center">
@@ -147,7 +164,6 @@
                                     <td class="py-4 px-6 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]" x-text="surat.perihal"></td>
                                 </tr>
                             </template>
-                            <!-- Empty State -->
                             <tr x-show="filteredSuratMasuk.length === 0 && !isLoading">
                                 <td colspan="4" class="py-10 text-center text-slate-500">Tidak ada data ditemukan.</td>
                             </tr>
@@ -155,6 +171,16 @@
                     </table>
                 </div>
             </div>
+            
+            <!-- Modul Lain (Placeholder agar navigasi jalan) -->
+            <div x-show="['surat_keluar','sppk','pk'].includes(currentView)" x-transition x-cloak class="flex items-center justify-center h-full min-h-[400px]">
+                <div class="text-center text-slate-400 dark:text-slate-600 space-y-4">
+                    <i class="fa-solid fa-person-digging text-6xl text-slate-200 dark:text-slate-700"></i>
+                    <h2 class="text-2xl font-bold">Modul <span x-text="currentView.toUpperCase().replace('_',' ')"></span></h2>
+                    <p>Antarmuka segera hadir untuk API Backend.</p>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -194,5 +220,142 @@
             </div>
         </div>
     </div>
+
+    <!-- Script Utama (Logic App) -->
+    <script>
+        // --- KONFIGURASI PENTING ---
+        // GANTI INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwmERQs7jhb2b9f0sWQTtTdnE_BepV0q2Sb9djIYdi5rJf50RFoV4ai71Q7xodJu75m/exec'; 
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('appData', () => ({
+                sidebarOpen: false,
+                currentView: 'dashboard',
+                openModal: false,
+                isDark: false,
+                isLoading: false,
+                isSubmitting: false,
+                searchQuery: '',
+                
+                menuItems: [
+                    { id: 'dashboard', label: 'Dashboard', icon: 'fa-solid fa-chart-pie' },
+                    { id: 'surat_masuk', label: 'Surat Masuk', icon: 'fa-solid fa-inbox' },
+                    { id: 'surat_keluar', label: 'Surat Keluar', icon: 'fa-solid fa-paper-plane' },
+                    { id: 'sppk', label: 'SPPK / PK', icon: 'fa-solid fa-file-contract' }
+                ],
+                
+                // Data State
+                stats: { suratMasuk: 0, suratKeluar: 0, totalPK: 0 },
+                suratMasukData: [],
+                formData: { nomor: '', pengirim: '', perihal: '' },
+                
+                get filteredSuratMasuk() {
+                    if (this.searchQuery === '') return this.suratMasukData;
+                    const q = this.searchQuery.toLowerCase();
+                    return this.suratMasukData.filter(s => 
+                        (s.nomor && s.nomor.toLowerCase().includes(q)) || 
+                        (s.perihal && s.perihal.toLowerCase().includes(q)) ||
+                        (s.pengirim && s.pengirim.toLowerCase().includes(q))
+                    );
+                },
+
+                getMenuLabel() { 
+                    return (this.menuItems.find(m => m.id === this.currentView) || {}).label || 'Menu'; 
+                },
+
+                switchMenu(menuId) {
+                    this.currentView = menuId;
+                    if (window.innerWidth < 768) this.sidebarOpen = false;
+                    
+                    if(menuId === 'dashboard') this.fetchDashboard();
+                    if(menuId === 'surat_masuk') this.fetchSuratMasuk();
+                },
+
+                toggleTheme() { 
+                    this.isDark = !this.isDark; 
+                    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+                },
+
+                // --- FUNGSI API FETCH KE GOOGLE APPS SCRIPT ---
+                async fetchDashboard() {
+                    // Hanya mock data jika API belum di set
+                    if (API_URL.includes("URL_ANDA")) {
+                        this.stats = { suratMasuk: 120, suratKeluar: 45, totalPK: 10 };
+                        return;
+                    }
+
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch(`${API_URL}?action=getDashboard`);
+                        const data = await res.json();
+                        this.stats = data;
+                    } catch (err) {
+                        console.error("Gagal get dashboard:", err);
+                    }
+                    this.isLoading = false;
+                },
+
+                async fetchSuratMasuk() {
+                    if (API_URL.includes("URL_ANDA")) {
+                        this.suratMasukData = [{id: 1, nomor: "DUMMY/01", tanggal: "2026-08-10", pengirim: "System", perihal: "Tolong Ganti API_URL"}];
+                        return;
+                    }
+
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch(`${API_URL}?action=getSuratMasuk`);
+                        const data = await res.json();
+                        this.suratMasukData = data;
+                    } catch (err) {
+                        console.error("Gagal get surat:", err);
+                    }
+                    this.isLoading = false;
+                },
+
+                async submitForm() {
+                    if (API_URL.includes("URL_ANDA")) {
+                        alert("Harap ganti API_URL di dalam script dengan URL Google Apps Script Anda.");
+                        return;
+                    }
+
+                    this.isSubmitting = true;
+                    try {
+                        const res = await fetch(API_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ action: 'saveSuratMasuk', data: this.formData })
+                        });
+                        const result = await res.json();
+                        
+                        if(result.success) {
+                            this.openModal = false;
+                            this.formData = { nomor: '', pengirim: '', perihal: '' };
+                            this.fetchSuratMasuk();
+                            alert("Data berhasil disimpan!");
+                        }
+                    } catch (err) {
+                        alert("Terjadi kesalahan jaringan.");
+                    }
+                    this.isSubmitting = false;
+                },
+
+                init() {
+                    // Set Theme
+                    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        this.isDark = true;
+                    }
+                    // Load Awal
+                    this.fetchDashboard();
+                }
+            }));
+        });
+
+        // Register Service Worker untuk PWA jika ada file sw.js
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(e => console.log('SW Note:', e));
+            });
+        }
+    </script>
 </body>
 </html>
