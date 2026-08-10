@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-SURAT PRO (SPPK/PK)</title>
+    
+    <!-- PWA Setup -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' },
+                        accent: { 500: '#f43f5e', 400: '#fb7185' },
+                        warning: '#facc15', success: '#22c55e'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome & CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Alpine.js & Chart.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Core App Logic -->
+    <script src="app.js" defer></script>
+</head>
+
+<body x-data="appData()" :class="{ 'dark': isDark }" class="antialiased h-screen flex overflow-hidden transition-colors duration-300 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+
+    <!-- Sidebar Overlay Mobile -->
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 bg-slate-900/60 z-20 md:hidden" x-cloak></div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-brand-900 dark:bg-slate-950 text-white flex flex-col transition-transform duration-300 shadow-xl z-30 fixed md:relative h-full" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
+        <div class="h-16 flex items-center px-6 border-b border-brand-600/50 dark:border-slate-800">
+            <i class="fa-solid fa-paper-plane text-accent-500 text-2xl mr-3"></i>
+            <span class="text-lg font-bold tracking-wider">E-SURAT <span class="text-accent-500">PRO</span></span>
+            <button @click="sidebarOpen = false" class="ml-auto md:hidden text-white hover:text-accent-400 transition"><i class="fa-solid fa-times text-xl"></i></button>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 custom-scrollbar">
+            <ul class="space-y-1 px-2">
+                <template x-for="item in menuItems" :key="item.id">
+                    <li>
+                        <button @click="switchMenu(item.id)" :class="{'bg-brand-600 dark:bg-slate-800 rounded-xl text-white shadow-md': currentView === item.id, 'text-brand-100 hover:bg-brand-600/50 hover:text-white rounded-xl': currentView !== item.id}" class="w-full flex items-center px-4 py-3 text-left transition-all duration-200">
+                            <i :class="item.icon" class="w-5 text-center mr-3 opacity-80"></i>
+                            <span class="font-medium text-sm" x-text="item.label"></span>
+                        </button>
+                    </li>
+                </template>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- Topbar -->
+        <header class="h-16 glass-panel border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8 z-10 sticky top-0 transition-colors">
+            <div class="flex items-center">
+                <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-slate-500 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 mr-4 transition"><i class="fa-solid fa-bars text-xl"></i></button>
+                <h1 class="text-xl font-bold text-slate-800 dark:text-slate-100" x-text="getMenuLabel()"></h1>
+            </div>
+            
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <button @click="toggleTheme()" class="p-2 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid text-xl" :class="isDark ? 'fa-sun' : 'fa-moon'"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Area -->
+        <div class="flex-1 overflow-auto p-4 lg:p-8 custom-scrollbar relative">
+            
+            <!-- Dashboard View -->
+            <div x-show="currentView === 'dashboard'" x-transition x-cloak class="space-y-6">
+                <!-- Loader -->
+                <div x-show="isLoading" class="flex justify-center items-center h-32">
+                    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-brand-500"></i>
+                </div>
+                
+                <div x-show="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 fade-in">
+                    <!-- Stat Card 1 -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all group">
+                        <div class="z-10">
+                            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Surat Masuk</p>
+                            <h3 class="text-3xl font-bold text-slate-800 dark:text-white" x-text="stats.suratMasuk">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-brand-100 dark:bg-brand-900/50 text-brand-600 dark:text-brand-400 rounded-full flex items-center justify-center text-xl z-10 shadow-sm"><i class="fa-solid fa-inbox"></i></div>
+                    </div>
+                    <!-- Stat Card 2 -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-between hover:shadow-lg hover:-translate-y-1 transition-all group">
+                        <div class="z-10">
+                            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Surat Keluar</p>
+                            <h3 class="text-3xl font-bold text-slate-800 dark:text-white" x-text="stats.suratKeluar">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center text-xl z-10 shadow-sm"><i class="fa-solid fa-paper-plane"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Surat Masuk View (Data Table) -->
+            <div x-show="currentView === 'surat_masuk'" x-transition x-cloak class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 h-full flex flex-col transition-colors">
+                <div class="p-4 md:p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <button @click="openModal = true" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-lg flex items-center">
+                        <i class="fa-solid fa-plus mr-2"></i>Tambah Surat
+                    </button>
+                    <div class="relative w-full md:w-auto">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" x-model="searchQuery" placeholder="Pencarian cepat..." class="pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:ring-brand-400 bg-slate-50 dark:bg-slate-900 w-full md:w-72">
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-x-auto custom-scrollbar relative">
+                    <!-- Loader Overlay -->
+                    <div x-show="isLoading" class="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center z-20">
+                        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-500"></i>
+                    </div>
+
+                    <table class="w-full text-left border-collapse min-w-[800px]">
+                        <thead class="bg-slate-50 dark:bg-slate-900/50 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
+                            <tr>
+                                <th class="py-3 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">No Surat</th>
+                                <th class="py-3 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Tanggal</th>
+                                <th class="py-3 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Pengirim</th>
+                                <th class="py-3 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Perihal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                            <template x-for="surat in filteredSuratMasuk" :key="surat.id">
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
+                                    <td class="py-4 px-6 text-sm font-medium text-slate-900 dark:text-slate-200" x-text="surat.nomor"></td>
+                                    <td class="py-4 px-6 text-sm text-slate-600 dark:text-slate-400" x-text="surat.tanggal"></td>
+                                    <td class="py-4 px-6 text-sm text-slate-800 dark:text-slate-300" x-text="surat.pengirim"></td>
+                                    <td class="py-4 px-6 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]" x-text="surat.perihal"></td>
+                                </tr>
+                            </template>
+                            <!-- Empty State -->
+                            <tr x-show="filteredSuratMasuk.length === 0 && !isLoading">
+                                <td colspan="4" class="py-10 text-center text-slate-500">Tidak ada data ditemukan.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Input Data -->
+    <div x-show="openModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div x-show="openModal" x-transition.opacity class="fixed inset-0 transition-opacity bg-slate-900/60 backdrop-blur-sm" @click="openModal = false"></div>
+            <div x-show="openModal" x-transition class="relative inline-block w-full max-w-2xl p-6 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-slate-800 shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700">
+                <div class="flex items-center justify-between mb-5 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">Tambah Data Baru</h3>
+                    <button @click="openModal = false" class="text-slate-400 hover:text-accent-500 transition bg-slate-100 dark:bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-times"></i></button>
+                </div>
+                <form class="space-y-4" @submit.prevent="submitForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nomor Surat</label>
+                            <input type="text" x-model="formData.nomor" class="w-full border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl p-3 text-sm focus:ring-brand-400 dark:text-slate-200" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Pengirim</label>
+                            <input type="text" x-model="formData.pengirim" class="w-full border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl p-3 text-sm focus:ring-brand-400 dark:text-slate-200" required>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Perihal</label>
+                            <input type="text" x-model="formData.perihal" class="w-full border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl p-3 text-sm focus:ring-brand-400 dark:text-slate-200" required>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-slate-700">
+                        <button type="button" @click="openModal = false" class="px-5 py-2.5 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium transition">Batal</button>
+                        <button type="submit" :disabled="isSubmitting" class="px-5 py-2.5 bg-brand-600 text-white rounded-xl font-medium shadow-lg flex items-center gap-2 disabled:opacity-50">
+                            <i class="fa-solid fa-save" x-show="!isSubmitting"></i>
+                            <i class="fa-solid fa-spinner fa-spin" x-show="isSubmitting"></i>
+                            <span x-text="isSubmitting ? 'Menyimpan...' : 'Simpan Data'"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
