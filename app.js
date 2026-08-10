@@ -1,118 +1,117 @@
-// Ganti URL dengan URL Web App Anda
-const API_URL = 'https://script.google.com/macros/s/AKfycbwmERQs7jhb2b9f0sWQTtTdnE_BepV0q2Sb9djIYdi5rJf50RFoV4ai71Q7xodJu75m/exec'; 
-
-document.addEventListener('alpine:init', () => {
-    Alpine.data('appData', () => ({
-        sidebarOpen: false,
-        currentView: 'dashboard',
-        isLoading: false,
-        isSubmitting: false,
-        
-        menuItems: [
-            { id: 'dashboard', label: 'Dashboard', icon: 'fa-solid fa-border-all' },
-            { id: 'input_surat', label: 'Surat Masuk', icon: 'fa-solid fa-envelope' },
-            { id: 'analytics', label: 'Analytics', icon: 'fa-solid fa-chart-simple' },
-            { id: 'loans', label: 'Loans (SPPK/PK)', icon: 'fa-solid fa-money-check-dollar' },
-            { id: 'clients', label: 'Clients', icon: 'fa-solid fa-user-group' },
-            { id: 'settings', label: 'Settings', icon: 'fa-solid fa-gear' }
-        ],
-        
-        stats: { suratMasuk: 0, suratKeluar: 0, totalPK: 0 },
-        loansData: [], // Array untuk data SPPK / PK
-        formData: { nomor: '', tanggal: '', pengirim: '', perihal: '' },
-
-        getMenuLabel() { return (this.menuItems.find(m => m.id === this.currentView) || {}).label || 'Menu'; },
-
-        switchMenu(menuId) {
-            this.currentView = menuId;
-            if (window.innerWidth < 768) this.sidebarOpen = false;
-            
-            if(menuId === 'dashboard') {
-                this.fetchDashboard();
-                setTimeout(() => this.renderChart(), 100);
-            }
-            if(menuId === 'loans') this.fetchLoans();
-        },
-
-        async fetchDashboard() {
-            this.isLoading = true;
-            try {
-                const res = await fetch(`${API_URL}?action=getDashboard`, { method: 'GET', mode: 'cors' });
-                const data = await res.json();
-                this.stats = data;
-            } catch (err) { console.error("Gagal get dashboard:", err); }
-            this.isLoading = false;
-        },
-
-        async fetchLoans() {
-            this.isLoading = true;
-            try {
-                const res = await fetch(`${API_URL}?action=getLoans`, { method: 'GET', mode: 'cors' });
-                const data = await res.json();
-                
-                // Tambahkan inisial huruf pertama nama debitur untuk avatar di UI
-                this.loansData = data.map(item => ({
-                    ...item,
-                    inisial: item.debitur ? item.debitur.charAt(0).toUpperCase() : '?'
-                }));
-            } catch (err) { console.error("Gagal get loans:", err); }
-            this.isLoading = false;
-        },
-
-        async submitForm() {
-            this.isSubmitting = true;
-            try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'saveSuratMasuk', data: this.formData })
-                });
-                
-                const result = await res.json();
-                if(result.success) {
-                    alert("Berhasil! Data surat tersimpan ke database.");
-                    this.formData = { nomor: '', tanggal: '', pengirim: '', perihal: '' };
-                    this.currentView = 'dashboard';
-                    this.fetchDashboard(); // Refresh stats
-                } else {
-                    alert("Gagal menyimpan: " + result.error);
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Terjadi kesalahan jaringan.");
-            }
-            this.isSubmitting = false;
-        },
-
-        renderChart() {
-            const ctx = document.getElementById('mainChart');
-            if (!ctx) return;
-            let chartStatus = Chart.getChart("mainChart");
-            if (chartStatus != undefined) chartStatus.destroy();
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                    datasets: [
-                        { label: 'Masuk', data: [45, 60, 30, 75, 70], backgroundColor: '#2563eb', borderRadius: 4, barPercentage: 0.6, categoryPercentage: 0.8 },
-                        { label: 'Keluar', data: [25, 35, 50, 55, 25], backgroundColor: '#2b8a72', borderRadius: 4, barPercentage: 0.6, categoryPercentage: 0.8 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, border: {display: false}, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
-            });
-        },
-
-        init() {
-            this.fetchDashboard();
-            setTimeout(() => this.renderChart(), 300);
-        }
-    }));
-});
-
-// PWA Service Worker
+// Konfigurasi PWA & Service Worker
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(err => {}));
+    navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('Service Worker Registered'))
+    .catch(err => console.error('Service Worker Error', err));
 }
+
+// Konfigurasi API Google Apps Script (Ubah URL ini saat deploy GAS)
+const API_URL = 'https://script.google.com/macros/s/AKfycbwmERQs7jhb2b9f0sWQTtTdnE_BepV0q2Sb9djIYdi5rJf50RFoV4ai71Q7xodJu75m/exec';
+
+// State Aplikasi
+let currentUser = null;
+let currentTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', currentTheme);
+
+// --- UI Helpers ---
+function toggleTheme() {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('theme', currentTheme);
+    const icon = document.getElementById('theme-icon');
+    icon.className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+function showAlert(title, message, type) {
+    const overlay = document.getElementById('custom-alert');
+    document.getElementById('alert-title').innerText = title;
+    document.getElementById('alert-message').innerText = message;
+    
+    const icon = document.getElementById('alert-icon');
+    if(type === 'success') icon.innerHTML = '<i class="fa-solid fa-check-circle icon-success"></i>';
+    else if(type === 'error') icon.innerHTML = '<i class="fa-solid fa-circle-xmark icon-error"></i>';
+    else icon.innerHTML = '<i class="fa-solid fa-circle-info icon-info"></i>';
+    
+    overlay.classList.remove('hidden');
+}
+
+function closeAlert() {
+    document.getElementById('custom-alert').classList.add('hidden');
+}
+
+// --- Navigation & Routing ---
+function navigate(page) {
+    // Tutup sidebar di mobile
+    document.getElementById('sidebar').classList.remove('open');
+    
+    // Update active state di menu
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    // Sembunyikan semua view
+    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+    
+    // Tampilkan view yang dipilih
+    const titleEl = document.getElementById('page-title');
+    if (page === 'dashboard') {
+        document.getElementById('view-dashboard').classList.remove('hidden');
+        titleEl.innerText = 'Dashboard';
+    } else if (page === 'sppk') {
+        document.getElementById('view-sppk').classList.remove('hidden');
+        titleEl.innerText = 'Data SPPK';
+    } else {
+        document.getElementById('view-blank').classList.remove('hidden');
+        titleEl.innerText = page.charAt(0).toUpperCase() + page.slice(1).replace('-', ' ');
+    }
+}
+
+// --- Authentication ---
+function handleLogin(e) {
+    e.preventDefault();
+    const user = document.getElementById('login-username').value;
+    const role = document.getElementById('login-role').value;
+    
+    if(!user) return showAlert('Error', 'Username tidak boleh kosong', 'error');
+    
+    // Simulasi Login Sukses
+    currentUser = { username: user, role: role };
+    document.getElementById('user-name').innerText = user;
+    document.getElementById('user-role').innerText = role;
+    
+    // Sembunyikan menu berdasarkan role
+    if(role !== 'Admin') {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+    }
+    
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('main-screen').classList.remove('hidden');
+    
+    showAlert('Selamat Datang', `Login berhasil sebagai ${role}`, 'success');
+}
+
+function handleLogout() {
+    currentUser = null;
+    document.getElementById('main-screen').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('login-form').reset();
+}
+
+// --- Laporan & API Mocks ---
+function copyWhatsAppSummary() {
+    const text = `*Ringkasan Laporan SPPK & PK*\nPeriode: Agustus 2026\nTotal SPPK: 45\nTotal PK: 42\nTotal Plafon: Rp 5.000.000.000\n\n_Auto-generated by Sistem Manajemen Surat_`;
+    navigator.clipboard.writeText(text).then(() => {
+        showAlert('Sukses', 'Ringkasan laporan disalin ke clipboard! Siap di-paste ke WhatsApp.', 'success');
+    }).catch(() => {
+        showAlert('Error', 'Gagal menyalin ke clipboard', 'error');
+    });
+}
+
+// Inisialisasi awal UI tema icon
+window.onload = () => {
+    const icon = document.getElementById('theme-icon');
+    icon.className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+};
