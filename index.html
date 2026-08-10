@@ -20,7 +20,7 @@
         </div>
     </div>
 
-  <!-- ==================== KUMPULAN MODAL FORM ==================== -->
+    <!-- ==================== KUMPULAN MODAL FORM ==================== -->
     
     <!-- Modal Surat Masuk -->
     <div id="modal-surat-masuk" class="modal-overlay hidden">
@@ -167,6 +167,76 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal Disposisi -->
+    <div id="modal-disposisi" class="modal-overlay hidden">
+        <div class="modal-card modal-form">
+            <h3><i class="fa-solid fa-share-nodes text-warning"></i> Buat Disposisi Baru</h3>
+            <form onsubmit="submitDisposisi(event)">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Sumber Surat (No / Perihal)</label>
+                        <input type="text" name="suratSumber" required placeholder="Surat yang didisposisikan">
+                    </div>
+                    <div class="input-group">
+                        <label>Tujuan Disposisi (Kepada)</label>
+                        <select name="kepada" required>
+                            <option value="Manager Operasional">Manager Operasional</option>
+                            <option value="Kepala Cabang">Kepala Cabang</option>
+                            <option value="Staf Administrasi">Staf Administrasi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Instruksi / Catatan</label>
+                    <input type="text" name="instruksi" required placeholder="Tindak lanjut yang diminta...">
+                </div>
+                <div class="input-group">
+                    <label>Batas Waktu</label>
+                    <input type="date" name="batasWaktu" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-disposisi')">Batal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Kirim Disposisi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal PK -->
+    <div id="modal-pk" class="modal-overlay hidden">
+        <div class="modal-card modal-form">
+            <h3><i class="fa-solid fa-file-signature text-orange"></i> Terbitkan PK Baru</h3>
+            <form onsubmit="submitPK(event)">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>No. SPPK Induk</label>
+                        <input type="text" name="nomorSPPK" required placeholder="Pilih / Ketik Nomor SPPK">
+                    </div>
+                    <div class="input-group">
+                        <label>Tanggal PK</label>
+                        <input type="date" name="tanggalPK" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Nama Debitur</label>
+                        <input type="text" name="namaDebitur" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Nilai Plafon (Rp)</label>
+                        <input type="number" name="plafon" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Upload File PK (Final) - <span style="color:var(--text-secondary); text-transform:none;">Opsional</span></label>
+                    <input type="file" name="fileUpload" accept=".pdf">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-pk')">Batal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan PK</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- ==================== END MODAL FORM ==================== -->
 
     <!-- Loading Screen Awal -->
@@ -255,19 +325,19 @@
                     <div class="stats-grid">
                         <div class="stat-card playful-card blue" onclick="navigate('surat-masuk')">
                             <div class="stat-icon"><i class="fa-solid fa-inbox"></i></div>
-                            <div class="stat-details"><h3>124</h3><p>Surat Masuk</p></div>
+                            <div class="stat-details"><h3 id="stat-sm">0</h3><p>Surat Masuk</p></div>
                         </div>
                         <div class="stat-card playful-card green" onclick="navigate('surat-keluar')">
                             <div class="stat-icon"><i class="fa-solid fa-paper-plane"></i></div>
-                            <div class="stat-details"><h3>89</h3><p>Surat Keluar</p></div>
+                            <div class="stat-details"><h3 id="stat-sk">0</h3><p>Surat Keluar</p></div>
                         </div>
                         <div class="stat-card playful-card purple" onclick="navigate('sppk')">
                             <div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div>
-                            <div class="stat-details"><h3>45</h3><p>Total SPPK</p></div>
+                            <div class="stat-details"><h3 id="stat-sppk">0</h3><p>Total SPPK</p></div>
                         </div>
                         <div class="stat-card playful-card orange" onclick="navigate('pk')">
                             <div class="stat-icon"><i class="fa-solid fa-file-signature"></i></div>
-                            <div class="stat-details"><h3>42</h3><p>Total PK</p></div>
+                            <div class="stat-details"><h3 id="stat-pk">0</h3><p>Total PK</p></div>
                         </div>
                     </div>
                     <div class="dashboard-widgets">
@@ -308,7 +378,6 @@
                                 <thead>
                                     <tr><th>No. Surat</th><th>Tgl Terima</th><th>Pengirim</th><th>Perihal</th><th>Status</th><th>Aksi</th></tr>
                                 </thead>
-                                <!-- ID TBODY DITAMBAHKAN DI SINI -->
                                 <tbody id="tbody-surat-masuk">
                                     <tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Memuat data...</td></tr>
                                 </tbody>
@@ -332,7 +401,6 @@
                                 <thead>
                                     <tr><th>Tujuan</th><th>Tgl Surat</th><th>Perihal</th><th>Penandatangan</th><th>Status</th><th>Aksi</th></tr>
                                 </thead>
-                                <!-- ID TBODY DITAMBAHKAN DI SINI -->
                                 <tbody id="tbody-surat-keluar">
                                     <tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Memuat data...</td></tr>
                                 </tbody>
@@ -346,19 +414,18 @@
                     <div class="card table-card">
                         <div class="card-header flex-between">
                             <h3>Daftar Disposisi Masuk</h3>
-                            <input type="text" class="search-input" placeholder="Cari instruksi...">
+                            <div class="actions flex-gap">
+                                <input type="text" class="search-input" placeholder="Cari instruksi...">
+                                <button class="btn btn-primary" onclick="openModal('modal-disposisi')"><i class="fa-solid fa-plus"></i> Buat Disposisi</button>
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table class="modern-table">
                                 <thead>
                                     <tr><th>Surat Sumber</th><th>Dari</th><th>Instruksi</th><th>Batas Waktu</th><th>Status</th><th>Aksi</th></tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>102/BKN/VIII/2026</td><td>Direktur Utama</td><td>Harap hadiri dan siapkan materi</td><td>15 Aug 2026</td>
-                                        <td><span class="badge badge-danger">Belum Dibaca</span></td>
-                                        <td><button class="btn btn-primary-light">Tindak Lanjut</button></td>
-                                    </tr>
+                                <tbody id="tbody-disposisi">
+                                    <tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Memuat data...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -380,7 +447,6 @@
                                 <thead>
                                     <tr><th>Kredit/Aplikasi</th><th>Tanggal</th><th>Debitur</th><th>Plafon</th><th>Status PK</th><th>Aksi</th></tr>
                                 </thead>
-                                <!-- ID TBODY DITAMBAHKAN DI SINI -->
                                 <tbody id="tbody-sppk">
                                     <tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Memuat data...</td></tr>
                                 </tbody>
@@ -394,18 +460,18 @@
                     <div class="card table-card">
                         <div class="card-header flex-between">
                             <h3>Daftar Perjanjian Kredit (PK)</h3>
-                            <input type="text" class="search-input" placeholder="Cari PK...">
+                            <div class="actions flex-gap">
+                                <input type="text" class="search-input" placeholder="Cari PK...">
+                                <button class="btn btn-primary" onclick="openModal('modal-pk')"><i class="fa-solid fa-plus"></i> Terbitkan PK</button>
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table class="modern-table">
                                 <thead>
-                                    <tr><th>No. PK</th><th>SPPK Induk</th><th>Tgl PK</th><th>Debitur</th><th>Plafon</th><th>Aksi</th></tr>
+                                    <tr><th>No. PK</th><th>SPPK Induk</th><th>Tgl PK</th><th>Debitur</th><th>Plafon</th><th>Status</th><th>Aksi</th></tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>067/886/89/99/BBL/2026</strong></td><td>067/SPPK/2026</td><td>14 Aug 2026</td><td>PT. Maju Bersama</td><td>Rp 500.000.000</td>
-                                        <td><button class="btn-icon"><i class="fa-solid fa-eye"></i></button></td>
-                                    </tr>
+                                <tbody id="tbody-pk">
+                                    <tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">Memuat data...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -431,9 +497,15 @@
                             <div class="input-group">
                                 <input type="text" placeholder="Ketik kata kunci, nama debitur, pengirim, atau nomor dokumen..." style="font-size: 1.1rem; padding: 15px;">
                             </div>
-                            <div class="empty-state">
-                                <i class="fa-solid fa-folder-open fa-3x text-secondary" style="margin-bottom:15px; opacity:0.5;"></i>
-                                <p>Gunakan kolom pencarian di atas untuk menemukan file arsip.</p>
+                            <div class="table-responsive">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr><th>Kategori</th><th>Nomor Dokumen</th><th>Tanggal</th><th>Keterangan / Debitur</th><th>Aksi</th></tr>
+                                    </thead>
+                                    <tbody id="tbody-arsip">
+                                        <tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Memuat arsip dari seluruh sistem...</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
