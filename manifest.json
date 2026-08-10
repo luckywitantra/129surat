@@ -1,0 +1,16 @@
+{
+  "name": "E-SURAT PRO",
+  "short_name": "E-SURAT",
+  "description": "Sistem Manajemen Surat dan Penomoran Kredit (SPPK/PK)",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2911/2911230.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
