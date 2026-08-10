@@ -29,7 +29,6 @@ async function initSystem() {
         }
     } catch (error) {
         console.error("Init Error:", error);
-        // Fallback untuk keperluan demo UI jika API belum di-deploy:
         setTimeout(() => {
             document.getElementById('init-screen').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
@@ -68,30 +67,34 @@ function closeAlert() {
     document.getElementById('custom-alert').classList.add('hidden');
 }
 
-// --- Navigation & Routing Dinamis ---
+// ==========================================
+// --- NAVIGATION & DYNAMIC TABLE RENDERING ---
+// ==========================================
+
 function navigate(page) {
     document.getElementById('sidebar').classList.remove('open');
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     event.currentTarget.classList.add('active');
     
-    // Daftar semua view yang tersedia
     const views = ['dashboard', 'surat-masuk', 'surat-keluar', 'disposisi', 'sppk', 'pk', 'arsip', 'laporan', 'pengaturan'];
     
-    // Sembunyikan semua view
     views.forEach(v => {
         const el = document.getElementById(`view-${v}`);
         if(el) el.classList.add('hidden');
     });
     
-    // Tampilkan view target
     const targetEl = document.getElementById(`view-${page}`);
     if(targetEl) {
         targetEl.classList.remove('hidden');
     } else {
         document.getElementById('view-blank').classList.remove('hidden');
     }
+
+    // TARIK DATA OTOMATIS KETIKA MENU DIKLIK
+    if (page === 'surat-masuk' || page === 'surat-keluar' || page === 'sppk') {
+        loadDataTabel(page);
+    }
     
-    // Ubah Judul Halaman
     const titles = {
         'dashboard': 'Dashboard Utama',
         'surat-masuk': 'Manajemen Surat Masuk',
@@ -104,6 +107,91 @@ function navigate(page) {
         'pengaturan': 'Konfigurasi Sistem'
     };
     document.getElementById('page-title').innerText = titles[page] || 'Aplikasi';
+}
+
+// Fungsi Fetch Data ke API Google Script
+async function loadDataTabel(jenis) {
+    const tbody = document.getElementById(`tbody-${jenis}`);
+    if(!tbody) return;
+
+    // Loading State
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--primary); padding:20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Menarik data dari server...</td></tr>`;
+
+    let actionName = '';
+    if (jenis === 'surat-masuk') actionName = 'getSuratMasuk';
+    else if (jenis === 'surat-keluar') actionName = 'getSuratKeluar';
+    else if (jenis === 'sppk') actionName = 'getSPPK';
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: actionName })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            renderHTMLTabel(jenis, result.data, tbody);
+        } else {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger);">${result.message}</td></tr>`;
+        }
+    } catch (error) {
+        console.error(error);
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger);">Gagal terhubung ke database. Periksa CORS atau Deployment Apps Script.</td></tr>`;
+    }
+}
+
+// Fungsi Cetak HTML ke Tabel
+function renderHTMLTabel(jenis, dataArray, tbody) {
+    if (!dataArray || dataArray.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary); padding:20px;">Belum ada data tersedia.</td></tr>`;
+        return;
+    }
+
+    let html = '';
+    // Reverse array agar data terbaru (paling bawah di sheet) tampil di atas
+    dataArray.reverse().forEach(item => {
+        let statusBadge = `<span class="badge badge-warning">${item.status}</span>`;
+        if (item.status.toLowerCase().includes('selesai') || item.status.toLowerCase().includes('terkirim') || item.status.toLowerCase().includes('sudah')) {
+            statusBadge = `<span class="badge badge-success">${item.status}</span>`;
+        }
+
+        // Tampilkan ikon PDF merah jika ada URL Lampiran
+        let fileBtn = item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="btn-icon" title="Lihat Lampiran"><i class="fa-solid fa-file-pdf text-danger"></i></a>` : `<span style="opacity:0.3; font-size:0.8rem;">-No File-</span>`;
+
+        if (jenis === 'surat-masuk') {
+            html += `<tr>
+                <td><strong>${item.nomor}</strong></td>
+                <td>${item.tanggal}</td>
+                <td>${item.pengirim}</td>
+                <td>${item.perihal}</td>
+                <td>${statusBadge}</td>
+                <td>${fileBtn}</td>
+            </tr>`;
+        } 
+        else if (jenis === 'surat-keluar') {
+            html += `<tr>
+                <td><strong>${item.tujuan}</strong></td>
+                <td>${item.tanggal}</td>
+                <td>${item.perihal}</td>
+                <td>${item.penandatangan}</td>
+                <td>${statusBadge}</td>
+                <td>${fileBtn}</td>
+            </tr>`;
+        } 
+        else if (jenis === 'sppk') {
+            let rpFormat = "Rp " + parseFloat(item.plafon || 0).toLocaleString('id-ID');
+            html += `<tr>
+                <td><strong>${item.nomorAplikasi}</strong></td>
+                <td>${item.tanggal}</td>
+                <td>${item.debitur}</td>
+                <td>${rpFormat}</td>
+                <td>${statusBadge}</td>
+                <td>${fileBtn}</td>
+            </tr>`;
+        }
+    });
+
+    tbody.innerHTML = html;
 }
 
 // --- Authentication ---
@@ -133,8 +221,6 @@ function handleLogout() {
     document.getElementById('main-screen').classList.add('hidden');
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('login-form').reset();
-    
-    // Kembalikan visibilitas menu admin
     document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
 }
 
@@ -159,7 +245,6 @@ function closeModal(modalId) {
     document.getElementById(modalId).classList.add('hidden');
 }
 
-// Helper: Convert File ke Base64 (Aman dikirim via JSON ke Google Script)
 const getBase64 = (file) => new Promise((resolve, reject) => {
     if (!file) return resolve(null);
     const reader = new FileReader();
@@ -167,17 +252,15 @@ const getBase64 = (file) => new Promise((resolve, reject) => {
     reader.onload = () => resolve({
         mimeType: file.type,
         filename: file.name,
-        base64Data: reader.result.split(',')[1] // Ambil raw base64 data
+        base64Data: reader.result.split(',')[1] 
     });
     reader.onerror = error => reject(error);
 });
 
-// Fungsi universal kirim form
-async function sendFormData(action, payload, formEl, modalId) {
+async function sendFormData(action, payload, formEl, modalId, jenisMenuRef) {
     const btn = formEl.querySelector('button[type="submit"]');
     const originalBtnHTML = btn.innerHTML;
     
-    // UI Loading di tombol submit
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
     btn.disabled = true;
 
@@ -191,7 +274,11 @@ async function sendFormData(action, payload, formEl, modalId) {
         if (result.status === 'success') {
             closeModal(modalId);
             showAlert('Berhasil', result.message || 'Data berhasil disimpan.', 'success');
-            formEl.reset(); // Kosongkan form jika berhasil
+            formEl.reset(); 
+            
+            // REFRESH TABEL SECARA LIVE SETELAH SIMPAN
+            if(jenisMenuRef) loadDataTabel(jenisMenuRef);
+            
         } else {
             showAlert('Gagal', result.message || 'Terjadi kesalahan pada sistem backend.', 'error');
         }
@@ -199,7 +286,6 @@ async function sendFormData(action, payload, formEl, modalId) {
         console.error(error);
         showAlert('Koneksi Gagal', 'Gagal mengirim data. Periksa jaringan Anda.', 'error');
     } finally {
-        // Kembalikan tombol ke keadaan semula
         btn.innerHTML = originalBtnHTML;
         btn.disabled = false;
     }
@@ -210,7 +296,6 @@ async function submitSuratMasuk(e) {
     e.preventDefault();
     const form = e.target;
     
-    // Periksa apakah user mengupload file atau tidak (Opsional)
     const fileInput = form.elements['fileUpload'];
     const fileData = (fileInput && fileInput.files.length > 0) ? await getBase64(fileInput.files[0]) : null;
     
@@ -223,7 +308,7 @@ async function submitSuratMasuk(e) {
         file: fileData, 
         user: currentUser ? currentUser.username : 'Unknown'
     };
-    sendFormData('insertSuratMasuk', payload, form, 'modal-surat-masuk');
+    sendFormData('insertSuratMasuk', payload, form, 'modal-surat-masuk', 'surat-masuk');
 }
 
 // Handler Submit Surat Keluar
@@ -243,7 +328,7 @@ async function submitSuratKeluar(e) {
         file: fileData,
         user: currentUser ? currentUser.username : 'Unknown'
     };
-    sendFormData('insertSuratKeluar', payload, form, 'modal-surat-keluar');
+    sendFormData('insertSuratKeluar', payload, form, 'modal-surat-keluar', 'surat-keluar');
 }
 
 // Handler Submit SPPK
@@ -265,7 +350,7 @@ async function submitSPPK(e) {
         file: fileData,
         user: currentUser ? currentUser.username : 'Unknown'
     };
-    sendFormData('insertSPPK', payload, form, 'modal-sppk');
+    sendFormData('insertSPPK', payload, form, 'modal-sppk', 'sppk');
 }
 
 // PWA Service Worker
