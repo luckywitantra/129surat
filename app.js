@@ -147,6 +147,42 @@ function copyWhatsAppSummary() {
     });
 }
 
+// --- Modal Form Handlers ---
+
+// Membuka form popup
+function openModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+}
+
+// Menutup form popup
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+// Handler Submit Surat Masuk
+function submitSuratMasuk(e) {
+    e.preventDefault(); // Mencegah reload halaman
+    closeModal('modal-surat-masuk');
+    showAlert('Berhasil', 'Data Surat Masuk berhasil disimpan ke database.', 'success');
+    e.target.reset(); // Kosongkan form setelah simpan
+}
+
+// Handler Submit Surat Keluar
+function submitSuratKeluar(e) {
+    e.preventDefault();
+    closeModal('modal-surat-keluar');
+    showAlert('Berhasil', 'Draft Surat Keluar berhasil dibuat.', 'success');
+    e.target.reset();
+}
+
+// Handler Submit SPPK
+function submitSPPK(e) {
+    e.preventDefault();
+    closeModal('modal-sppk');
+    showAlert('Berhasil', 'Data SPPK baru berhasil ditambahkan dan menunggu proses PK.', 'success');
+    e.target.reset();
+}
+
 // PWA Service Worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.error(err));
