@@ -20,6 +20,147 @@
         </div>
     </div>
 
+    <!-- ==================== KUMPULAN MODAL FORM ==================== -->
+    
+    <!-- Modal Surat Masuk -->
+    <div id="modal-surat-masuk" class="modal-overlay hidden">
+        <div class="modal-card modal-form">
+            <h3><i class="fa-solid fa-inbox text-primary"></i> Tambah Surat Masuk</h3>
+            <form onsubmit="submitSuratMasuk(event)">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Nomor Surat</label>
+                        <input type="text" required placeholder="Cth: 123/BKN/VIII/2026">
+                    </div>
+                    <div class="input-group">
+                        <label>Tanggal Surat</label>
+                        <input type="date" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Pengirim</label>
+                        <input type="text" required placeholder="Instansi/Perusahaan Pengirim">
+                    </div>
+                    <div class="input-group">
+                        <label>Sifat Surat</label>
+                        <select required>
+                            <option value="Biasa">Biasa</option>
+                            <option value="Penting">Penting</option>
+                            <option value="Rahasia">Rahasia</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Perihal</label>
+                    <input type="text" required placeholder="Ringkasan isi surat...">
+                </div>
+                <div class="input-group">
+                    <label>Upload File (PDF)</label>
+                    <input type="file" accept=".pdf" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-surat-masuk')">Batal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Surat Keluar -->
+    <div id="modal-surat-keluar" class="modal-overlay hidden">
+        <div class="modal-card modal-form">
+            <h3><i class="fa-solid fa-paper-plane text-success"></i> Buat Surat Keluar</h3>
+            <form onsubmit="submitSuratKeluar(event)">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Jenis Surat</label>
+                        <select required>
+                            <option value="">Pilih Jenis...</option>
+                            <option value="A-1">A-1 (Edaran)</option>
+                            <option value="A-2">A-2 (Undangan)</option>
+                            <option value="A-3">A-3 (Pemberitahuan)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Tujuan</label>
+                        <input type="text" required placeholder="Nama penerima/instansi">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Perihal</label>
+                    <input type="text" required placeholder="Perihal surat...">
+                </div>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Penandatangan</label>
+                        <select required>
+                            <option value="Direktur Utama">Direktur Utama</option>
+                            <option value="Manager Operasional">Manager Operasional</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Sifat</label>
+                        <select required>
+                            <option value="Biasa">Biasa</option>
+                            <option value="Segera">Segera</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-surat-keluar')">Batal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan Draft</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Tambah SPPK -->
+    <div id="modal-sppk" class="modal-overlay hidden">
+        <div class="modal-card modal-form">
+            <h3><i class="fa-solid fa-file-contract text-primary"></i> Input Data SPPK Baru</h3>
+            <form onsubmit="submitSPPK(event)">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>No. Aplikasi / Kredit</label>
+                        <input type="text" required placeholder="Cth: APP-887192">
+                    </div>
+                    <div class="input-group">
+                        <label>Tanggal SPPK</label>
+                        <input type="date" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Nama Debitur</label>
+                        <input type="text" required placeholder="Nama Lengkap / Perusahaan">
+                    </div>
+                    <div class="input-group">
+                        <label>Jenis Kredit</label>
+                        <select required>
+                            <option value="Kredit Modal Kerja">Kredit Modal Kerja (KMK)</option>
+                            <option value="Kredit Investasi">Kredit Investasi (KI)</option>
+                            <option value="Kredit Konsumtif">Kredit Konsumtif</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Nilai Plafon (Rp)</label>
+                        <input type="number" required placeholder="Tanpa titik/koma">
+                    </div>
+                    <div class="input-group">
+                        <label>Jangka Waktu (Bulan)</label>
+                        <input type="number" required placeholder="Cth: 12">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Tujuan Kredit</label>
+                    <input type="text" required placeholder="Tujuan penggunaan dana...">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-sppk')">Batal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Terbitkan SPPK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- ==================== END MODAL FORM ==================== -->
+
     <!-- Loading Screen Awal -->
     <div id="init-screen" class="screen-container">
         <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
@@ -125,9 +266,9 @@
                         <div class="card widget">
                             <div class="card-header"><h3>Shortcut Cepat</h3></div>
                             <div class="card-body shortcut-grid">
-                                <button class="btn btn-primary-light" onclick="navigate('surat-masuk')"><i class="fa-solid fa-plus"></i> Surat Masuk</button>
-                                <button class="btn btn-primary-light" onclick="navigate('surat-keluar')"><i class="fa-solid fa-plus"></i> Surat Keluar</button>
-                                <button class="btn btn-primary-light" onclick="navigate('sppk')"><i class="fa-solid fa-plus"></i> Buat SPPK</button>
+                                <button class="btn btn-primary-light" onclick="navigate('surat-masuk'); openModal('modal-surat-masuk')"><i class="fa-solid fa-plus"></i> Surat Masuk</button>
+                                <button class="btn btn-primary-light" onclick="navigate('surat-keluar'); openModal('modal-surat-keluar')"><i class="fa-solid fa-plus"></i> Surat Keluar</button>
+                                <button class="btn btn-primary-light" onclick="navigate('sppk'); openModal('modal-sppk')"><i class="fa-solid fa-plus"></i> Buat SPPK</button>
                                 <button class="btn btn-primary-light" onclick="copyWhatsAppSummary()"><i class="fa-brands fa-whatsapp"></i> Share Laporan</button>
                             </div>
                         </div>
@@ -151,7 +292,8 @@
                             <h3>Data Surat Masuk</h3>
                             <div class="actions flex-gap">
                                 <input type="text" class="search-input" placeholder="Cari nomor/pengirim...">
-                                <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah Baru</button>
+                                <!-- TOMBOL DENGAN ONCLICK BARU -->
+                                <button class="btn btn-primary" onclick="openModal('modal-surat-masuk')"><i class="fa-solid fa-plus"></i> Tambah Baru</button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -183,7 +325,8 @@
                             <h3>Data Surat Keluar</h3>
                             <div class="actions flex-gap">
                                 <input type="text" class="search-input" placeholder="Cari surat keluar...">
-                                <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Buat Surat</button>
+                                <!-- TOMBOL DENGAN ONCLICK BARU -->
+                                <button class="btn btn-primary" onclick="openModal('modal-surat-keluar')"><i class="fa-solid fa-plus"></i> Buat Surat</button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -234,7 +377,8 @@
                             <h3>Daftar SPPK</h3>
                             <div class="actions flex-gap">
                                 <input type="text" class="search-input" placeholder="Cari SPPK...">
-                                <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah SPPK</button>
+                                <!-- TOMBOL DENGAN ONCLICK BARU -->
+                                <button class="btn btn-primary" onclick="openModal('modal-sppk')"><i class="fa-solid fa-plus"></i> Tambah SPPK</button>
                             </div>
                         </div>
                         <div class="table-responsive">
