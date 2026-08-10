@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <!-- ==================== KUMPULAN MODAL FORM ==================== -->
+  <!-- ==================== KUMPULAN MODAL FORM ==================== -->
     
     <!-- Modal Surat Masuk -->
     <div id="modal-surat-masuk" class="modal-overlay hidden">
@@ -30,19 +30,19 @@
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Nomor Surat</label>
-                        <input type="text" required placeholder="Cth: 123/BKN/VIII/2026">
+                        <input type="text" name="nomorSurat" required placeholder="Cth: 123/BKN/VIII/2026">
                     </div>
                     <div class="input-group">
                         <label>Tanggal Surat</label>
-                        <input type="date" required>
+                        <input type="date" name="tanggalSurat" required>
                     </div>
                     <div class="input-group">
                         <label>Pengirim</label>
-                        <input type="text" required placeholder="Instansi/Perusahaan Pengirim">
+                        <input type="text" name="pengirim" required placeholder="Instansi/Perusahaan Pengirim">
                     </div>
                     <div class="input-group">
                         <label>Sifat Surat</label>
-                        <select required>
+                        <select name="sifatSurat" required>
                             <option value="Biasa">Biasa</option>
                             <option value="Penting">Penting</option>
                             <option value="Rahasia">Rahasia</option>
@@ -51,11 +51,12 @@
                 </div>
                 <div class="input-group">
                     <label>Perihal</label>
-                    <input type="text" required placeholder="Ringkasan isi surat...">
+                    <input type="text" name="perihal" required placeholder="Ringkasan isi surat...">
                 </div>
                 <div class="input-group">
-                    <label>Upload File (PDF)</label>
-                    <input type="file" accept=".pdf" required>
+                    <label>Upload File (PDF) - <span style="color:var(--text-secondary); text-transform:none;">Opsional</span></label>
+                    <!-- required DIHAPUS AGAR OPSIONAL -->
+                    <input type="file" name="fileUpload" accept=".pdf">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeModal('modal-surat-masuk')">Batal</button>
@@ -73,7 +74,7 @@
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Jenis Surat</label>
-                        <select required>
+                        <select name="jenisSurat" required>
                             <option value="">Pilih Jenis...</option>
                             <option value="A-1">A-1 (Edaran)</option>
                             <option value="A-2">A-2 (Undangan)</option>
@@ -82,28 +83,32 @@
                     </div>
                     <div class="input-group">
                         <label>Tujuan</label>
-                        <input type="text" required placeholder="Nama penerima/instansi">
+                        <input type="text" name="tujuan" required placeholder="Nama penerima/instansi">
                     </div>
                 </div>
                 <div class="input-group">
                     <label>Perihal</label>
-                    <input type="text" required placeholder="Perihal surat...">
+                    <input type="text" name="perihal" required placeholder="Perihal surat...">
                 </div>
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Penandatangan</label>
-                        <select required>
+                        <select name="penandatangan" required>
                             <option value="Direktur Utama">Direktur Utama</option>
                             <option value="Manager Operasional">Manager Operasional</option>
                         </select>
                     </div>
                     <div class="input-group">
                         <label>Sifat</label>
-                        <select required>
+                        <select name="sifat" required>
                             <option value="Biasa">Biasa</option>
                             <option value="Segera">Segera</option>
                         </select>
                     </div>
+                </div>
+                <div class="input-group">
+                    <label>Upload Draft / Lampiran - <span style="color:var(--text-secondary); text-transform:none;">Opsional</span></label>
+                    <input type="file" name="fileUpload" accept=".pdf,.docx">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeModal('modal-surat-keluar')">Batal</button>
@@ -121,19 +126,19 @@
                 <div class="form-grid">
                     <div class="input-group">
                         <label>No. Aplikasi / Kredit</label>
-                        <input type="text" required placeholder="Cth: APP-887192">
+                        <input type="text" name="nomorAplikasi" required placeholder="Cth: APP-887192">
                     </div>
                     <div class="input-group">
                         <label>Tanggal SPPK</label>
-                        <input type="date" required>
+                        <input type="date" name="tanggalSPPK" required>
                     </div>
                     <div class="input-group">
                         <label>Nama Debitur</label>
-                        <input type="text" required placeholder="Nama Lengkap / Perusahaan">
+                        <input type="text" name="namaDebitur" required placeholder="Nama Lengkap / Perusahaan">
                     </div>
                     <div class="input-group">
                         <label>Jenis Kredit</label>
-                        <select required>
+                        <select name="jenisKredit" required>
                             <option value="Kredit Modal Kerja">Kredit Modal Kerja (KMK)</option>
                             <option value="Kredit Investasi">Kredit Investasi (KI)</option>
                             <option value="Kredit Konsumtif">Kredit Konsumtif</option>
@@ -141,16 +146,20 @@
                     </div>
                     <div class="input-group">
                         <label>Nilai Plafon (Rp)</label>
-                        <input type="number" required placeholder="Tanpa titik/koma">
+                        <input type="number" name="plafon" required placeholder="Tanpa titik/koma">
                     </div>
                     <div class="input-group">
                         <label>Jangka Waktu (Bulan)</label>
-                        <input type="number" required placeholder="Cth: 12">
+                        <input type="number" name="jangkaWaktu" required placeholder="Cth: 12">
                     </div>
                 </div>
                 <div class="input-group">
                     <label>Tujuan Kredit</label>
-                    <input type="text" required placeholder="Tujuan penggunaan dana...">
+                    <input type="text" name="tujuanKredit" required placeholder="Tujuan penggunaan dana...">
+                </div>
+                <div class="input-group">
+                    <label>Upload Dokumen Pendukung - <span style="color:var(--text-secondary); text-transform:none;">Opsional</span></label>
+                    <input type="file" name="fileUpload" accept=".pdf">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeModal('modal-sppk')">Batal</button>
