@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arsip Surat & Manajemen Pro</title>
     
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1d4ed8">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,7 +43,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="app.js" defer></script>
 </head>
 
 <body x-data="appData()" class="text-slate-800 h-screen flex overflow-hidden selection:bg-brand-500 selection:text-white">
@@ -95,7 +93,8 @@
                         <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-danger-500 rounded-full border-2 border-surface"></span>
                     </button>
                     <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden ml-2 cursor-pointer">
-                        <img src="https://i.pravatar.cc/150?img=32" alt="Profile" class="w-full h-full object-cover">
+                        <!-- Placeholder Avatar -->
+                        <div class="w-full h-full bg-brand-500 text-white flex items-center justify-center font-bold">AD</div>
                     </div>
                 </div>
             </div>
@@ -138,7 +137,7 @@
                     </div>
                 </div>
 
-                <!-- Middle Section: Chart -->
+                <!-- Chart -->
                 <div class="bg-white rounded-2xl p-6 shadow-soft">
                     <div class="flex justify-between items-start mb-6">
                         <div><h3 class="text-xl font-bold text-slate-900">Volume Overview</h3><p class="text-sm text-slate-500">Masuk vs Keluar (Monthly)</p></div>
@@ -147,7 +146,7 @@
                 </div>
             </div>
 
-            <!-- INPUT SURAT MASUK (Form sudah tersambung ke `formData`) -->
+            <!-- INPUT SURAT MASUK -->
             <div x-show="currentView === 'input_surat'" x-transition:enter="fade-enter" x-cloak class="max-w-4xl mx-auto space-y-6 pt-4">
                 <div>
                     <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">Input Surat Masuk</h1>
@@ -189,7 +188,7 @@
                 </div>
             </div>
 
-            <!-- LOANS (Tabel SPPK/PK sudah tersambung ke `loansData`) -->
+            <!-- LOANS (Tabel SPPK/PK) -->
             <div x-show="currentView === 'loans'" x-transition:enter="fade-enter" x-cloak class="space-y-6 pt-2">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <div>
@@ -247,5 +246,122 @@
         </div>
     </main>
 
+    <!-- SCRIPTS APLIKASI UTAMA (Menggantikan app.js yang terpisah) -->
+    <script>
+        // MASUKKAN URL DEPLOYMENT APPS SCRIPT ANDA DI SINI
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwmERQs7jhb2b9f0sWQTtTdnE_BepV0q2Sb9djIYdi5rJf50RFoV4ai71Q7xodJu75m/exec'; 
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('appData', () => ({
+                sidebarOpen: false,
+                currentView: 'dashboard',
+                isLoading: false,
+                isSubmitting: false,
+                
+                menuItems: [
+                    { id: 'dashboard', label: 'Dashboard', icon: 'fa-solid fa-border-all' },
+                    { id: 'input_surat', label: 'Surat Masuk', icon: 'fa-solid fa-envelope' },
+                    { id: 'analytics', label: 'Analytics', icon: 'fa-solid fa-chart-simple' },
+                    { id: 'loans', label: 'Loans (SPPK/PK)', icon: 'fa-solid fa-money-check-dollar' },
+                    { id: 'clients', label: 'Clients', icon: 'fa-solid fa-user-group' },
+                    { id: 'settings', label: 'Settings', icon: 'fa-solid fa-gear' }
+                ],
+                
+                stats: { suratMasuk: 0, suratKeluar: 0, totalPK: 0 },
+                loansData: [], 
+                formData: { nomor: '', tanggal: '', pengirim: '', perihal: '' },
+
+                getMenuLabel() { 
+                    return (this.menuItems.find(m => m.id === this.currentView) || {}).label || 'Menu'; 
+                },
+
+                switchMenu(menuId) {
+                    this.currentView = menuId;
+                    if (window.innerWidth < 768) this.sidebarOpen = false;
+                    
+                    if(menuId === 'dashboard') {
+                        this.fetchDashboard();
+                        setTimeout(() => this.renderChart(), 100);
+                    }
+                    if(menuId === 'loans') this.fetchLoans();
+                },
+
+                async fetchDashboard() {
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch(`${API_URL}?action=getDashboard`, { method: 'GET', mode: 'cors' });
+                        const data = await res.json();
+                        this.stats = data;
+                    } catch (err) { console.error("Gagal get dashboard:", err); }
+                    this.isLoading = false;
+                },
+
+                async fetchLoans() {
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch(`${API_URL}?action=getLoans`, { method: 'GET', mode: 'cors' });
+                        const data = await res.json();
+                        
+                        this.loansData = data.map(item => ({
+                            ...item,
+                            inisial: item.debitur ? item.debitur.charAt(0).toUpperCase() : '?'
+                        }));
+                    } catch (err) { console.error("Gagal get loans:", err); }
+                    this.isLoading = false;
+                },
+
+                async submitForm() {
+                    this.isSubmitting = true;
+                    try {
+                        const res = await fetch(API_URL, {
+                            method: 'POST',
+                            mode: 'cors',
+                            redirect: 'follow',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ action: 'saveSuratMasuk', data: this.formData })
+                        });
+                        
+                        const result = await res.json();
+                        if(result.success) {
+                            alert("Berhasil! Data surat tersimpan ke database.");
+                            this.formData = { nomor: '', tanggal: '', pengirim: '', perihal: '' };
+                            this.currentView = 'dashboard';
+                            this.fetchDashboard();
+                        } else {
+                            alert("Gagal menyimpan: " + result.error);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("Terjadi kesalahan jaringan.");
+                    }
+                    this.isSubmitting = false;
+                },
+
+                renderChart() {
+                    const ctx = document.getElementById('mainChart');
+                    if (!ctx) return;
+                    let chartStatus = Chart.getChart("mainChart");
+                    if (chartStatus != undefined) chartStatus.destroy();
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                            datasets: [
+                                { label: 'Masuk', data: [45, 60, 30, 75, 70], backgroundColor: '#2563eb', borderRadius: 4, barPercentage: 0.6, categoryPercentage: 0.8 },
+                                { label: 'Keluar', data: [25, 35, 50, 55, 25], backgroundColor: '#2b8a72', borderRadius: 4, barPercentage: 0.6, categoryPercentage: 0.8 }
+                            ]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, border: {display: false}, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+                    });
+                },
+
+                init() {
+                    this.fetchDashboard();
+                    setTimeout(() => this.renderChart(), 300);
+                }
+            }));
+        });
+    </script>
 </body>
 </html>
