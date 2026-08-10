@@ -55,7 +55,6 @@
                 </div>
                 <div class="input-group">
                     <label>Upload File (PDF) - <span style="color:var(--text-secondary); text-transform:none;">Opsional</span></label>
-                    <!-- required DIHAPUS AGAR OPSIONAL -->
                     <input type="file" name="fileUpload" accept=".pdf">
                 </div>
                 <div class="modal-footer">
@@ -301,7 +300,6 @@
                             <h3>Data Surat Masuk</h3>
                             <div class="actions flex-gap">
                                 <input type="text" class="search-input" placeholder="Cari nomor/pengirim...">
-                                <!-- TOMBOL DENGAN ONCLICK BARU -->
                                 <button class="btn btn-primary" onclick="openModal('modal-surat-masuk')"><i class="fa-solid fa-plus"></i> Tambah Baru</button>
                             </div>
                         </div>
@@ -310,17 +308,9 @@
                                 <thead>
                                     <tr><th>No. Surat</th><th>Tgl Terima</th><th>Pengirim</th><th>Perihal</th><th>Status</th><th>Aksi</th></tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>102/BKN/VIII/2026</strong></td><td>01 Aug 2026</td><td>BKN Pusat</td><td>Undangan Rapat</td>
-                                        <td><span class="badge badge-success">Selesai</span></td>
-                                        <td><button class="btn-icon"><i class="fa-solid fa-eye"></i></button> <button class="btn-icon"><i class="fa-solid fa-share-nodes text-warning"></i></button></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>089/PEMDA/VIII/2026</strong></td><td>05 Aug 2026</td><td>Pemda Prov</td><td>Edaran Cuti Bersama</td>
-                                        <td><span class="badge badge-warning">Diproses</span></td>
-                                        <td><button class="btn-icon"><i class="fa-solid fa-eye"></i></button> <button class="btn-icon"><i class="fa-solid fa-share-nodes text-warning"></i></button></td>
-                                    </tr>
+                                <!-- ID TBODY DITAMBAHKAN DI SINI -->
+                                <tbody id="tbody-surat-masuk">
+                                    <tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Memuat data...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -334,21 +324,17 @@
                             <h3>Data Surat Keluar</h3>
                             <div class="actions flex-gap">
                                 <input type="text" class="search-input" placeholder="Cari surat keluar...">
-                                <!-- TOMBOL DENGAN ONCLICK BARU -->
                                 <button class="btn btn-primary" onclick="openModal('modal-surat-keluar')"><i class="fa-solid fa-plus"></i> Buat Surat</button>
                             </div>
                         </div>
                         <div class="table-responsive">
                             <table class="modern-table">
                                 <thead>
-                                    <tr><th>No. Surat Keluar</th><th>Tgl Surat</th><th>Tujuan</th><th>Perihal</th><th>Status</th><th>Aksi</th></tr>
+                                    <tr><th>Tujuan</th><th>Tgl Surat</th><th>Perihal</th><th>Penandatangan</th><th>Status</th><th>Aksi</th></tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>045/SK/VIII/2026</strong></td><td>10 Aug 2026</td><td>Kementerian Keuangan</td><td>Laporan Anggaran</td>
-                                        <td><span class="badge badge-success">Terkirim</span></td>
-                                        <td><button class="btn-icon"><i class="fa-solid fa-file-pdf text-danger"></i></button></td>
-                                    </tr>
+                                <!-- ID TBODY DITAMBAHKAN DI SINI -->
+                                <tbody id="tbody-surat-keluar">
+                                    <tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Memuat data...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -386,26 +372,17 @@
                             <h3>Daftar SPPK</h3>
                             <div class="actions flex-gap">
                                 <input type="text" class="search-input" placeholder="Cari SPPK...">
-                                <!-- TOMBOL DENGAN ONCLICK BARU -->
                                 <button class="btn btn-primary" onclick="openModal('modal-sppk')"><i class="fa-solid fa-plus"></i> Tambah SPPK</button>
                             </div>
                         </div>
                         <div class="table-responsive">
                             <table class="modern-table">
                                 <thead>
-                                    <tr><th>No. SPPK</th><th>Tanggal</th><th>Debitur</th><th>Plafon</th><th>Status PK</th><th>Aksi</th></tr>
+                                    <tr><th>Kredit/Aplikasi</th><th>Tanggal</th><th>Debitur</th><th>Plafon</th><th>Status PK</th><th>Aksi</th></tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>067/SPPK/2026</strong><br><small>Urut: 067</small></td><td>10 Aug 2026</td><td>PT. Maju Bersama</td><td>Rp 500.000.000</td>
-                                        <td><span class="badge badge-success">Sudah PK</span></td>
-                                        <td><button class="btn-icon" title="Lihat"><i class="fa-solid fa-eye"></i></button></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>068/SPPK/2026</strong><br><small>Urut: 068</small></td><td>12 Aug 2026</td><td>CV. Jaya Abadi</td><td>Rp 150.000.000</td>
-                                        <td><span class="badge badge-warning">Belum PK</span></td>
-                                        <td><button class="btn-icon" title="Buat PK"><i class="fa-solid fa-file-signature text-primary"></i></button></td>
-                                    </tr>
+                                <!-- ID TBODY DITAMBAHKAN DI SINI -->
+                                <tbody id="tbody-sppk">
+                                    <tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Memuat data...</td></tr>
                                 </tbody>
                             </table>
                         </div>
