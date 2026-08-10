@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Custom Modern Alert -->
+    <!-- Alert Global -->
     <div id="custom-alert" class="modal-overlay hidden">
         <div class="modal-card alert-card">
             <div id="alert-icon" class="alert-icon"></div>
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <!-- 1. Initial Loading Screen (Akan mengecek & membuat database) -->
+    <!-- Loading Screen Awal -->
     <div id="init-screen" class="screen-container">
         <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
             <i class="fa-solid fa-circle-notch fa-spin fa-4x text-primary" style="margin-bottom: 20px;"></i>
@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <!-- 2. Login Screen (Sembunyi secara default sampai loading selesai) -->
+    <!-- Login Screen -->
     <div id="login-screen" class="screen-container hidden">
         <div class="login-card">
             <div class="login-header">
@@ -40,10 +40,10 @@
             <form id="login-form" onsubmit="handleLogin(event)">
                 <div class="input-group">
                     <label>Username</label>
-                    <input type="text" id="login-username" required placeholder="Masukkan username...">
+                    <input type="text" id="login-username" required placeholder="Masukkan username..." value="admin">
                 </div>
                 <div class="input-group">
-                    <label>Role Demo</label>
+                    <label>Role</label>
                     <select id="login-role">
                         <option value="Admin">Admin</option>
                         <option value="Pejabat">Pejabat</option>
@@ -55,8 +55,9 @@
         </div>
     </div>
 
-    <!-- 3. Main Application -->
+    <!-- Main Application -->
     <div id="main-screen" class="screen-container hidden">
+        <!-- Sidebar Menu -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h3><i class="fa-solid fa-envelope-open-text"></i> SuratApp</h3>
@@ -87,6 +88,7 @@
             </div>
         </aside>
 
+        <!-- Area Konten Utama -->
         <main class="main-content">
             <header class="topbar">
                 <button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
@@ -98,58 +100,139 @@
             </header>
 
             <div class="content-area" id="content-area">
+                
+                <!-- VIEW: DASHBOARD -->
                 <div id="view-dashboard" class="view-section active">
                     <div class="stats-grid">
-                        <div class="stat-card playful-card blue">
+                        <div class="stat-card playful-card blue" onclick="navigate('surat-masuk')">
                             <div class="stat-icon"><i class="fa-solid fa-inbox"></i></div>
                             <div class="stat-details"><h3>124</h3><p>Surat Masuk</p></div>
                         </div>
-                        <div class="stat-card playful-card green">
+                        <div class="stat-card playful-card green" onclick="navigate('surat-keluar')">
                             <div class="stat-icon"><i class="fa-solid fa-paper-plane"></i></div>
                             <div class="stat-details"><h3>89</h3><p>Surat Keluar</p></div>
                         </div>
-                        <div class="stat-card playful-card purple">
+                        <div class="stat-card playful-card purple" onclick="navigate('sppk')">
                             <div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div>
                             <div class="stat-details"><h3>45</h3><p>Total SPPK</p></div>
                         </div>
-                        <div class="stat-card playful-card orange">
+                        <div class="stat-card playful-card orange" onclick="navigate('pk')">
                             <div class="stat-icon"><i class="fa-solid fa-file-signature"></i></div>
                             <div class="stat-details"><h3>42</h3><p>Total PK</p></div>
                         </div>
                     </div>
-                    
                     <div class="dashboard-widgets">
                         <div class="card widget">
-                            <div class="card-header">
-                                <h3>Shortcut Cepat</h3>
-                            </div>
+                            <div class="card-header"><h3>Shortcut Cepat</h3></div>
                             <div class="card-body shortcut-grid">
-                                <button class="btn btn-primary-light" onclick="showAlert('Info', 'Form Input dalam pengembangan', 'info')"><i class="fa-solid fa-plus"></i> Surat Masuk</button>
-                                <button class="btn btn-primary-light"><i class="fa-solid fa-plus"></i> Surat Keluar</button>
-                                <button class="btn btn-primary-light"><i class="fa-solid fa-plus"></i> Buat SPPK</button>
+                                <button class="btn btn-primary-light" onclick="navigate('surat-masuk')"><i class="fa-solid fa-plus"></i> Surat Masuk</button>
+                                <button class="btn btn-primary-light" onclick="navigate('surat-keluar')"><i class="fa-solid fa-plus"></i> Surat Keluar</button>
+                                <button class="btn btn-primary-light" onclick="navigate('sppk')"><i class="fa-solid fa-plus"></i> Buat SPPK</button>
                                 <button class="btn btn-primary-light" onclick="copyWhatsAppSummary()"><i class="fa-brands fa-whatsapp"></i> Share Laporan</button>
                             </div>
                         </div>
                         <div class="card widget">
-                            <div class="card-header">
-                                <h3>Aktivitas Terbaru</h3>
-                            </div>
+                            <div class="card-header"><h3>Aktivitas Terbaru</h3></div>
                             <div class="card-body">
                                 <ul class="activity-list">
-                                    <li><i class="fa-solid fa-check-circle text-success"></i> SPPK 067/SPPK/2026 telah dibuat PK.</li>
-                                    <li><i class="fa-solid fa-envelope text-primary"></i> Surat Masuk dari Instansi A diterima.</li>
-                                    <li><i class="fa-solid fa-share text-warning"></i> Disposisi baru dari Direktur.</li>
+                                    <li><i class="fa-solid fa-check-circle text-success"></i> PK 067/886/89/99/BBL/2026 berhasil diterbitkan.</li>
+                                    <li><i class="fa-solid fa-envelope text-primary"></i> Surat Masuk dari BKN (No. 012/A) diterima.</li>
+                                    <li><i class="fa-solid fa-share text-warning"></i> Disposisi baru menanti persetujuan Anda.</li>
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- VIEW: SURAT MASUK -->
+                <div id="view-surat-masuk" class="view-section hidden">
+                    <div class="card table-card">
+                        <div class="card-header flex-between">
+                            <h3>Data Surat Masuk</h3>
+                            <div class="actions flex-gap">
+                                <input type="text" class="search-input" placeholder="Cari nomor/pengirim...">
+                                <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah Baru</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr><th>No. Surat</th><th>Tgl Terima</th><th>Pengirim</th><th>Perihal</th><th>Status</th><th>Aksi</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>102/BKN/VIII/2026</strong></td><td>01 Aug 2026</td><td>BKN Pusat</td><td>Undangan Rapat</td>
+                                        <td><span class="badge badge-success">Selesai</span></td>
+                                        <td><button class="btn-icon"><i class="fa-solid fa-eye"></i></button> <button class="btn-icon"><i class="fa-solid fa-share-nodes text-warning"></i></button></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>089/PEMDA/VIII/2026</strong></td><td>05 Aug 2026</td><td>Pemda Prov</td><td>Edaran Cuti Bersama</td>
+                                        <td><span class="badge badge-warning">Diproses</span></td>
+                                        <td><button class="btn-icon"><i class="fa-solid fa-eye"></i></button> <button class="btn-icon"><i class="fa-solid fa-share-nodes text-warning"></i></button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: SURAT KELUAR -->
+                <div id="view-surat-keluar" class="view-section hidden">
+                    <div class="card table-card">
+                        <div class="card-header flex-between">
+                            <h3>Data Surat Keluar</h3>
+                            <div class="actions flex-gap">
+                                <input type="text" class="search-input" placeholder="Cari surat keluar...">
+                                <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Buat Surat</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr><th>No. Surat Keluar</th><th>Tgl Surat</th><th>Tujuan</th><th>Perihal</th><th>Status</th><th>Aksi</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>045/SK/VIII/2026</strong></td><td>10 Aug 2026</td><td>Kementerian Keuangan</td><td>Laporan Anggaran</td>
+                                        <td><span class="badge badge-success">Terkirim</span></td>
+                                        <td><button class="btn-icon"><i class="fa-solid fa-file-pdf text-danger"></i></button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: DISPOSISI -->
+                <div id="view-disposisi" class="view-section hidden">
+                    <div class="card table-card">
+                        <div class="card-header flex-between">
+                            <h3>Daftar Disposisi Masuk</h3>
+                            <input type="text" class="search-input" placeholder="Cari instruksi...">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr><th>Surat Sumber</th><th>Dari</th><th>Instruksi</th><th>Batas Waktu</th><th>Status</th><th>Aksi</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>102/BKN/VIII/2026</td><td>Direktur Utama</td><td>Harap hadiri dan siapkan materi</td><td>15 Aug 2026</td>
+                                        <td><span class="badge badge-danger">Belum Dibaca</span></td>
+                                        <td><button class="btn btn-primary-light">Tindak Lanjut</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: SPPK -->
                 <div id="view-sppk" class="view-section hidden">
                     <div class="card table-card">
                         <div class="card-header flex-between">
                             <h3>Daftar SPPK</h3>
-                            <div class="actions">
+                            <div class="actions flex-gap">
                                 <input type="text" class="search-input" placeholder="Cari SPPK...">
                                 <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah SPPK</button>
                             </div>
@@ -157,36 +240,131 @@
                         <div class="table-responsive">
                             <table class="modern-table">
                                 <thead>
-                                    <tr>
-                                        <th>No. SPPK</th>
-                                        <th>Tanggal</th>
-                                        <th>Debitur</th>
-                                        <th>Plafon</th>
-                                        <th>Status PK</th>
-                                        <th>Aksi</th>
-                                    </tr>
+                                    <tr><th>No. SPPK</th><th>Tanggal</th><th>Debitur</th><th>Plafon</th><th>Status PK</th><th>Aksi</th></tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><strong>067/SPPK/2026</strong><br><small>Urut: 067</small></td>
-                                        <td>10 Aug 2026</td>
-                                        <td>PT. Maju Bersama</td>
-                                        <td>Rp 500.000.000</td>
+                                        <td><strong>067/SPPK/2026</strong><br><small>Urut: 067</small></td><td>10 Aug 2026</td><td>PT. Maju Bersama</td><td>Rp 500.000.000</td>
                                         <td><span class="badge badge-success">Sudah PK</span></td>
-                                        <td><button class="btn-icon" title="Lihat Detail"><i class="fa-solid fa-eye"></i></button></td>
+                                        <td><button class="btn-icon" title="Lihat"><i class="fa-solid fa-eye"></i></button></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>068/SPPK/2026</strong><br><small>Urut: 068</small></td><td>12 Aug 2026</td><td>CV. Jaya Abadi</td><td>Rp 150.000.000</td>
+                                        <td><span class="badge badge-warning">Belum PK</span></td>
+                                        <td><button class="btn-icon" title="Buat PK"><i class="fa-solid fa-file-signature text-primary"></i></button></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-                
-                <div id="view-blank" class="view-section hidden">
-                    <div class="empty-state">
-                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Empty" width="120">
-                        <h3>Modul dalam Pengembangan</h3>
+
+                <!-- VIEW: PK -->
+                <div id="view-pk" class="view-section hidden">
+                    <div class="card table-card">
+                        <div class="card-header flex-between">
+                            <h3>Daftar Perjanjian Kredit (PK)</h3>
+                            <input type="text" class="search-input" placeholder="Cari PK...">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr><th>No. PK</th><th>SPPK Induk</th><th>Tgl PK</th><th>Debitur</th><th>Plafon</th><th>Aksi</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>067/886/89/99/BBL/2026</strong></td><td>067/SPPK/2026</td><td>14 Aug 2026</td><td>PT. Maju Bersama</td><td>Rp 500.000.000</td>
+                                        <td><button class="btn-icon"><i class="fa-solid fa-eye"></i></button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
+                <!-- VIEW: ARSIP -->
+                <div id="view-arsip" class="view-section hidden">
+                    <div class="card table-card">
+                        <div class="card-header flex-between">
+                            <h3>Pencarian Arsip Terpadu</h3>
+                            <div class="input-group" style="margin-bottom:0; width: 300px;">
+                                <select>
+                                    <option>Semua Kategori</option>
+                                    <option>Surat Masuk</option>
+                                    <option>Surat Keluar</option>
+                                    <option>SPPK</option>
+                                    <option>PK</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group">
+                                <input type="text" placeholder="Ketik kata kunci, nama debitur, pengirim, atau nomor dokumen..." style="font-size: 1.1rem; padding: 15px;">
+                            </div>
+                            <div class="empty-state">
+                                <i class="fa-solid fa-folder-open fa-3x text-secondary" style="margin-bottom:15px; opacity:0.5;"></i>
+                                <p>Gunakan kolom pencarian di atas untuk menemukan file arsip.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: LAPORAN -->
+                <div id="view-laporan" class="view-section hidden admin-only">
+                    <div class="form-grid">
+                        <div class="card">
+                            <div class="card-header"><h3>Generate Laporan PDF</h3></div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <label>Jenis Laporan</label>
+                                    <select><option>Laporan Rekap SPPK & PK</option><option>Laporan Surat Masuk/Keluar</option></select>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="input-group"><label>Dari Tanggal</label><input type="date"></div>
+                                    <div class="input-group"><label>Sampai Tanggal</label><input type="date"></div>
+                                </div>
+                                <button class="btn btn-primary w-100" onclick="showAlert('Sukses', 'Laporan PDF sedang diunduh.', 'success')"><i class="fa-solid fa-file-pdf"></i> Unduh PDF</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h3>Ringkasan Eksekutif (WhatsApp)</h3></div>
+                            <div class="card-body">
+                                <p style="margin-bottom: 20px;">Hasilkan teks ringkasan otomatis yang siap di-*forward* ke pimpinan atau grup WhatsApp.</p>
+                                <button class="btn btn-outline w-100" style="border-color:#25D366; color:#25D366;" onclick="copyWhatsAppSummary()"><i class="fa-brands fa-whatsapp"></i> Generate & Copy Teks WA</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: PENGATURAN -->
+                <div id="view-pengaturan" class="view-section hidden admin-only">
+                    <div class="card">
+                        <div class="card-header"><h3>Konfigurasi Penomoran Sistem</h3></div>
+                        <div class="card-body">
+                            <div class="form-grid">
+                                <div class="input-group">
+                                    <label>Format Penomoran SPPK</label>
+                                    <input type="text" value="{URUT}/SPPK/{TAHUN}">
+                                </div>
+                                <div class="input-group">
+                                    <label>Format Penomoran PK</label>
+                                    <input type="text" value="{URUT}/{KODE1}/{KODE2}/{KODE3}/{UNIT}/{TAHUN}">
+                                </div>
+                                <div class="input-group">
+                                    <label>Kode Unit Cabang Default</label>
+                                    <input type="text" value="BBL">
+                                </div>
+                                <div class="input-group">
+                                    <label>Reset Counter Tahunan</label>
+                                    <select><option>Otomatis setiap 1 Januari</option><option>Manual</option></select>
+                                </div>
+                            </div>
+                            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+                            <button class="btn btn-primary" onclick="showAlert('Tersimpan', 'Konfigurasi penomoran berhasil diperbarui.', 'success')"><i class="fa-solid fa-save"></i> Simpan Konfigurasi</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
