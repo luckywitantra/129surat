@@ -20,8 +20,17 @@
         </div>
     </div>
 
-    <!-- Login Screen -->
-    <div id="login-screen" class="screen-container">
+    <!-- 1. Initial Loading Screen (Akan mengecek & membuat database) -->
+    <div id="init-screen" class="screen-container">
+        <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+            <i class="fa-solid fa-circle-notch fa-spin fa-4x text-primary" style="margin-bottom: 20px;"></i>
+            <h2>Memuat Sistem...</h2>
+            <p>Mempersiapkan integrasi database...</p>
+        </div>
+    </div>
+
+    <!-- 2. Login Screen (Sembunyi secara default sampai loading selesai) -->
+    <div id="login-screen" class="screen-container hidden">
         <div class="login-card">
             <div class="login-header">
                 <i class="fa-solid fa-paper-plane fa-3x text-primary"></i>
@@ -46,9 +55,8 @@
         </div>
     </div>
 
-    <!-- Main Application -->
+    <!-- 3. Main Application -->
     <div id="main-screen" class="screen-container hidden">
-        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h3><i class="fa-solid fa-envelope-open-text"></i> SuratApp</h3>
@@ -79,9 +87,7 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Topbar -->
             <header class="topbar">
                 <button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
                 <h2 id="page-title" class="page-title">Dashboard</h2>
@@ -91,9 +97,7 @@
                 </div>
             </header>
 
-            <!-- Content Area -->
             <div class="content-area" id="content-area">
-                <!-- Dashboard View -->
                 <div id="view-dashboard" class="view-section active">
                     <div class="stats-grid">
                         <div class="stat-card playful-card blue">
@@ -120,7 +124,7 @@
                                 <h3>Shortcut Cepat</h3>
                             </div>
                             <div class="card-body shortcut-grid">
-                                <button class="btn btn-primary-light" onclick="showAlert('Info', 'Fitur input form belum diimplementasi di demo ini', 'info')"><i class="fa-solid fa-plus"></i> Surat Masuk</button>
+                                <button class="btn btn-primary-light" onclick="showAlert('Info', 'Form Input dalam pengembangan', 'info')"><i class="fa-solid fa-plus"></i> Surat Masuk</button>
                                 <button class="btn btn-primary-light"><i class="fa-solid fa-plus"></i> Surat Keluar</button>
                                 <button class="btn btn-primary-light"><i class="fa-solid fa-plus"></i> Buat SPPK</button>
                                 <button class="btn btn-primary-light" onclick="copyWhatsAppSummary()"><i class="fa-brands fa-whatsapp"></i> Share Laporan</button>
@@ -141,7 +145,6 @@
                     </div>
                 </div>
 
-                <!-- SPPK View (Contoh Data Table) -->
                 <div id="view-sppk" class="view-section hidden">
                     <div class="card table-card">
                         <div class="card-header flex-between">
@@ -170,19 +173,7 @@
                                         <td>PT. Maju Bersama</td>
                                         <td>Rp 500.000.000</td>
                                         <td><span class="badge badge-success">Sudah PK</span></td>
-                                        <td>
-                                            <button class="btn-icon" title="Lihat Detail"><i class="fa-solid fa-eye"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>068/SPPK/2026</strong><br><small>Urut: 068</small></td>
-                                        <td>12 Aug 2026</td>
-                                        <td>CV. Jaya Abadi</td>
-                                        <td>Rp 150.000.000</td>
-                                        <td><span class="badge badge-warning">Belum PK</span></td>
-                                        <td>
-                                            <button class="btn-icon" title="Buat PK"><i class="fa-solid fa-file-signature text-primary"></i></button>
-                                        </td>
+                                        <td><button class="btn-icon" title="Lihat Detail"><i class="fa-solid fa-eye"></i></button></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -190,15 +181,12 @@
                     </div>
                 </div>
                 
-                <!-- Blank State untuk view lainnya -->
                 <div id="view-blank" class="view-section hidden">
                     <div class="empty-state">
                         <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Empty" width="120">
                         <h3>Modul dalam Pengembangan</h3>
-                        <p>Silakan gunakan navigasi untuk melihat Dashboard atau modul SPPK (Demo).</p>
                     </div>
                 </div>
-
             </div>
         </main>
     </div>
