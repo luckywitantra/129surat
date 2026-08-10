@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbwmERQs7jhb2b9f0sWQTtTdnE_BepV0q2Sb9djIYdi5rJf50RFoV4ai71Q7xodJu75m/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxj7uQSzJJLESto_xbCuQAw1iDEn-1_jNX68MlwLjtnmJqFpTOtsq2eOpBDZjpz648Y/exec';
 
 let currentUser = null;
 let currentTheme = localStorage.getItem('theme') || 'light';
@@ -147,40 +147,125 @@ function copyWhatsAppSummary() {
     });
 }
 
-// --- Modal Form Handlers ---
+// ==========================================
+// --- Modal Form Handlers & API Integrasi ---
+// ==========================================
 
-// Membuka form popup
 function openModal(modalId) {
     document.getElementById(modalId).classList.remove('hidden');
 }
 
-// Menutup form popup
 function closeModal(modalId) {
     document.getElementById(modalId).classList.add('hidden');
 }
 
+// Helper: Convert File ke Base64 (Aman dikirim via JSON ke Google Script)
+const getBase64 = (file) => new Promise((resolve, reject) => {
+    if (!file) return resolve(null);
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve({
+        mimeType: file.type,
+        filename: file.name,
+        base64Data: reader.result.split(',')[1] // Ambil raw base64 data
+    });
+    reader.onerror = error => reject(error);
+});
+
+// Fungsi universal kirim form
+async function sendFormData(action, payload, formEl, modalId) {
+    const btn = formEl.querySelector('button[type="submit"]');
+    const originalBtnHTML = btn.innerHTML;
+    
+    // UI Loading di tombol submit
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: action, payload: payload })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            closeModal(modalId);
+            showAlert('Berhasil', result.message || 'Data berhasil disimpan.', 'success');
+            formEl.reset(); // Kosongkan form jika berhasil
+        } else {
+            showAlert('Gagal', result.message || 'Terjadi kesalahan pada sistem backend.', 'error');
+        }
+    } catch (error) {
+        console.error(error);
+        showAlert('Koneksi Gagal', 'Gagal mengirim data. Periksa jaringan Anda.', 'error');
+    } finally {
+        // Kembalikan tombol ke keadaan semula
+        btn.innerHTML = originalBtnHTML;
+        btn.disabled = false;
+    }
+}
+
 // Handler Submit Surat Masuk
-function submitSuratMasuk(e) {
-    e.preventDefault(); // Mencegah reload halaman
-    closeModal('modal-surat-masuk');
-    showAlert('Berhasil', 'Data Surat Masuk berhasil disimpan ke database.', 'success');
-    e.target.reset(); // Kosongkan form setelah simpan
+async function submitSuratMasuk(e) {
+    e.preventDefault();
+    const form = e.target;
+    
+    // Periksa apakah user mengupload file atau tidak (Opsional)
+    const fileInput = form.elements['fileUpload'];
+    const fileData = (fileInput && fileInput.files.length > 0) ? await getBase64(fileInput.files[0]) : null;
+    
+    const payload = {
+        nomorSurat: form.elements['nomorSurat'].value,
+        tanggalSurat: form.elements['tanggalSurat'].value,
+        pengirim: form.elements['pengirim'].value,
+        sifatSurat: form.elements['sifatSurat'].value,
+        perihal: form.elements['perihal'].value,
+        file: fileData, 
+        user: currentUser ? currentUser.username : 'Unknown'
+    };
+    sendFormData('insertSuratMasuk', payload, form, 'modal-surat-masuk');
 }
 
 // Handler Submit Surat Keluar
-function submitSuratKeluar(e) {
+async function submitSuratKeluar(e) {
     e.preventDefault();
-    closeModal('modal-surat-keluar');
-    showAlert('Berhasil', 'Draft Surat Keluar berhasil dibuat.', 'success');
-    e.target.reset();
+    const form = e.target;
+    
+    const fileInput = form.elements['fileUpload'];
+    const fileData = (fileInput && fileInput.files.length > 0) ? await getBase64(fileInput.files[0]) : null;
+    
+    const payload = {
+        jenisSurat: form.elements['jenisSurat'].value,
+        tujuan: form.elements['tujuan'].value,
+        perihal: form.elements['perihal'].value,
+        penandatangan: form.elements['penandatangan'].value,
+        sifat: form.elements['sifat'].value,
+        file: fileData,
+        user: currentUser ? currentUser.username : 'Unknown'
+    };
+    sendFormData('insertSuratKeluar', payload, form, 'modal-surat-keluar');
 }
 
 // Handler Submit SPPK
-function submitSPPK(e) {
+async function submitSPPK(e) {
     e.preventDefault();
-    closeModal('modal-sppk');
-    showAlert('Berhasil', 'Data SPPK baru berhasil ditambahkan dan menunggu proses PK.', 'success');
-    e.target.reset();
+    const form = e.target;
+    
+    const fileInput = form.elements['fileUpload'];
+    const fileData = (fileInput && fileInput.files.length > 0) ? await getBase64(fileInput.files[0]) : null;
+    
+    const payload = {
+        nomorAplikasi: form.elements['nomorAplikasi'].value,
+        tanggalSPPK: form.elements['tanggalSPPK'].value,
+        namaDebitur: form.elements['namaDebitur'].value,
+        jenisKredit: form.elements['jenisKredit'].value,
+        plafon: form.elements['plafon'].value,
+        jangkaWaktu: form.elements['jangkaWaktu'].value,
+        tujuanKredit: form.elements['tujuanKredit'].value,
+        file: fileData,
+        user: currentUser ? currentUser.username : 'Unknown'
+    };
+    sendFormData('insertSPPK', payload, form, 'modal-sppk');
 }
 
 // PWA Service Worker
