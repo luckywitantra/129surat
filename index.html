@@ -60,6 +60,27 @@
         </div>
     </div>
 
+    <div id="modal-disposisi" class="modal-overlay hidden">
+        <div class="modal-card modal-form">
+            <h3 id="title-disposisi"><i class="fa-solid fa-share-nodes text-primary"></i> Disposisi Surat ke Staf</h3>
+            <form onsubmit="submitDisposisi(event)">
+                <input type="hidden" name="idSuratDisposisi" id="idSuratDisposisi">
+                <div class="input-group">
+                    <label>Pilih Staf Penerima</label>
+                    <select name="stafPenerima" id="disposisi-staf" required></select>
+                </div>
+                <div class="input-group">
+                    <label>Pesan / Instruksi Tugas</label>
+                    <input type="text" name="pesanDisposisi" required placeholder="Cth: Segera tindaklanjuti dan balas surat ini">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-disposisi')">Batal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Kirim Tugas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="modal-surat-keluar" class="modal-overlay hidden">
         <div class="modal-card modal-form">
             <h3 id="title-sk"><i class="fa-solid fa-paper-plane text-success"></i> Surat Keluar</h3>
@@ -198,10 +219,17 @@
         </aside>
 
         <main class="main-content">
-            <header class="topbar">
+           <header class="topbar">
                 <button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
                 <h2 id="page-title" class="page-title" style="margin:0; font-size:1.5rem;">Dashboard</h2>
-                <div class="topbar-actions"><button class="btn-icon" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button></div>
+                <div class="topbar-actions flex-gap">
+                    <!-- Lonceng Notifikasi Staf -->
+                    <div class="notif-bell hidden" id="topbar-notif" onclick="navigate('disposisi')">
+                        <i class="fa-solid fa-bell text-secondary" style="font-size:1.3rem;"></i>
+                        <span class="notif-badge" id="notif-count">0</span>
+                    </div>
+                    <button class="btn-icon" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+                </div>
             </header>
 
             <div class="content-area" id="content-area">
@@ -295,6 +323,16 @@
                         <div class="card-body">
                             <div id="filter-pk"></div>
                             <div class="table-responsive"><table class="modern-table"><thead><tr><th>No. PK</th><th>SPPK Induk</th><th>Tgl PK</th><th>Debitur / Cabang</th><th>Plafon</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbody-pk"><tr><td colspan="7" style="text-align: center;">Memuat data...</td></tr></tbody></table></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-disposisi" class="view-section hidden">
+                    <div class="card table-card">
+                        <div class="card-header flex-between"><h3>Manajemen Disposisi & Tugas</h3></div>
+                        <div class="card-body">
+                            <div id="filter-disposisi"></div>
+                            <div class="table-responsive"><table class="modern-table"><thead><tr><th>No. Surat</th><th>Tgl Terima</th><th>Pengirim</th><th>Perihal / Pesan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbody-disposisi"><tr><td colspan="6" style="text-align: center;">Memuat data...</td></tr></tbody></table></div>
                         </div>
                     </div>
                 </div>
