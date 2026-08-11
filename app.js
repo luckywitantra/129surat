@@ -27,14 +27,13 @@ const formatRupiah = (angka) => {
 
 const cleanNominal = (val) => { return val ? val.replace(/[^0-9]/g, '') : ''; };
 
+// 1. Auto Uppercase untuk semua input tipe teks dan password
 document.addEventListener('input', function(e) {
-    if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
-        if (e.target.id !== 'login-username') {
-            const start = e.target.selectionStart;
-            const end = e.target.selectionEnd;
-            e.target.value = e.target.value.toUpperCase();
-            e.target.setSelectionRange(start, end);
-        }
+    if (e.target.tagName === 'INPUT' && (e.target.type === 'text' || e.target.type === 'password')) {
+        const start = e.target.selectionStart;
+        const end = e.target.selectionEnd;
+        e.target.value = e.target.value.toUpperCase();
+        e.target.setSelectionRange(start, end);
     }
 });
 
@@ -474,30 +473,78 @@ function generateLaporanWA() {
     navigator.clipboard.writeText(text).then(()=>showAlert('Sukses', 'Teks laporan berhasil disalin ke clipboard!', 'success'));
 }
 
-// LOGIN
-function handleLogin(e) {
+// FUNGSI TAMPILKAN/SEMBUNYIKAN PASSWORD
+function togglePassword() {
+    const passInput = document.getElementById('login-password');
+    const eyeIcon = document.getElementById('eye-icon');
+    if (passInput.type === 'password') {
+        passInput.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+        eyeIcon.classList.add('text-danger');
+    } else {
+        passInput.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash', 'text-danger');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
+
+// LOGIKA LOGIN TERBARU (OTENTIKASI DATABASE)
+async function handleLogin(e) {
     e.preventDefault(); 
-    currentUser = { username: document.getElementById('login-username').value, role: document.getElementById('login-role').value }; 
-    document.getElementById('user-name').innerText = currentUser.username; 
-    document.getElementById('user-role').innerText = currentUser.role; 
-    
-    if(currentUser.role !== 'Admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none'); 
-    document.getElementById('login-screen').classList.add('hidden'); 
-    document.getElementById('main-screen').classList.remove('hidden'); 
-    loadDashboardStats();
-    
-    // Tarik data Cabang
-    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getCabang' }) }).then(res => res.json()).then(result => { if(result.status === 'success') { storeData['cabang'] = result.data; let options = '<option value="">Pilih Cabang...</option>'; result.data.forEach(j => options += `<option value="${j.kodeSM}|${j.kodePK}">${j.nama}</option>`); document.querySelectorAll('.sel-cabang-global').forEach(el => el.innerHTML = options); } });
-    
-    // Tarik data Jenis Surat
-    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getJenisSurat' }) }).then(res => res.json()).then(result => { if(result.status === 'success') { let options = '<option value="">Pilih Jenis Surat...</option>'; result.data.forEach(j => options += `<option value="${j.kode}">${j.kode} - ${j.nama}</option>`); if(document.getElementById('select-jenis-sm')) document.getElementById('select-jenis-sm').innerHTML = options; if(document.getElementById('select-jenis-sk')) document.getElementById('select-jenis-sk').innerHTML = options; } });
-    
-    // TAMBAHAN: Tarik data User (Staf) agar siap digunakan di menu Disposisi
-    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUser' }) }).then(res => res.json()).then(result => { 
-        if(result.status === 'success') { 
-            globalDataUser = result.data; 
-        } 
-    });
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi...';
+    btn.disabled = true;
+
+    const inputUser = document.getElementById('login-username').value;
+    const inputPass = document.getElementById('login-password').value;
+
+    try {
+        // Tarik data User dari database untuk otentikasi
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUser' }) });
+        const result = await res.json();
+        
+        if (result.status === 'success') {
+            globalDataUser = result.data;
+            const validUser = globalDataUser.find(u => u.username === inputUser);
+            
+            if (validUser) {
+                // CATATAN PENTING: Karena database Google Sheet Anda sebelumnya tidak memiliki kolom Password, 
+                // untuk sementara sistem ini mengizinkan login jika Password sama dengan Username, 
+                // atau menggunakan sandi bawaan pabrik '123456'.
+                if (inputPass === inputUser || inputPass === '123456') {
+                    
+                    currentUser = { username: validUser.username, role: validUser.role, nama: validUser.nama }; 
+                    document.getElementById('user-name').innerText = currentUser.username; 
+                    document.getElementById('user-role').innerText = currentUser.role; 
+                    
+                    // Filter tampilan berdasarkan Role yang ditarik dari Database
+                    if(currentUser.role !== 'Admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none'); 
+                    else document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+
+                    document.getElementById('login-screen').classList.add('hidden'); 
+                    document.getElementById('main-screen').classList.remove('hidden'); 
+                    loadDashboardStats();
+                    showAlert('Otentikasi Berhasil', `Selamat datang kembali, ${currentUser.nama}!`, 'success');
+                    
+                    // Tarik sisa data master
+                    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getCabang' }) }).then(r => r.json()).then(resC => { if(resC.status === 'success') { storeData['cabang'] = resC.data; let ops = '<option value="">Pilih Cabang...</option>'; resC.data.forEach(j => ops += `<option value="${j.kodeSM}|${j.kodePK}">${j.nama}</option>`); document.querySelectorAll('.sel-cabang-global').forEach(el => el.innerHTML = ops); } });
+                    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getJenisSurat' }) }).then(r => r.json()).then(resJ => { if(resJ.status === 'success') { let ops = '<option value="">Pilih Jenis Surat...</option>'; resJ.data.forEach(j => ops += `<option value="${j.kode}">${j.kode} - ${j.nama}</option>`); if(document.getElementById('select-jenis-sm')) document.getElementById('select-jenis-sm').innerHTML = ops; if(document.getElementById('select-jenis-sk')) document.getElementById('select-jenis-sk').innerHTML = ops; } });
+
+                } else {
+                    showAlert('Akses Ditolak', 'Password yang Anda masukkan salah.', 'error');
+                }
+            } else {
+                showAlert('Akses Ditolak', 'Username tidak terdaftar di sistem.', 'error');
+            }
+        }
+    } catch (error) {
+        showAlert('Koneksi Gagal', 'Tidak dapat menghubungi server verifikasi.', 'error');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
 }
 
 // ========================================================
