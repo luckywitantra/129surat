@@ -469,10 +469,30 @@ function generateLaporanWA() {
     navigator.clipboard.writeText(text).then(()=>showAlert('Sukses', 'Teks laporan berhasil disalin ke clipboard!', 'success'));
 }
 
+// LOGIN
 function handleLogin(e) {
-    e.preventDefault(); currentUser = { username: document.getElementById('login-username').value, role: document.getElementById('login-role').value }; document.getElementById('user-name').innerText = currentUser.username; document.getElementById('user-role').innerText = currentUser.role; if(currentUser.role !== 'Admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none'); document.getElementById('login-screen').classList.add('hidden'); document.getElementById('main-screen').classList.remove('hidden'); loadDashboardStats();
+    e.preventDefault(); 
+    currentUser = { username: document.getElementById('login-username').value, role: document.getElementById('login-role').value }; 
+    document.getElementById('user-name').innerText = currentUser.username; 
+    document.getElementById('user-role').innerText = currentUser.role; 
+    
+    if(currentUser.role !== 'Admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none'); 
+    document.getElementById('login-screen').classList.add('hidden'); 
+    document.getElementById('main-screen').classList.remove('hidden'); 
+    loadDashboardStats();
+    
+    // Tarik data Cabang
     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getCabang' }) }).then(res => res.json()).then(result => { if(result.status === 'success') { storeData['cabang'] = result.data; let options = '<option value="">Pilih Cabang...</option>'; result.data.forEach(j => options += `<option value="${j.kodeSM}|${j.kodePK}">${j.nama}</option>`); document.querySelectorAll('.sel-cabang-global').forEach(el => el.innerHTML = options); } });
+    
+    // Tarik data Jenis Surat
     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getJenisSurat' }) }).then(res => res.json()).then(result => { if(result.status === 'success') { let options = '<option value="">Pilih Jenis Surat...</option>'; result.data.forEach(j => options += `<option value="${j.kode}">${j.kode} - ${j.nama}</option>`); if(document.getElementById('select-jenis-sm')) document.getElementById('select-jenis-sm').innerHTML = options; if(document.getElementById('select-jenis-sk')) document.getElementById('select-jenis-sk').innerHTML = options; } });
+    
+    // TAMBAHAN: Tarik data User (Staf) agar siap digunakan di menu Disposisi
+    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUser' }) }).then(res => res.json()).then(result => { 
+        if(result.status === 'success') { 
+            globalDataUser = result.data; 
+        } 
+    });
 }
 function handleLogout() { currentUser = null; document.getElementById('main-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); document.getElementById('login-form').reset(); document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex'); }
 window.onload = () => { if (document.getElementById('theme-icon')) document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; };
