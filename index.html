@@ -187,7 +187,48 @@
     <!-- Modals Manajemen -->
     <div id="modal-cabang" class="modal-overlay hidden"><div class="modal-card modal-form"><h3 id="title-cabang"><i class="fa-solid fa-code-branch text-primary"></i> Tambah Cabang</h3><form onsubmit="submitCabang(event)"><input type="hidden" name="idCabang" id="idCabang"><div class="input-group"><label>Nama Cabang</label><input type="text" name="namaCabang" id="namaCabang" required></div><div class="form-grid"><div class="input-group"><label>Kode Cabang (SM/SK)</label><input type="text" name="kodeSMSK" id="kodeSMSK" required></div><div class="input-group"><label>Kode Cabang (PK)</label><input type="text" name="kodePK" id="kodePK" required></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-cabang')">Batal</button><button type="submit" class="btn btn-primary">Simpan Cabang</button></div></form></div></div>
     <div id="modal-jenis-surat" class="modal-overlay hidden"><div class="modal-card modal-form"><h3 id="title-jenis-surat"><i class="fa-solid fa-tags text-primary"></i> Tambah Jenis Surat</h3><form onsubmit="submitJenisSurat(event)"><input type="hidden" name="idJenisSurat" id="idJenisSurat"><div class="form-grid"><div class="input-group"><label>Kode Surat</label><input type="text" name="kodeJenis" id="kodeJenis" required></div><div class="input-group"><label>Nama Klasifikasi</label><input type="text" name="namaJenis" id="namaJenis" required></div></div><div class="input-group"><label>Uraian</label><input type="text" name="uraianJenis" id="uraianJenis" required></div><div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-jenis-surat')">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div></form></div></div>
-    <div id="modal-user" class="modal-overlay hidden"><div class="modal-card modal-form"><h3 id="title-user"><i class="fa-solid fa-user-plus text-primary"></i> Tambah User</h3><form onsubmit="submitUser(event)"><input type="hidden" name="idUser" id="idUser"><div class="form-grid"><div class="input-group"><label>Nama Lengkap</label><input type="text" name="namaLengkap" id="namaLengkap" required></div><div class="input-group"><label>Username</label><input type="text" name="usernameLogin" id="usernameLogin" required></div><div class="input-group"><label>Role</label><select name="roleUser" id="roleUser" required><option value="Admin">Admin</option><option value="Pejabat">Pejabat</option><option value="Staf">Staf</option></select></div><div class="input-group"><label>Jabatan</label><input type="text" name="jabatanUser" id="jabatanUser" required></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-user')">Batal</button><button type="submit" class="btn btn-primary">Simpan User</button></div></form></div></div>
+    <div id="modal-user" class="modal-overlay hidden">
+    <div class="modal-card modal-form">
+        <h3 id="title-user"><i class="fa-solid fa-user-plus text-primary"></i> Tambah User</h3>
+        <form onsubmit="submitUser(event)">
+            <input type="hidden" name="idUser" id="idUser">
+            
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" name="namaLengkap" id="namaLengkap" required placeholder="Cth: Budi Santoso">
+                </div>
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" name="usernameLogin" id="usernameLogin" required placeholder="Cth: BUDI123">
+                </div>
+                <div class="input-group">
+                    <label>Role</label>
+                    <select name="roleUser" id="roleUser" required>
+                        <option value="Admin">Admin</option>
+                        <option value="Pejabat">Pejabat</option>
+                        <option value="Staf">Staf</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Jabatan</label>
+                    <input type="text" name="jabatanUser" id="jabatanUser" required placeholder="Cth: Staf Administrasi">
+                </div>
+            </div>
+
+            <!-- Tambahan Kolom Password -->
+            <div class="input-group" style="margin-top: 5px;">
+                <label>Password Akses</label>
+                <input type="text" name="passwordUser" id="passwordUser" required placeholder="MASUKKAN KATA SANDI (HURUF BESAR)" style="font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modal-user')">Batal</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan User</button>
+            </div>
+        </form>
+    </div>
+</div>
     <div id="modal-referensi-pk" class="modal-overlay hidden"><div class="modal-card modal-form"><h3 id="title-referensi-pk"><i class="fa-solid fa-list text-primary"></i> Tambah Referensi PK</h3><form onsubmit="submitReferensiPK(event)"><input type="hidden" name="idRefPK" id="idRefPK"><div class="input-group"><label>Kategori</label><select name="katRefPK" id="katRefPK" required><option value="GolDebitur">Golongan Debitur</option><option value="JnsPenggunaan">Jenis Penggunaan</option><option value="KlasKredit">Klasifikasi Kredit</option><option value="SektorEko">Sektor Ekonomi</option></select></div><div class="form-grid"><div class="input-group"><label>Kode Referensi</label><input type="text" name="kodeRefPK" id="kodeRefPK" required></div><div class="input-group"><label>Deskripsi</label><input type="text" name="descRefPK" id="descRefPK" required></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-referensi-pk')">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div></form></div></div>
 
     <div id="modal-timeline" class="modal-overlay hidden"><div class="modal-card modal-form" style="max-width:500px!important;"><h3><i class="fa-solid fa-clock-rotate-left text-primary"></i> SLA Timeline History</h3><h4 id="timeline-debitur" style="color:var(--primary); margin-bottom:15px;"></h4><div id="timeline-content" class="timeline-container"></div><div class="modal-footer"><button class="btn btn-primary w-100" onclick="closeModal('modal-timeline')">Tutup</button></div></div></div>
