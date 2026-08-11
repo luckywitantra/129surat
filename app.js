@@ -67,7 +67,57 @@ function navigate(page) {
 }
 
 async function loadDashboardStats() {
-    try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboardStats' }) }); const result = await response.json(); if (result.status === 'success') { document.getElementById('stat-sm').innerText = result.data.sm; document.getElementById('stat-sk').innerText = result.data.sk; document.getElementById('stat-sppk').innerText = result.data.sppk; document.getElementById('stat-pk').innerText = result.data.pk; } } catch (e) { console.error(e); }
+    try { 
+        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboardStats' }) }); 
+        const result = await response.json(); 
+        if (result.status === 'success') { 
+            const data = result.data;
+            // Update Kartu Utama
+            document.getElementById('stat-sm').innerText = data.sm; 
+            document.getElementById('stat-sk').innerText = data.sk; 
+            document.getElementById('stat-sppk').innerText = data.sppk; 
+            document.getElementById('stat-pk').innerText = data.pk; 
+
+            // Render Daftar Menunggu Tindakan (Pending SLA)
+            const pendingList = document.getElementById('dash-pending-list');
+            if (data.pending && data.pending.length > 0) {
+                let pHtml = '';
+                data.pending.forEach(p => {
+                    let icon = p.type === 'D1' ? '<i class="fa-solid fa-user-clock text-warning"></i>' : '<i class="fa-solid fa-file-signature text-danger"></i>';
+                    let bg = p.type === 'D1' ? 'var(--warning-light)' : 'var(--danger-light)';
+                    pHtml += `<li><div class="activity-icon" style="background:${bg}">${icon}</div><div class="activity-content"><h4>${p.title}</h4><p>${p.desc}</p></div><div class="activity-time">${formatDateShort(p.time)}</div></li>`;
+                });
+                pendingList.innerHTML = pHtml;
+            } else {
+                pendingList.innerHTML = '<li style="padding:30px 20px; justify-content:center; text-align:center;"><div style="color:var(--success);"><i class="fa-solid fa-check-circle fa-2x" style="margin-bottom:10px;"></i><br><strong>Sempurna!</strong><br><small style="color:var(--text-secondary)">Tidak ada dokumen yang mengantri.</small></div></li>';
+            }
+
+            // Render Aktivitas Terbaru
+            const recentList = document.getElementById('dash-recent-list');
+            if (data.recent && data.recent.length > 0) {
+                let rHtml = '';
+                data.recent.forEach(r => {
+                    let icon = '', bg = '';
+                    if(r.type === 'SM') { icon = '<i class="fa-solid fa-inbox text-info"></i>'; bg = 'var(--info-light)'; }
+                    else if(r.type === 'SK') { icon = '<i class="fa-solid fa-paper-plane text-success"></i>'; bg = 'var(--success-light)'; }
+                    else if(r.type === 'SPPK') { icon = '<i class="fa-solid fa-file-contract text-primary"></i>'; bg = 'var(--primary-light)'; }
+                    else if(r.type === 'PK') { icon = '<i class="fa-solid fa-handshake text-orange"></i>'; bg = 'var(--warning-light)'; }
+
+                    rHtml += `<li><div class="activity-icon" style="background:${bg}">${icon}</div><div class="activity-content"><h4>${r.title}</h4><p>${r.desc}</p></div><div class="activity-time">${formatDateShort(r.time)}</div></li>`;
+                });
+                recentList.innerHTML = rHtml;
+            } else {
+                recentList.innerHTML = '<li style="padding:20px; justify-content:center; color:var(--text-secondary);">Belum ada aktivitas.</li>';
+            }
+        } 
+    } catch (e) { console.error(e); }
+}
+
+// Fungsi helper tambahan untuk format tanggal singkat
+function formatDateShort(dateStr) {
+    if(!dateStr) return '';
+    const d = new Date(dateStr);
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
 // GANTI fungsi loadConfig() dengan yang baru ini:
