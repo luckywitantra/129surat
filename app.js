@@ -179,7 +179,16 @@ async function loadConfig() {
         const result = await response.json(); 
         if (result.status === 'success') { 
             const formPenomoran = document.getElementById('form-config'), formIdentitas = document.getElementById('form-config-identitas'); 
-            for(let key in result.data) { if(formPenomoran.elements[key]) formPenomoran.elements[key].value = result.data[key]; if(formIdentitas.elements[key]) formIdentitas.elements[key].value = result.data[key]; }
+            for(let key in result.data) { 
+                if(formPenomoran.elements[key]) formPenomoran.elements[key].value = result.data[key]; 
+                if(formIdentitas.elements[key] && formIdentitas.elements[key].type !== 'file') formIdentitas.elements[key].value = result.data[key]; 
+            }
+            
+            // Tampilkan Preview Logo yang sudah tersimpan
+            if (result.data['AppLogo']) {
+                const previewImg = document.getElementById('preview-logo-img');
+                if(previewImg) { previewImg.src = result.data['AppLogo']; previewImg.style.display = 'block'; }
+            }
             applyIdentitas(result.data);
         } 
     } catch (e) { console.error(e); }
@@ -468,8 +477,34 @@ async function submitUser(e) {
 
 async function submitReferensiPK(e) { e.preventDefault(); const f = e.target; sendFormData('saveReferensiPK', { id: f.elements['idRefPK'].value, kategori: f.elements['katRefPK'].value, kode: f.elements['kodeRefPK'].value, uraian: f.elements['descRefPK'].value }, f, 'modal-referensi-pk', 'referensi-pk'); }
 async function submitConfig(e) { e.preventDefault(); const form = e.target; const payload = {}; Array.from(form.elements).forEach(el => { if(el.name) payload[el.name] = el.value; }); sendFormData('saveConfig', payload, form, null, null); setTimeout(loadConfig, 1000); }
-async function submitIdentitas(e) { e.preventDefault(); const form = e.target; const payload = {}; Array.from(form.elements).forEach(el => { if(el.name) payload[el.name] = el.value; }); sendFormData('saveConfig', payload, form, null, null); setTimeout(loadConfig, 1000); }
+async function submitIdentitas(e) { 
+    e.preventDefault(); const form = e.target; const payload = {}; 
+    Array.from(form.elements).forEach(el => { if(el.name && el.type !== 'file') payload[el.name] = el.value; }); 
+    
+    // Beri indikator loading pada tombol simpan
+    const btn = form.querySelector('button[type="submit"]'); 
+    const originalText = btn.innerHTML; 
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...'; btn.disabled = true;
 
+    // Proses convert file gambar menjadi data aman (Base64)
+    const fileInput = form.elements['AppLogoFile'];
+    if (fileInput && fileInput.files.length > 0) {
+        payload.AppLogoFile = await getBase64(fileInput.files[0]);
+    }
+
+    try {
+        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'saveConfig', payload: payload }) });
+        const result = await response.json();
+        if(result.status === 'success') {
+            showAlert('Berhasil', 'Identitas Aplikasi & Logo berhasil diperbarui!', 'success');
+            setTimeout(loadConfig, 1000);
+        } else showAlert('Gagal', result.message, 'error');
+    } catch(err) {
+        showAlert('Error', 'Gagal menyimpan identitas', 'error');
+    } finally {
+        btn.innerHTML = originalText; btn.disabled = false;
+    }
+}
 async function submitSuratMasuk(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); const isD1 = f.elements['jenisSurat'].value === 'D1'; sendFormData('upsertSuratMasuk', { id: f.elements['idSuratMasuk'].value, cabangSMSK: c[0], jenisSurat: f.elements['jenisSurat'].value, tanggalSurat: f.elements['tanggalSurat'].value, pengirim: isD1 ? f.elements['namaDebiturD1'].value : f.elements['pengirim'].value, sifatSurat: f.elements['sifatSurat'].value, perihal: isD1 ? 'Pengajuan Kredit Baru' : f.elements['perihal'].value, plafon: isD1 ? cleanNominal(f.elements['plafonD1'].value) : '', jangkaWaktu: isD1 ? f.elements['jangkaWaktuD1'].value : '', jenisKredit: isD1 ? f.elements['jenisKreditD1'].value : '', file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-masuk', 'surat-masuk'); }
 async function submitSuratKeluar(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertSuratKeluar', { id: f.elements['idSuratKeluar'].value, cabangSMSK: c[0], jenisSurat: f.elements['jenisSurat'].value, tujuan: f.elements['tujuan'].value, perihal: f.elements['perihal'].value, penandatangan: f.elements['penandatangan'].value, sifat: f.elements['sifat'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-keluar', 'surat-keluar'); }
 async function submitSPPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertSPPK', { id: f.elements['idSPPK'].value, cabangPK: c[1], tanggalSPPK: f.elements['tanggalSPPK'].value, namaDebitur: f.elements['namaDebitur'].value, jenisKredit: f.elements['jenisKredit'].value, plafon: cleanNominal(f.elements['plafon'].value), jangkaWaktu: f.elements['jangkaWaktu'].value, tujuanKredit: f.elements['tujuanKredit'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-sppk', ['sppk', 'pk', 'surat-masuk']); }
@@ -724,12 +759,26 @@ document.addEventListener('change', function(e) {
         const fileMsgEl = e.target.previousElementSibling;
         if (e.target.files && e.target.files.length > 0) {
             const fileName = e.target.files[0].name;
-            fileMsgEl.innerHTML = `<i class="fa-solid fa-file-pdf text-danger" style="font-size: 2.5rem;"></i> <span style="color: var(--text-primary); margin-top: 5px;">${fileName}</span>`;
+            
+            // Cek apakah yang diupload adalah gambar (Logo) atau PDF (Dokumen)
+            if (e.target.accept && e.target.accept.includes('image')) {
+                const reader = new FileReader();
+                reader.onload = function(e_read) {
+                    fileMsgEl.innerHTML = `<img src="${e_read.target.result}" style="max-height: 45px; margin-bottom: 8px; border-radius: 8px;"> <span style="color: var(--text-primary); margin-top: 5px;">${fileName}</span>`;
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            } else {
+                fileMsgEl.innerHTML = `<i class="fa-solid fa-file-pdf text-danger" style="font-size: 2.5rem;"></i> <span style="color: var(--text-primary); margin-top: 5px;">${fileName}</span>`;
+            }
             e.target.parentElement.style.background = 'var(--success-light)';
             e.target.parentElement.style.borderColor = 'var(--success)';
         } else {
-            // Reset jika batal memilih
-            fileMsgEl.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Klik atau Seret File PDF Anda ke Sini`;
+            // Logika reset
+            if (e.target.accept && e.target.accept.includes('image')) {
+                fileMsgEl.innerHTML = `<img id="preview-logo-img" src="" style="max-height: 45px; margin-bottom: 8px; display: none; border-radius: 8px;"><span><i class="fa-solid fa-cloud-arrow-up"></i> Klik/Seret File Gambar (PNG/JPG)</span>`;
+            } else {
+                fileMsgEl.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Klik atau Seret File PDF Anda ke Sini`;
+            }
             e.target.parentElement.style.background = 'var(--primary-light)';
             e.target.parentElement.style.borderColor = 'var(--primary)';
         }
