@@ -191,27 +191,93 @@ p { color: var(--text-secondary); line-height: 1.6; }
 .badge-danger { background: var(--danger-light); color: var(--danger); }
 .badge-primary { background: var(--primary-light); color: var(--primary); }
 
-/* Layout Sidebar & Main */
+/* ========================================================
+   LAYOUT SIDEBAR & MENU (RAPID & MINIMALIST)
+   ======================================================== */
 .sidebar {
-    width: 280px; background: var(--bg-sidebar); border-right: 1px solid var(--border-color);
-    display: flex; flex-direction: column; transition: var(--transition); z-index: 100;
+    width: 280px; 
+    background: var(--bg-sidebar); 
+    border-right: 1px solid var(--border-color);
+    display: flex; flex-direction: column; 
+    transition: var(--transition); z-index: 100;
 }
-.sidebar-header { padding: 25px; display: flex; justify-content: space-between; align-items: center; }
-.sidebar-header h3 { color: var(--primary); font-size: 1.6rem; display: flex; align-items: center; gap: 10px; }
-.sidebar-user { padding: 0 25px 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
-.avatar { width: 50px; height: 50px; border-radius: 18px; background: var(--primary-gradient); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(102,126,234,0.3); }
-.nav-item {
-    display: flex; align-items: center; gap: 15px; padding: 14px 25px; margin: 5px 15px;
-    color: var(--text-secondary); text-decoration: none; border-radius: var(--radius-md);
-    font-weight: 800; transition: var(--transition); font-size: 0.95rem;
+.sidebar-header { 
+    padding: 25px 25px 15px; 
+    display: flex; justify-content: space-between; align-items: center; 
 }
-.nav-item i { font-size: 1.2rem; width: 22px; text-align: center; }
-.nav-item:hover { background: var(--bg-main); color: var(--primary); transform: translateX(8px); }
-.nav-item.active { background: var(--primary-gradient); color: white; box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4); }
+.sidebar-header .brand {
+    display: flex; align-items: center; gap: 12px;
+}
+.sidebar-header img {
+    height: 38px; width: 38px; object-fit: contain; border-radius: 8px;
+}
+.sidebar-header h3 { 
+    color: var(--primary); font-size: 1.4rem; margin: 0;
+}
 
-.main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-.topbar { height: 80px; padding: 0 30px; display: flex; justify-content: space-between; align-items: center; }
-.content-area { flex: 1; padding: 10px 30px 40px; overflow-y: auto; }
+.sidebar-user { 
+    padding: 0 25px 20px; display: flex; align-items: center; gap: 15px; 
+    margin-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+[data-theme="dark"] .sidebar-user { border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+.avatar { 
+    width: 46px; height: 46px; border-radius: 14px; 
+    background: var(--primary-gradient); color: white; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 1.4rem; box-shadow: 0 4px 10px rgba(102,126,234,0.3); 
+}
+
+/* Navigasi & Item Menu */
+.sidebar-nav { 
+    flex: 1; padding: 10px 15px; overflow-y: auto; 
+}
+.sidebar-nav::-webkit-scrollbar { width: 4px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+.nav-item {
+    display: flex; align-items: center; gap: 14px; 
+    padding: 12px 20px; margin-bottom: 6px;
+    color: var(--text-secondary); text-decoration: none; border-radius: 14px;
+    font-weight: 700; transition: var(--transition); font-size: 0.95rem;
+    border: 2px solid transparent; /* Hilangkan border hitam bawaan */
+}
+.nav-item i { font-size: 1.1rem; width: 22px; text-align: center; transition: transform 0.3s; }
+
+.nav-item:hover { 
+    background: var(--bg-main); color: var(--primary); 
+    transform: translateX(5px); 
+}
+.nav-item:hover i { transform: scale(1.1); }
+
+.nav-item.active { 
+    background: var(--primary-light); color: var(--primary); 
+    box-shadow: none; border: none; font-weight: 800;
+}
+
+/* Pembatas Kategori Menu */
+.nav-divider { 
+    font-size: 0.7rem; font-weight: 900; color: var(--text-secondary); 
+    text-transform: uppercase; margin: 20px 0 8px 20px; 
+    letter-spacing: 1.2px; opacity: 0.7;
+}
+
+/* Footer & Tombol Keluar */
+.sidebar-footer { 
+    padding: 20px 25px; border-top: 1px solid rgba(0,0,0,0.05); 
+}
+[data-theme="dark"] .sidebar-footer { border-top: 1px solid rgba(255,255,255,0.05); }
+
+.btn-logout {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 12px; border-radius: 14px; font-weight: 800; font-size: 0.95rem;
+    background: var(--danger-light); color: var(--danger); border: none; cursor: pointer;
+    transition: var(--transition);
+}
+.btn-logout:hover {
+    background: var(--danger); color: white; transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(245, 101, 101, 0.3);
+}
 
 /* ========================================================
    MODAL POPUP ELEMEN PROFESIONAL
