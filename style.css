@@ -549,3 +549,27 @@ p { color: var(--text-secondary); line-height: 1.6; }
     }
     .card-header .btn-primary i { font-size: 1.5rem; margin: 0; color: white; }
 }
+
+/* ========================================================
+   PERBAIKAN PADDING POPUP SLA TIMELINE & KESELURUHAN
+   ======================================================== */
+#modal-timeline .modal-card {
+    padding-bottom: 20px; /* Memberi ruang tambahan di bawah tombol */
+}
+#modal-timeline h4 {
+    padding: 0 30px;
+    margin-top: 25px !important;
+}
+#modal-timeline .timeline-container {
+    padding: 10px 30px 10px 45px; /* Margin kiri diperbesar agar titik timeline tidak terpotong */
+}
+#modal-timeline .modal-footer {
+    margin: 0 30px 10px 30px;
+    padding-top: 15px;
+}
+
+@media (max-width: 768px) {
+    #modal-timeline h4 { padding: 0 25px; }
+    #modal-timeline .timeline-container { padding: 10px 25px 10px 40px; }
+    #modal-timeline .modal-footer { margin: 0 25px 10px 25px; }
+}
