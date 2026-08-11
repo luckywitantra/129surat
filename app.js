@@ -685,6 +685,7 @@ function viewDetail(jenis, id) {
     openModal('modal-detail');
 }
 
+
 function handleLogout() { currentUser = null; document.getElementById('main-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); document.getElementById('login-form').reset(); document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex'); }
 window.onload = () => { if (document.getElementById('theme-icon')) document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; };
 
@@ -713,4 +714,24 @@ document.addEventListener('touchend', () => {
         setTimeout(() => { closeModal(overlayId); activeSwipeModal.style.transform = ''; }, 300); 
     } else { activeSwipeModal.style.transform = 'translateY(0)'; setTimeout(() => { if(activeSwipeModal) activeSwipeModal.style.transform = ''; }, 400); }
     activeSwipeModal = null; currentDeltaY = 0;
+});
+
+// ========================================================
+// --- INTERAKSI FILE UPLOAD MODERN (DROPZONE) ---
+// ========================================================
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('file-input-modern')) {
+        const fileMsgEl = e.target.previousElementSibling;
+        if (e.target.files && e.target.files.length > 0) {
+            const fileName = e.target.files[0].name;
+            fileMsgEl.innerHTML = `<i class="fa-solid fa-file-pdf text-danger" style="font-size: 2.5rem;"></i> <span style="color: var(--text-primary); margin-top: 5px;">${fileName}</span>`;
+            e.target.parentElement.style.background = 'var(--success-light)';
+            e.target.parentElement.style.borderColor = 'var(--success)';
+        } else {
+            // Reset jika batal memilih
+            fileMsgEl.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Klik atau Seret File PDF Anda ke Sini`;
+            e.target.parentElement.style.background = 'var(--primary-light)';
+            e.target.parentElement.style.borderColor = 'var(--primary)';
+        }
+    }
 });
