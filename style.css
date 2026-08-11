@@ -609,3 +609,73 @@ p { color: var(--text-secondary); line-height: 1.6; }
     50% { transform: scale(1.2); }
     100% { transform: scale(1); }
 }
+
+/* ========================================================
+   POPUP DETAIL PROFESIONAL & TOMBOL CLOSE PRESISI
+   ======================================================== */
+/* Tombol Silang Presisi Tinggi */
+.btn-close-modal {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.btn-close-modal:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+    border-color: var(--danger-light);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* Grid Tampilan Detail */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+.detail-item {
+    background: rgba(0, 0, 0, 0.02);
+    padding: 15px 18px;
+    border-radius: 14px;
+    border-left: 4px solid var(--primary);
+    transition: var(--transition);
+}
+[data-theme="dark"] .detail-item { background: rgba(255, 255, 255, 0.03); }
+.detail-item:hover {
+    background: var(--primary-light);
+    transform: translateX(5px);
+}
+.detail-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 900;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+.detail-value {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    word-break: break-word;
+    line-height: 1.5;
+}
+
+@media (min-width: 600px) {
+    .detail-grid.two-cols {
+        grid-template-columns: 1fr 1fr;
+    }
+}
