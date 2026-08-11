@@ -159,10 +159,11 @@
 
     <!-- MODAL DETAIL ULTRA MODERN -->
     <div id="modal-detail" class="modal-overlay hidden">
-        <div class="modal-card" style="max-width: 700px; padding: 0; overflow: hidden; background: var(--bg-main);">
+        <!-- Penambahan position: relative; pada baris ini -->
+        <div class="modal-card" style="max-width: 700px; padding: 0; overflow: hidden; background: var(--bg-main); position: relative;">
             
-            <!-- Tombol Silang (Close) Mengambang Estetik -->
-            <button class="btn-close-modal" onclick="closeModal('modal-detail')" style="background: rgba(255,255,255,0.2); color: white; border: none; backdrop-filter: blur(5px); box-shadow: none;">
+            <!-- Tombol Silang (Close) Mengambang Estetik dengan Z-Index Tinggi -->
+            <button class="btn-close-modal" onclick="closeModal('modal-detail')" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; backdrop-filter: blur(5px); box-shadow: none; z-index: 999;">
                 <i class="fa-solid fa-times"></i>
             </button>
             
@@ -170,7 +171,14 @@
             <div id="detail-header-dynamic"></div>
             
             <!-- Konten Kartu (Di-inject JS) -->
-            <div id="detail-content" style="padding: 25px 30px 30px; overflow-y: auto; max-height: 60vh;">
+            <div id="detail-content" style="padding: 25px 30px 10px; overflow-y: auto; max-height: 60vh;">
+            </div>
+            
+            <!-- Tombol Tutup Ekstra di Bawah -->
+            <div style="padding: 10px 30px 25px; text-align: center; background: var(--bg-main);">
+                <button type="button" class="btn btn-outline w-100" onclick="closeModal('modal-detail')" style="border-radius: 14px; font-weight: 800; border-color: var(--border-color); color: var(--text-secondary);">
+                    Tutup Detail
+                </button>
             </div>
             
         </div>
