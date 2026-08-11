@@ -78,14 +78,24 @@ function buildFilterUI(jenis) {
         extraFilter = `<select id="fil-kategori-arsip" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Semua Kategori</option><option value="Surat Masuk">Surat Masuk</option><option value="Surat Keluar">Surat Keluar</option><option value="SPPK">SPPK</option><option value="PK">PK</option></select>`;
     }
 
+    // Perhatikan penggunaan class "filter-container"
     container.innerHTML = `
         <div class="filter-container">
-            <input type="text" id="search-${jenis}" class="search-input" placeholder="Pencarian..." onkeyup="applyFilter('${jenis}')">
+            <input type="text" id="search-${jenis}" class="search-input" placeholder="🔍 Cari nama/nomor..." onkeyup="applyFilter('${jenis}')">
             ${extraFilter}
-            <select id="sort-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="newest">Baru - Lama</option><option value="oldest">Lama - Baru</option><option value="az">A - Z</option><option value="za">Z - A</option></select>
-            <select id="fil-cabang-${jenis}" class="search-input sel-cabang-filter" onchange="applyFilter('${jenis}')"><option value="">Semua Cabang</option></select>
-            <select id="fil-bulan-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Bulan</option><option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option><option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option></select>
-            <select id="fil-tahun-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select>
+            <select id="sort-${jenis}" class="search-input" onchange="applyFilter('${jenis}')">
+                <option value="newest">📅 Baru - Lama</option>
+                <option value="oldest">📅 Lama - Baru</option>
+                <option value="az">🔤 A - Z</option>
+                <option value="za">🔤 Z - A</option>
+            </select>
+            <select id="fil-cabang-${jenis}" class="search-input sel-cabang-filter" onchange="applyFilter('${jenis}')"><option value="">🏢 Semua Cabang</option></select>
+            <select id="fil-bulan-${jenis}" class="search-input" onchange="applyFilter('${jenis}')">
+                <option value="">🗓️ Bulan</option><option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option><option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+            </select>
+            <select id="fil-tahun-${jenis}" class="search-input" onchange="applyFilter('${jenis}')">
+                <option value="">⏳ Tahun</option><option value="2026">2026</option><option value="2027">2027</option>
+            </select>
         </div>`;
     
     populateCabangFilters();
