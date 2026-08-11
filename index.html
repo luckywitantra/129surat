@@ -157,6 +157,26 @@
         </div>
     </div>
 
+    <!-- MODAL DETAIL PROFESIONAL -->
+    <div id="modal-detail" class="modal-overlay hidden">
+        <div class="modal-card" style="max-width: 650px; position: relative; padding: 0;">
+            <!-- Tombol Silang (Close) Presisi -->
+            <button class="btn-close-modal" onclick="closeModal('modal-detail')"><i class="fa-solid fa-times"></i></button>
+            
+            <h3 id="detail-title" style="padding: 25px 30px; margin: 0; border-bottom: 1px dashed var(--border-color); background: var(--bg-main); border-radius: 30px 30px 0 0; padding-right: 60px;">
+                <i class="fa-solid fa-file-lines text-primary"></i> Detail Informasi
+            </h3>
+            
+            <div id="detail-content" style="padding: 25px 30px; overflow-y: auto; max-height: 65vh;">
+                <!-- Konten Detail Di-inject via Javascript -->
+            </div>
+            
+            <div class="modal-footer" style="margin: 0; padding: 15px 30px; background: var(--bg-main); border-top: 1px dashed var(--border-color); border-radius: 0 0 30px 30px; justify-content: center;">
+                <button type="button" class="btn btn-primary w-100" onclick="closeModal('modal-detail')">Tutup Detail</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modals Manajemen -->
     <div id="modal-cabang" class="modal-overlay hidden"><div class="modal-card modal-form"><h3 id="title-cabang"><i class="fa-solid fa-code-branch text-primary"></i> Tambah Cabang</h3><form onsubmit="submitCabang(event)"><input type="hidden" name="idCabang" id="idCabang"><div class="input-group"><label>Nama Cabang</label><input type="text" name="namaCabang" id="namaCabang" required></div><div class="form-grid"><div class="input-group"><label>Kode Cabang (SM/SK)</label><input type="text" name="kodeSMSK" id="kodeSMSK" required></div><div class="input-group"><label>Kode Cabang (PK)</label><input type="text" name="kodePK" id="kodePK" required></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-cabang')">Batal</button><button type="submit" class="btn btn-primary">Simpan Cabang</button></div></form></div></div>
     <div id="modal-jenis-surat" class="modal-overlay hidden"><div class="modal-card modal-form"><h3 id="title-jenis-surat"><i class="fa-solid fa-tags text-primary"></i> Tambah Jenis Surat</h3><form onsubmit="submitJenisSurat(event)"><input type="hidden" name="idJenisSurat" id="idJenisSurat"><div class="form-grid"><div class="input-group"><label>Kode Surat</label><input type="text" name="kodeJenis" id="kodeJenis" required></div><div class="input-group"><label>Nama Klasifikasi</label><input type="text" name="namaJenis" id="namaJenis" required></div></div><div class="input-group"><label>Uraian</label><input type="text" name="uraianJenis" id="uraianJenis" required></div><div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-jenis-surat')">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div></form></div></div>
