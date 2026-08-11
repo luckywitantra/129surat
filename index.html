@@ -126,9 +126,10 @@
         </div>
     </div>
 
+    <!-- FORM PK DIPERBARUI DENGAN REFERENSI -->
     <div id="modal-pk" class="modal-overlay hidden">
-        <div class="modal-card modal-form">
-            <h3><i class="fa-solid fa-file-signature text-orange"></i> Terbitkan PK Baru</h3>
+        <div class="modal-card modal-form" style="max-width: 800px !important;">
+            <h3><i class="fa-solid fa-file-signature text-orange"></i> Terbitkan PK Baru (Auto Penomoran)</h3>
             <form onsubmit="submitPK(event)">
                 <div class="form-grid">
                     <div class="input-group">
@@ -139,8 +140,36 @@
                     <div class="input-group"><label>Nama Debitur</label><input type="text" name="namaDebitur" required></div>
                     <div class="input-group"><label>Nilai Plafon (Rp)</label><input type="number" name="plafon" required></div>
                 </div>
-                <div class="input-group"><label>Upload File PK (Final) - Opsional</label><input type="file" name="fileUpload" accept=".pdf"></div>
-                <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-pk')">Batal</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Buat Nomor PK</button></div>
+                
+                <h4 style="margin: 15px 0 10px; padding-bottom:5px; border-bottom:1px dashed var(--border-color); color:var(--primary);">Komponen Pembentuk Nomor PK</h4>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Golongan Debitur</label>
+                        <select name="golDebitur" id="sel-goldebitur" required><option value="">Memuat data...</option></select>
+                    </div>
+                    <div class="input-group">
+                        <label>Jenis Penggunaan</label>
+                        <select name="jnsPenggunaan" id="sel-jnspenggunaan" required><option value="">Memuat data...</option></select>
+                    </div>
+                    <div class="input-group">
+                        <label>Klasifikasi Kredit</label>
+                        <select name="klasKredit" id="sel-klaskredit" required><option value="">Memuat data...</option></select>
+                    </div>
+                    <div class="input-group">
+                        <label>Kode Cabang</label>
+                        <select name="kodeCabang" id="sel-cabang" required><option value="">Memuat data...</option></select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Sektor Ekonomi</label>
+                    <select name="sektorEko" id="sel-sektoreko" required><option value="">Memuat data...</option></select>
+                </div>
+
+                <div class="input-group" style="margin-top: 15px;">
+                    <label>Upload File PK (Final) - Opsional</label>
+                    <input type="file" name="fileUpload" accept=".pdf">
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-pk')">Batal</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Generate Nomor PK</button></div>
             </form>
         </div>
     </div>
@@ -150,12 +179,12 @@
             <h3><i class="fa-solid fa-share-nodes text-warning"></i> Buat Disposisi Baru</h3>
             <form onsubmit="submitDisposisi(event)">
                 <div class="form-grid">
-                    <div class="input-group"><label>Sumber Surat</label><input type="text" name="suratSumber" required></div>
-                    <div class="input-group"><label>Tujuan Disposisi</label><select name="kepada" required><option value="Manager Operasional">Manager Operasional</option></select></div>
+                    <div class="input-group"><label>Sumber Surat (No / Perihal)</label><input type="text" name="suratSumber" required></div>
+                    <div class="input-group"><label>Tujuan Disposisi (Kepada)</label><select name="kepada" required><option value="Manager Operasional">Manager Operasional</option></select></div>
                 </div>
-                <div class="input-group"><label>Instruksi</label><input type="text" name="instruksi" required></div>
+                <div class="input-group"><label>Instruksi / Catatan</label><input type="text" name="instruksi" required></div>
                 <div class="input-group"><label>Batas Waktu</label><input type="date" name="batasWaktu" required></div>
-                <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-disposisi')">Batal</button><button type="submit" class="btn btn-primary">Kirim Disposisi</button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-disposisi')">Batal</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Kirim Disposisi</button></div>
             </form>
         </div>
     </div>
@@ -187,6 +216,30 @@
                     <div class="input-group"><label>Jabatan</label><input type="text" name="jabatanUser" id="jabatanUser" required></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-user')">Batal</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan User</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-referensi-pk" class="modal-overlay hidden">
+        <div class="modal-card modal-form">
+            <h3 id="title-referensi-pk"><i class="fa-solid fa-list text-primary"></i> Tambah Referensi PK</h3>
+            <form onsubmit="submitReferensiPK(event)">
+                <input type="hidden" name="idRefPK" id="idRefPK">
+                <div class="input-group">
+                    <label>Kategori Referensi</label>
+                    <select name="katRefPK" id="katRefPK" required>
+                        <option value="GolDebitur">Golongan Debitur</option>
+                        <option value="JnsPenggunaan">Jenis Penggunaan</option>
+                        <option value="KlasKredit">Klasifikasi Kredit</option>
+                        <option value="SektorEko">Sektor Ekonomi</option>
+                        <option value="Cabang">Kode Cabang</option>
+                    </select>
+                </div>
+                <div class="form-grid">
+                    <div class="input-group"><label>Kode Referensi</label><input type="text" name="kodeRefPK" id="kodeRefPK" required placeholder="Cth: 886"></div>
+                    <div class="input-group"><label>Uraian / Deskripsi</label><input type="text" name="descRefPK" id="descRefPK" required placeholder="Cth: PDD.SS.PERSEORANGAN"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-referensi-pk')">Batal</button><button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan Referensi</button></div>
             </form>
         </div>
     </div>
@@ -229,9 +282,7 @@
             <header class="topbar">
                 <button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
                 <h2 id="page-title" class="page-title">Dashboard</h2>
-                <div class="topbar-actions">
-                    <button class="btn-icon" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
-                </div>
+                <div class="topbar-actions"><button class="btn-icon" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button></div>
             </header>
 
             <div class="content-area" id="content-area">
@@ -274,6 +325,16 @@
                 <div id="view-pengaturan" class="view-section hidden admin-only">
                     
                     <div class="card" style="margin-bottom: 20px;">
+                        <div class="card-header flex-between"><h3>Manajemen Referensi Penomoran PK</h3><button class="btn btn-primary btn-sm" onclick="openModalReferensiPK()"><i class="fa-solid fa-plus"></i> Tambah Referensi</button></div>
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead><tr><th>Kategori</th><th>Kode</th><th>Uraian / Deskripsi</th><th>Aksi</th></tr></thead>
+                                <tbody id="tbody-referensi-pk"><tr><td colspan="4" style="text-align: center;">Memuat data...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-bottom: 20px;">
                         <div class="card-header flex-between"><h3>Manajemen Jenis Surat</h3><button class="btn btn-primary btn-sm" onclick="openModalJenisSurat()"><i class="fa-solid fa-plus"></i> Tambah</button></div>
                         <div class="table-responsive"><table class="modern-table"><thead><tr><th>Kode</th><th>Nama Klasifikasi</th><th>Uraian / Tujuan</th><th>Aksi</th></tr></thead><tbody id="tbody-jenis-surat"><tr><td colspan="4" style="text-align: center;">Memuat...</td></tr></tbody></table></div>
                     </div>
@@ -284,28 +345,23 @@
                     </div>
 
                     <div class="card">
-                        <div class="card-header"><h3>Konfigurasi Template Penomoran Sistem</h3></div>
+                        <div class="card-header"><h3>Format Dasar Penomoran Sistem</h3></div>
                         <div class="card-body">
                             <form onsubmit="submitConfig(event)" id="form-config">
                                 <div class="form-grid">
                                     <div class="input-group"><label>Format Surat Masuk</label><input type="text" name="FormatSM" required></div>
                                     <div class="input-group"><label>Format Surat Keluar</label><input type="text" name="FormatSK" required></div>
                                     <div class="input-group"><label>Format SPPK</label><input type="text" name="FormatSPPK" required></div>
-                                    <div class="input-group"><label>Format PK</label><input type="text" name="FormatPK" required></div>
-                                    <div class="input-group"><label>Kode Cabang (SM / SK)</label><input type="text" name="CabangSM" required></div>
-                                    <div class="input-group"><label>Kode Cabang (PK)</label><input type="text" name="CabangPK" required></div>
-                                    <div class="input-group"><label>Kode PK 1 (Jenis Perorangan)</label><input type="text" name="PK_Kode1" required></div>
-                                    <div class="input-group"><label>Kode PK 2 (Jenis Kredit)</label><input type="text" name="PK_Kode2" required></div>
-                                    <div class="input-group"><label>Kode PK 3 (Peruntukan)</label><input type="text" name="PK_Kode3" required></div>
-                                    <div class="input-group"><label>Kode PK 4 (Penggunaan)</label><input type="text" name="PK_Kode4" required></div>
                                 </div>
                                 <div style="background:var(--primary-light); padding:15px; border-radius:8px; font-size:0.85rem; color:var(--text-primary); margin-bottom:15px;">
-                                    <strong>Variabel Tersedia:</strong> {URUT}, {JENIS}, {CABANG}, {CABANG_PK}, {BULAN_ROMAWI}, {TAHUN}, {KODE1}, {KODE2}, {KODE3}, {KODE4}
+                                    <strong>Variabel:</strong> {URUT}, {JENIS}, {CABANG}, {BULAN_ROMAWI}, {TAHUN}. <br>
+                                    <em>Catatan: Format PK otomatis akan mengikuti struktur {URUT}/Golongan/Penggunaan/Klasifikasi/SektorEko/Cabang/{TAHUN}.</em>
                                 </div>
-                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Terapkan Format Penomoran</button>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan Format Dasar</button>
                             </form>
                         </div>
                     </div>
+
                 </div>
 
             </div>
