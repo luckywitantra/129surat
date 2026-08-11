@@ -962,3 +962,83 @@ html { font-size: 14px; } /* Mengecilkan ukuran standar dari 16px ke 14px */
     /* Sembunyikan elemen kolom yang kosong agar tidak memakan ruang */
     .modern-table td:empty { display: none; }
 }
+
+/* ========================================================
+   MODUL IDENTITAS VISUAL (COLOR CODING & ICONOGRAPHY)
+   ======================================================== */
+
+/* --- 1. SURAT MASUK (Ocean Blue) --- */
+#view-surat-masuk .card-header { background: linear-gradient(135deg, #0284C7 0%, #06B6D4 100%); }
+#modal-surat-masuk h3 { background: linear-gradient(135deg, #0284C7 0%, #06B6D4 100%); }
+#view-surat-masuk .card-header h3::before { content: "\f01c"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 10px; }
+
+/* --- 2. SURAT KELUAR (Emerald Green) --- */
+#view-surat-keluar .card-header { background: linear-gradient(135deg, #059669 0%, #10B981 100%); }
+#modal-surat-keluar h3 { background: linear-gradient(135deg, #059669 0%, #10B981 100%); }
+#view-surat-keluar .card-header h3::before { content: "\f1d8"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 10px; }
+
+/* --- 3. DISPOSISI (Royal Purple) --- */
+#view-disposisi .card-header { background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 100%); }
+#modal-disposisi h3 { background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 100%); }
+#view-disposisi .card-header h3::before { content: "\f1e0"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 10px; }
+
+/* --- 4. SPPK (Amber Gold) --- */
+#view-sppk .card-header { background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%); }
+#modal-sppk h3 { background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%); }
+#view-sppk .card-header h3::before { content: "\f56c"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 10px; }
+
+/* --- 5. PK (Ruby Red) --- */
+#view-pk .card-header { background: linear-gradient(135deg, #BE123C 0%, #E11D48 100%); }
+#modal-pk h3 { background: linear-gradient(135deg, #BE123C 0%, #E11D48 100%); }
+#view-pk .card-header h3::before { content: "\f573"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 10px; }
+
+/* --- 6. ARSIP (Slate Gray) --- */
+#view-arsip .card-header { background: linear-gradient(135deg, #334155 0%, #475569 100%); }
+#view-arsip .card-header h3::before { content: "\f187"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 10px; }
+
+
+/* ========================================================
+   GLOBAL OVERRIDES UNTUK MENYEMPURNAKAN TEMA DI ATAS
+   ======================================================== */
+
+/* Memaksa Judul Tabel menjadi Putih, Tebal, dan Rapi */
+.view-section .card-header {
+    border-radius: var(--radius-md) var(--radius-md) 0 0; /* Sudut melengkung halus di atas */
+    border-bottom: none !important;
+}
+.view-section .card-header h3 {
+    color: #FFFFFF !important;
+    font-weight: 800;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15); /* Efek teks timbul */
+}
+
+/* Mengubah Tombol (FAB) "+" di Header Tabel agar Berwarna Putih (Kontras) */
+.view-section .card-header .btn-primary,
+.view-section .card-header .btn-success {
+    background: #FFFFFF !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+    border: none !important;
+}
+/* Menyesuaikan warna teks ikon di dalam Tombol Putih sesuai halamannya */
+#view-surat-masuk .card-header .btn-primary { color: #0284C7 !important; }
+#view-surat-keluar .card-header .btn-success { color: #059669 !important; }
+#view-sppk .card-header .btn-primary { color: #D97706 !important; }
+#view-pk .card-header .btn-primary { color: #BE123C !important; }
+
+.view-section .card-header .btn-primary:hover,
+.view-section .card-header .btn-success:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3) !important;
+}
+
+/* Memaksa Teks & Ikon di Header Popup Form menjadi Putih & Estetik */
+.modal-form h3 {
+    color: #FFFFFF !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.modal-form h3 i {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.25) !important; /* Latar bulat transparan di belakang ikon */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
