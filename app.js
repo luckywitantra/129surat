@@ -14,7 +14,14 @@ async function initSystem() {
     try {
         const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'initApp' }) });
         const result = await response.json();
-        if(result.status === 'success') { setTimeout(() => { document.getElementById('init-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); }, 800); } 
+       // Di dalam initSystem(), ubah blok IF success menjadi:
+if(result.status === 'success') { 
+    await loadConfig(); // Panggil config terlebih dahulu
+    setTimeout(() => { 
+        document.getElementById('init-screen').classList.add('hidden'); 
+        document.getElementById('login-screen').classList.remove('hidden'); 
+    }, 800); 
+}
         else showAlert('Error Sistem', result.message, 'error');
     } catch (error) { setTimeout(() => { document.getElementById('init-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); showAlert('Mode Offline', 'UI berjalan tanpa koneksi backend.', 'info'); }, 1000); }
 }
@@ -63,8 +70,70 @@ async function loadDashboardStats() {
     try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboardStats' }) }); const result = await response.json(); if (result.status === 'success') { document.getElementById('stat-sm').innerText = result.data.sm; document.getElementById('stat-sk').innerText = result.data.sk; document.getElementById('stat-sppk').innerText = result.data.sppk; document.getElementById('stat-pk').innerText = result.data.pk; } } catch (e) { console.error(e); }
 }
 
+// GANTI fungsi loadConfig() dengan yang baru ini:
 async function loadConfig() {
-    try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getConfig' }) }); const result = await response.json(); if (result.status === 'success') { const form = document.getElementById('form-config'); for(let key in result.data) { if(form.elements[key]) form.elements[key].value = result.data[key]; } } } catch (e) { console.error(e); }
+    try { 
+        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getConfig' }) }); 
+        const result = await response.json(); 
+        if (result.status === 'success') { 
+            const formPenomoran = document.getElementById('form-config'); 
+            const formIdentitas = document.getElementById('form-config-identitas'); 
+            
+            // Render ke form
+            for(let key in result.data) { 
+                if(formPenomoran.elements[key]) formPenomoran.elements[key].value = result.data[key]; 
+                if(formIdentitas.elements[key]) formIdentitas.elements[key].value = result.data[key]; 
+            }
+
+            // Terapkan Identitas ke DOM Aplikasi secara langsung
+            applyIdentitas(result.data);
+        } 
+    } catch (e) { console.error(e); }
+}
+
+// TAMBAHKAN fungsi applyIdentitas di bawah loadConfig():
+function applyIdentitas(data) {
+    const appName = data['AppName'] || 'SuratApp';
+    const companyName = data['CompanyName'] || 'Sistem Manajemen Terpadu';
+    const appLogo = data['AppLogo'] || 'https://cdn-icons-png.flaticon.com/512/3062/3062634.png';
+    
+    // Set Sidebar & Login Texts
+    if(document.getElementById('sidebar-app-name')) document.getElementById('sidebar-app-name').innerText = appName;
+    if(document.getElementById('login-app-name')) document.getElementById('login-app-name').innerText = appName;
+    if(document.getElementById('login-company-name')) document.getElementById('login-company-name').innerText = companyName;
+    
+    // Set Logos
+    if(document.getElementById('sidebar-app-logo')) document.getElementById('sidebar-app-logo').src = appLogo;
+    if(document.getElementById('login-app-logo')) document.getElementById('login-app-logo').src = appLogo;
+    
+    // Update Document Title
+    document.title = `${appName} - ${companyName}`;
+    
+    // Cek jika tema belum pernah diset manual oleh user, gunakan DefaultTheme
+    if(!localStorage.getItem('theme_manually_set') && data['DefaultTheme']) {
+        currentTheme = data['DefaultTheme'];
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        if (document.getElementById('theme-icon')) {
+            document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        }
+    }
+}
+
+// GANTI sedikit fungsi toggleTheme() agar merekam setting manual:
+function toggleTheme() { 
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light'; 
+    document.documentElement.setAttribute('data-theme', currentTheme); 
+    localStorage.setItem('theme', currentTheme); 
+    localStorage.setItem('theme_manually_set', 'true'); // Penanda user menimpa default sistem
+    document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; 
+}
+
+// TAMBAHKAN submitIdentitas di area FORM SUBMITTERS (berdekatan dengan submitConfig):
+async function submitIdentitas(e) { 
+    e.preventDefault(); const form = e.target; const payload = {}; 
+    Array.from(form.elements).forEach(el => { if(el.name) payload[el.name] = el.value; }); 
+    sendFormData('saveConfig', payload, form, null, null); 
+    setTimeout(loadConfig, 1000); // Reload config agar UI langsung berubah
 }
 
 // GANTI FUNGSI INI
