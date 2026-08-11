@@ -683,3 +683,61 @@ p { color: var(--text-secondary); line-height: 1.6; }
         grid-template-columns: 1fr 1fr;
     }
 }
+
+/* ========================================================
+   COMPACT & HIGH DATA DENSITY PATCH (OPTIMASI RESOLUSI RENDAH)
+   ======================================================== */
+
+/* 1. Dynamic Base Font Size: Menyesuaikan ukuran semua elemen teks otomatis */
+html { font-size: 14px; } /* Mengecilkan ukuran standar dari 16px ke 14px */
+@media (min-width: 1440px) { html { font-size: 15px; } } /* Sedikit membesar di layar monitor lebar */
+@media (max-width: 768px) { html { font-size: 13px; } } /* Sangat padat di HP */
+
+/* 2. Merampingkan Sidebar & Ruang Kerja agar ruang data lebih lega */
+.sidebar { width: 240px; } /* Menyusut dari 280px */
+.topbar { height: 60px; padding: 0 20px; }
+.content-area { padding: 10px 20px 30px; }
+.sidebar-header { padding: 20px 20px 10px; }
+.sidebar-user { padding: 0 20px 15px; }
+.nav-item { padding: 10px 15px; margin-bottom: 4px; font-size: 0.9rem; }
+.nav-item i { width: 20px; }
+
+/* 3. Merapatkan Kartu (Card) & Widget Dashboard */
+.card-header { padding: 15px 20px; }
+.card-body { padding: 15px 20px; }
+.stat-card { padding: 18px 20px; gap: 15px; border-radius: var(--radius-md); }
+.stat-icon { width: 48px; height: 48px; font-size: 1.4rem; border-radius: 14px; }
+.stat-details h3 { font-size: 1.8rem; }
+.activity-list li { padding: 12px 20px; }
+
+/* 4. Tabel Padat (High Density) - Sangat cocok untuk data ribuan */
+.modern-table td { padding: 12px 15px !important; font-size: 0.9rem; }
+.modern-table th { padding: 10px 15px !important; }
+.badge { padding: 6px 12px; font-size: 0.7rem; }
+.btn-icon { width: 34px; height: 34px; font-size: 1rem; }
+
+/* 5. Optimasi Modal Popup agar tidak over-height (melewati batas bawah) di laptop kecil */
+.modal-card { max-height: 88vh; }
+.modal-card h3 { padding: 18px 25px; font-size: 1.15rem; }
+.modal-card form { padding: 20px 25px; }
+.input-group input, .input-group select { padding: 10px 15px; font-size: 0.9rem; }
+.detail-item { padding: 12px 15px; }
+
+/* 6. Mobile Layout Tuning Ekstra Rapi */
+@media (max-width: 768px) {
+    .sidebar { width: 260px; }
+    
+    /* Mengompres kartu tabel di HP */
+    .modern-table tr { padding: 14px !important; margin-bottom: 12px !important; border-radius: 14px !important; }
+    .modern-table td:first-child { font-size: 1.05rem !important; padding-right: 110px !important; padding-bottom: 8px !important; margin-bottom: 8px !important; }
+    .modern-table td:nth-last-child(2) { top: 14px !important; right: 14px !important; }
+    
+    /* Mengecilkan Floating Action Button (Tombol +) di HP */
+    .card-header .btn-primary { 
+        width: 52px !important; 
+        height: 52px !important; 
+        bottom: 20px !important; 
+        right: 20px !important; 
+    }
+    .card-header .btn-primary i { font-size: 1.25rem !important; }
+}
