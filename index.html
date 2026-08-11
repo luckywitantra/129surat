@@ -207,12 +207,54 @@
             <div class="content-area" id="content-area">
                 
                 <!-- VIEW: DASHBOARD -->
+                <!-- VIEW: DASHBOARD -->
                 <div id="view-dashboard" class="view-section active">
+                    <!-- Kartu Statistik Utama -->
                     <div class="stats-grid">
                         <div class="stat-card blue" onclick="navigate('surat-masuk')"><div class="stat-icon"><i class="fa-solid fa-inbox"></i></div><div class="stat-details"><h3 id="stat-sm">0</h3><p>Surat Masuk</p></div></div>
                         <div class="stat-card green" onclick="navigate('surat-keluar')"><div class="stat-icon"><i class="fa-solid fa-paper-plane"></i></div><div class="stat-details"><h3 id="stat-sk">0</h3><p>Surat Keluar</p></div></div>
                         <div class="stat-card purple" onclick="navigate('sppk')"><div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div><div class="stat-details"><h3 id="stat-sppk">0</h3><p>Total SPPK</p></div></div>
                         <div class="stat-card orange" onclick="navigate('pk')"><div class="stat-icon"><i class="fa-solid fa-file-signature"></i></div><div class="stat-details"><h3 id="stat-pk">0</h3><p>Total PK</p></div></div>
+                    </div>
+
+                    <!-- Panel Informasi Lanjutan (Baru) -->
+                    <div class="dashboard-widgets">
+                        <!-- Kolom Kiri: Pintasan & Pending Action -->
+                        <div class="widget-column">
+                            <div class="card" style="margin-bottom: 20px;">
+                                <div class="card-header"><h3><i class="fa-solid fa-bolt text-warning"></i> Akses Cepat</h3></div>
+                                <div class="card-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px;">
+                                    <button class="btn btn-outline" onclick="openModalSM()" style="justify-content: flex-start;"><i class="fa-solid fa-inbox text-info"></i> + Surat Masuk</button>
+                                    <button class="btn btn-outline" onclick="openModalSK()" style="justify-content: flex-start;"><i class="fa-solid fa-paper-plane text-success"></i> + Surat Keluar</button>
+                                    <button class="btn btn-outline" onclick="openModalSPPK()" style="justify-content: flex-start;"><i class="fa-solid fa-file-contract text-primary"></i> + Buat SPPK</button>
+                                    <button class="btn btn-outline" onclick="openModalPK()" style="justify-content: flex-start;"><i class="fa-solid fa-file-signature text-orange"></i> + Terbitkan PK</button>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header flex-between">
+                                    <h3><i class="fa-solid fa-bell text-danger"></i> Menunggu Tindakan</h3>
+                                    <span class="badge badge-danger" style="font-size:0.65rem;">SLA Tracker</span>
+                                </div>
+                                <div class="card-body" style="padding: 0;">
+                                    <ul class="activity-list" id="dash-pending-list">
+                                        <li style="padding: 20px; justify-content: center; color: var(--text-secondary);">Memuat data...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kolom Kanan: Log Aktivitas Terbaru -->
+                        <div class="widget-column">
+                            <div class="card" style="height: 100%; margin-bottom: 0;">
+                                <div class="card-header"><h3><i class="fa-solid fa-clock-rotate-left text-primary"></i> Aktivitas Sistem Terbaru</h3></div>
+                                <div class="card-body" style="padding: 0;">
+                                    <ul class="activity-list" id="dash-recent-list">
+                                        <li style="padding: 20px; justify-content: center; color: var(--text-secondary);">Memuat data...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
