@@ -446,7 +446,7 @@ function openModalSPPK() {
 
 function autofillSPPK() {
     const deb = document.getElementById('sppk-sumber-d1').value; const data = storeData['surat-masuk'].find(d => d.jenisSurat==='D1' && d.pengirim===deb);
-    if(data) { document.getElementById('sppk-debitur').value = data.pengirim; document.getElementById('sppk-plafon').value = data.plafon; document.getElementById('sppk-jangkawaktu').value = data.jangkaWaktu; document.getElementById('sppk-jeniskredit').value = data.jenisKredit; }
+    if(data) { document.getElementById('sppk-debitur').value = data.pengirim; document.getElementById('sppk-plafon').value = formatRupiah(data.plafon.toString()); document.getElementById('sppk-jangkawaktu').value = data.jangkaWaktu; document.getElementById('sppk-jeniskredit').value = data.jenisKredit; }
 }
 function openModalPK() { document.getElementById('idPK').value=''; document.getElementById('title-pk').innerHTML='<i class="fa-solid fa-file-signature text-orange"></i> Terbitkan PK Baru'; populatePKForm(); openModal('modal-pk'); }
 
@@ -550,15 +550,15 @@ async function submitReferensiPK(e) { e.preventDefault(); const f = e.target; se
 async function submitConfig(e) { e.preventDefault(); const form = e.target; const payload = {}; Array.from(form.elements).forEach(el => { if(el.name) payload[el.name] = el.value; }); sendFormData('saveConfig', payload, form, null, null); setTimeout(loadConfig, 1000); }
 
 // Transaksi Submits
-async function submitSuratMasuk(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); const isD1 = f.elements['jenisSurat'].value === 'D1'; sendFormData('upsertSuratMasuk', { id: f.elements['idSuratMasuk'].value, cabangSMSK: c[0], jenisSurat: f.elements['jenisSurat'].value, tanggalSurat: f.elements['tanggalSurat'].value, pengirim: isD1 ? f.elements['namaDebiturD1'].value : f.elements['pengirim'].value, sifatSurat: f.elements['sifatSurat'].value, perihal: isD1 ? 'Pengajuan Kredit Baru' : f.elements['perihal'].value, plafon: isD1 ? f.elements['plafonD1'].value : '', jangkaWaktu: isD1 ? f.elements['jangkaWaktuD1'].value : '', jenisKredit: isD1 ? f.elements['jenisKreditD1'].value : '', file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-masuk', 'surat-masuk'); }
+async function submitSuratMasuk(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); const isD1 = f.elements['jenisSurat'].value === 'D1'; sendFormData('upsertSuratMasuk', { id: f.elements['idSuratMasuk'].value, cabangSMSK: c[0], jenisSurat: f.elements['jenisSurat'].value, tanggalSurat: f.elements['tanggalSurat'].value, pengirim: isD1 ? f.elements['namaDebiturD1'].value : f.elements['pengirim'].value, sifatSurat: f.elements['sifatSurat'].value, perihal: isD1 ? 'Pengajuan Kredit Baru' : f.elements['perihal'].value, plafon: isD1 ? cleanNominal(f.elements['plafonD1'].value) : '', jangkaWaktu: isD1 ? f.elements['jangkaWaktuD1'].value : '', jenisKredit: isD1 ? f.elements['jenisKreditD1'].value : '', file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-masuk', 'surat-masuk'); }
 async function submitSuratKeluar(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertSuratKeluar', { id: f.elements['idSuratKeluar'].value, cabangSMSK: c[0], jenisSurat: f.elements['jenisSurat'].value, tujuan: f.elements['tujuan'].value, perihal: f.elements['perihal'].value, penandatangan: f.elements['penandatangan'].value, sifat: f.elements['sifat'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-keluar', 'surat-keluar'); }
 // Menggunakan Array reload agar dropdown tabel lain langsung update
-async function submitSPPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertSPPK', { id: f.elements['idSPPK'].value, cabangPK: c[1], tanggalSPPK: f.elements['tanggalSPPK'].value, namaDebitur: f.elements['namaDebitur'].value, jenisKredit: f.elements['jenisKredit'].value, plafon: f.elements['plafon'].value, jangkaWaktu: f.elements['jangkaWaktu'].value, tujuanKredit: f.elements['tujuanKredit'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-sppk', ['sppk', 'pk']); }
-async function submitPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertPK', { id: f.elements['idPK'].value, cabangPK: c[1], nomorSPPK: f.elements['nomorSPPK'].value, tanggalPK: f.elements['tanggalPK'].value, namaDebitur: f.elements['namaDebitur'].value, plafon: f.elements['plafon'].value, golDebitur: f.elements['golDebitur'].value, jnsPenggunaan: f.elements['jnsPenggunaan'].value, klasKredit: f.elements['klasKredit'].value, sektorEko: f.elements['sektorEko'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-pk', ['pk', 'sppk']); }
+async function submitSPPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertSPPK', { id: f.elements['idSPPK'].value, cabangPK: c[1], tanggalSPPK: f.elements['tanggalSPPK'].value, namaDebitur: f.elements['namaDebitur'].value, jenisKredit: f.elements['jenisKredit'].value, plafon: cleanNominal(f.elements['plafon'].value), jangkaWaktu: f.elements['jangkaWaktu'].value, tujuanKredit: f.elements['tujuanKredit'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-sppk', ['sppk', 'pk']); }
+async function submitPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertPK', { id: f.elements['idPK'].value, cabangPK: c[1], nomorSPPK: f.elements['nomorSPPK'].value, tanggalPK: f.elements['tanggalPK'].value, namaDebitur: f.elements['namaDebitur'].value, plafon: cleanNominal(f.elements['plafon'].value), golDebitur: f.elements['golDebitur'].value, jnsPenggunaan: f.elements['jnsPenggunaan'].value, klasKredit: f.elements['klasKredit'].value, sektorEko: f.elements['sektorEko'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-pk', ['pk', 'sppk']); }
 
 function populatePKForm() {
     let options = '<option value="">Pilih SPPK yang Disetujui...</option>'; storeData['sppk'].forEach(j => { if(j.status !== "Sudah PK") options += `<option value="${j.nomorSPPK}">${j.nomorSPPK} - ${j.debitur}</option>`; }); document.getElementById('select-sppk-induk').innerHTML = options;
-    document.getElementById('select-sppk-induk').onchange = function(e) { const sel = storeData['sppk'].find(x => x.nomorSPPK === e.target.value); if(sel) { document.getElementById('pk-nama-debitur').value = sel.debitur; document.getElementById('pk-plafon').value = sel.plafon; const cbSel = document.getElementById('pk-cabang'); Array.from(cbSel.options).forEach(opt => { if(opt.value.includes(sel.cabang)) cbSel.value = opt.value; }); } };
+    document.getElementById('select-sppk-induk').onchange = function(e) { const sel = storeData['sppk'].find(x => x.nomorSPPK === e.target.value); if(sel) { document.getElementById('pk-nama-debitur').value = sel.debitur; document.getElementById('pk-plafon').value = formatRupiah(sel.plafon.toString()); const cbSel = document.getElementById('pk-cabang'); Array.from(cbSel.options).forEach(opt => { if(opt.value.includes(sel.cabang)) cbSel.value = opt.value; }); } };
     fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getReferensiPK' }) }).then(res => res.json()).then(result => {
         if(result.status === 'success') {
             let opsGol = '<option value="">Pilih...</option>', opsJns = '<option value="">Pilih...</option>', opsKlas = '<option value="">Pilih...</option>', opsSek = '<option value="">Pilih...</option>';
@@ -674,3 +674,54 @@ document.addEventListener('touchend', () => {
     activeSwipeModal = null;
     currentDeltaY = 0;
 });
+
+// ========================================================
+// --- UPGRADE: AUTO UPPERCASE & FORMAT RUPIAH OTOMATIS ---
+// ========================================================
+
+// 1. Auto Uppercase untuk semua input tipe teks
+document.addEventListener('input', function(e) {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
+        // Pengecualian jika kita tidak ingin field tertentu ikut besar (misal password/email)
+        if (e.target.id !== 'login-username') {
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            e.target.value = e.target.value.toUpperCase();
+            e.target.setSelectionRange(start, end);
+        }
+    }
+});
+
+// 2. Fungsi Format Rupiah ("500000" jadi "Rp 500.000")
+const formatRupiah = (angka) => {
+    if (!angka) return '';
+    let number_string = angka.toString().replace(/[^,\d]/g, '');
+    let split = number_string.split(',');
+    let sisa = split[0].length % 3;
+    let rupiah = split[0].substr(0, sisa);
+    let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    if (ribuan) {
+        let separator = sisa ? '.' : '';
+        rupiah += separator + ribuan.join('.');
+    }
+    rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+    return 'Rp ' + rupiah;
+};
+
+// 3. Fungsi Membersihkan Rupiah ("Rp 500.000" dikembalikan ke "500000" untuk Google Script)
+const cleanNominal = (val) => { return val ? val.replace(/[^0-9]/g, '') : ''; };
+
+// 4. Ubah tipe input plafon dari 'number' ke 'text' agar bisa memuat "Rp"
+const plafonInputs = ['sm-plafon', 'sppk-plafon', 'pk-plafon'];
+plafonInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.type = 'text'; 
+        el.setAttribute('inputmode', 'numeric'); // Menjaga keyboard HP tetap numpad
+        el.addEventListener('input', function(e) {
+            e.target.value = formatRupiah(e.target.value);
+        });
+    }
+});
+
+
