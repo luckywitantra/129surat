@@ -194,15 +194,41 @@ async function loadConfig() {
     } catch (e) { console.error(e); }
 }
 
+// TAMBAHKAN LOGIKA KONVERSI LINK GAMBAR GOOGLE DRIVE
 function applyIdentitas(data) {
-    const appName = data['AppName'] || 'SuratApp', companyName = data['CompanyName'] || 'Sistem Manajemen Terpadu', appLogo = data['AppLogo'] || 'https://cdn-icons-png.flaticon.com/512/3062/3062634.png';
+    const appName = data['AppName'] || 'SuratApp';
+    const companyName = data['CompanyName'] || 'Sistem Manajemen Terpadu';
+    let appLogo = data['AppLogo'] || 'https://cdn-icons-png.flaticon.com/512/3062/3062634.png';
+    
+    // LOGIKA ANTI-BLOKIR GOOGLE DRIVE (Ubah uc?export ke thumbnail API)
+    if (appLogo.includes('drive.google.com')) {
+        const match = appLogo.match(/id=([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+            // Memaksa Google mengeluarkan gambar dengan ukuran lebar 500px yang stabil
+            appLogo = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w500`;
+        }
+    }
+    
+    // Set Sidebar & Login Texts
     if(document.getElementById('sidebar-app-name')) document.getElementById('sidebar-app-name').innerText = appName;
     if(document.getElementById('login-app-name')) document.getElementById('login-app-name').innerText = appName;
     if(document.getElementById('login-company-name')) document.getElementById('login-company-name').innerText = companyName;
+    
+    // Set Logos
     if(document.getElementById('sidebar-app-logo')) document.getElementById('sidebar-app-logo').src = appLogo;
     if(document.getElementById('login-app-logo')) document.getElementById('login-app-logo').src = appLogo;
+    
+    // Update Document Title
     document.title = `${appName} - ${companyName}`;
-    if(!localStorage.getItem('theme_manually_set') && data['DefaultTheme']) { currentTheme = data['DefaultTheme']; document.documentElement.setAttribute('data-theme', currentTheme); if (document.getElementById('theme-icon')) { document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; } }
+    
+    // Cek jika tema belum pernah diset manual oleh user, gunakan DefaultTheme
+    if(!localStorage.getItem('theme_manually_set') && data['DefaultTheme']) {
+        currentTheme = data['DefaultTheme'];
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        if (document.getElementById('theme-icon')) {
+            document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        }
+    }
 }
 
 function buildFilterUI(jenis) {
