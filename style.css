@@ -411,24 +411,70 @@ input[type="text"].search-input { flex: 2; min-width: 200px; cursor: text; }
     .modal-card::before { content: ''; position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 60px; height: 6px; background: var(--border-color); border-radius: 10px; z-index: 10; }
     @keyframes slideUp { 0% { transform: translateY(100%); opacity:0; } 100% { transform: translateY(0); opacity:1; } }
 
-    /* Perbaikan Mobile List View (Mengganti Tabel menjadi Kartu) */
+    /* Perbaikan Mobile List View (KARTU SUPER MINIMALIS) */
     .modern-table { min-width: 100% !important; }
     .table-responsive { overflow-x: hidden !important; }
     .modern-table thead { display: none; }
     .modern-table, .modern-table tbody, .modern-table tr, .modern-table td { display: block; width: 100%; box-sizing: border-box; }
     
-    .modern-table tr { background: var(--bg-card) !important; margin-bottom: 16px !important; border-radius: 18px !important; padding: 16px !important; box-shadow: 0 6px 15px rgba(0,0,0,0.06); border: 1px solid var(--border-color); position: relative; }
-    .modern-table td { background: transparent !important; padding: 5px 0 !important; text-align: left !important; font-size: 0.9rem !important; border: none !important; color: var(--text-primary); }
+    .modern-table tr { 
+        background: var(--bg-card) !important; 
+        margin-bottom: 12px !important; 
+        border-radius: 16px !important; 
+        padding: 14px 16px 12px !important; /* Padding diperkecil untuk menghemat ruang */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+        border: 1px solid var(--border-color); 
+        position: relative; 
+    }
     
-    .modern-table td:first-child { font-size: 1.1rem !important; color: var(--primary) !important; padding-bottom: 12px !important; margin-bottom: 10px !important; border-bottom: 1px dashed var(--border-color) !important; padding-right: 120px !important; word-break: break-word; }
-    .modern-table td:nth-child(2) { font-size: 0.75rem !important; color: var(--primary); font-weight: 900; margin-bottom: 4px; }
-    .modern-table td small { font-size: 0.75rem; color: var(--text-secondary); display: block; margin-top: 4px; }
+    /* DEFAULT: Sembunyikan SEMUA Kolom agar bersih */
+    .modern-table td { display: none !important; padding: 0 !important; border: none !important; }
     
-    .modern-table td:nth-last-child(2) { position: absolute !important; top: 16px !important; right: 16px !important; padding: 0 !important; width: auto !important; }
-    .modern-table td:nth-last-child(2) .badge { display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-    .modern-table td:nth-last-child(2) small { margin-top: 8px; font-weight: 800; color: var(--warning); }
+    /* HANYA Tampilkan: Kolom 1 (Nomor), Kolom 3 (Nama), Status, dan Aksi */
+    .modern-table td:first-child,
+    .modern-table td:nth-child(3),
+    .modern-table td:nth-last-child(2),
+    .modern-table td:last-child {
+        display: block !important;
+    }
+
+    /* Khusus untuk Data PK, kolom namanya berada di urutan ke-4 */
+    #tbody-pk td:nth-child(3) { display: none !important; }
+    #tbody-pk td:nth-child(4) { display: block !important; }
     
-    .modern-table td:last-child { display: flex; flex-direction: row; justify-content: flex-end; gap: 12px; margin-top: 12px; padding-top: 12px !important; border-top: 1px dashed var(--border-color) !important; }
+    /* Styling Nomor Surat */
+    .modern-table td:first-child { 
+        font-size: 1rem !important; 
+        color: var(--primary) !important; 
+        padding-bottom: 8px !important; 
+        margin-bottom: 8px !important; 
+        border-bottom: 1px dashed var(--border-color) !important; 
+        padding-right: 110px !important; /* Ruang aman untuk lencana status */
+        word-break: break-word; 
+    }
+    
+    /* Styling Keterangan 1 (Nama Pengirim / Debitur) */
+    .modern-table td:nth-child(3),
+    #tbody-pk td:nth-child(4) { 
+        font-size: 0.95rem !important; 
+        color: var(--text-primary) !important; 
+        font-weight: 800; 
+        margin-bottom: 4px; 
+    }
+    
+    /* Sembunyikan teks Cabang (<small>) agar benar-benar hanya 1 baris */
+    .modern-table td small { display: none !important; }
+    
+    /* Styling Status (Melayang Kanan Atas) */
+    .modern-table td:nth-last-child(2) { position: absolute !important; top: 14px !important; right: 14px !important; width: auto !important; }
+    .modern-table td:nth-last-child(2) .badge { display: inline-block; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    
+    /* Styling Tombol Aksi (Rapat di Bawah) */
+    .modern-table td:last-child { 
+        display: flex; flex-direction: row; justify-content: flex-end; gap: 10px; 
+        margin-top: 10px; padding-top: 10px !important; 
+        border-top: 1px dashed var(--border-color) !important; 
+    }
     .modern-table tbody tr:hover td { background: transparent !important; transform: none !important; }
     .modern-table td:empty { display: none; }
 
