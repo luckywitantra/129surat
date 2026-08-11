@@ -795,3 +795,61 @@ html { font-size: 14px; } /* Mengecilkan ukuran standar dari 16px ke 14px */
 .master-data-actions .stat-details p {
     font-size: 0.75rem; margin: 0; font-weight: 600; opacity: 0.9;
 }
+
+/* ========================================================
+   ULTRA MODERN FORM STYLING (FINTECH UI)
+   ======================================================== */
+/* Modifikasi Area Modal Utama */
+.modal-card.modal-form { padding: 0 !important; overflow: hidden; }
+.modal-form h3 { 
+    padding: 25px 30px; margin: 0; background: var(--bg-main); 
+    border-bottom: 1px dashed var(--border-color); 
+    font-size: 1.25rem; display: flex; align-items: center; gap: 12px;
+}
+.modal-form h3 i { 
+    font-size: 1.4rem; background: var(--primary-light); 
+    padding: 10px; border-radius: 12px; color: var(--primary);
+}
+.modal-form form { padding: 25px 30px; background: var(--bg-card); }
+.modal-form .modal-footer { 
+    margin: 0; padding: 20px 30px; background: var(--bg-main); 
+    border-top: 1px dashed var(--border-color); 
+}
+
+/* Modifikasi Gaya Teks Label & Kolom Input */
+.modal-form .input-group label {
+    font-size: 0.75rem; text-transform: uppercase; font-weight: 900;
+    letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 8px; display: block;
+}
+.modal-form .input-group input, 
+.modal-form .input-group select {
+    background: var(--bg-main);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    width: 100%; box-sizing: border-box;
+    transition: var(--transition);
+}
+/* Efek Menyala Saat Diketik */
+.modal-form .input-group input:focus, 
+.modal-form .input-group select:focus {
+    background: #FFFFFF;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+    outline: none;
+}
+.input-group.full-width { grid-column: 1 / -1; }
+
+/* Desain Area Upload File Modern (Dropzone) */
+.file-drop-area {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 110px; border: 2px dashed var(--primary); border-radius: 14px;
+    background: var(--primary-light); transition: var(--transition); cursor: pointer; text-align: center;
+}
+.file-drop-area:hover { background: rgba(37, 99, 235, 0.15); border-color: var(--primary-hover); transform: translateY(-2px); }
+.file-msg { color: var(--primary); font-weight: 800; display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; pointer-events: none; }
+.file-msg i { font-size: 2.2rem; }
+.file-input-modern { position: absolute; left: 0; top: 0; height: 100%; width: 100%; cursor: pointer; opacity: 0; }
