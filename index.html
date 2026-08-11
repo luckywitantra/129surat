@@ -145,16 +145,43 @@
 
     <div id="init-screen" class="screen-container"><div style="text-align: center;"><i class="fa-solid fa-circle-notch fa-spin fa-4x text-primary" style="margin-bottom: 20px;"></i><h2>Memuat Sistem...</h2></div></div>
     
-    <div id="login-screen" class="screen-container hidden"><div class="login-card"><div class="login-header"><i class="fa-solid fa-paper-plane fa-3x text-primary"></i><h2>Selamat Datang</h2></div><form id="login-form" onsubmit="handleLogin(event)"><div class="input-group"><label>Username</label><input type="text" id="login-username" required value="admin"></div><div class="input-group"><label>Role</label><select id="login-role"><option value="Admin">Admin</option><option value="Pejabat">Pejabat</option><option value="Staf">Staf</option></select></div><button type="submit" class="btn btn-primary w-100">Masuk Aplikasi</button></form></div></div>
-
+   <div id="login-screen" class="screen-container hidden">
+        <div class="login-card">
+            <div class="login-header">
+                <!-- ID logo dan nama diubah agar bisa dirender dinamis via JS -->
+                <img id="login-app-logo" src="https://cdn-icons-png.flaticon.com/512/3062/3062634.png" style="height:70px; margin-bottom:15px; object-fit:contain;">
+                <h2 id="login-app-name">SuratApp</h2>
+                <p id="login-company-name">Sistem Manajemen Terpadu</p>
+            </div>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="input-group"><label>Username</label><input type="text" id="login-username" required value="admin"></div>
+                <div class="input-group"><label>Role</label><select id="login-role"><option value="Admin">Admin</option><option value="Pejabat">Pejabat</option><option value="Staf">Staf</option></select></div>
+                <button type="submit" class="btn btn-primary w-100">Masuk Aplikasi <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
+        </div>
+    </div>
+    
     <div id="main-screen" class="screen-container hidden">
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header"><h3><i class="fa-solid fa-envelope-open-text"></i> SuratApp</h3><button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-times"></i></button></div>
-            <div class="sidebar-user"><div class="avatar"><i class="fa-solid fa-user-tie"></i></div><div class="user-info"><h4 id="user-name">User Name</h4><span class="badge badge-primary" id="user-role">Role</span></div></div>
+            <div class="sidebar-header">
+                <div class="brand">
+                    <img id="sidebar-app-logo" src="https://cdn-icons-png.flaticon.com/512/3062/3062634.png" alt="Logo">
+                    <h3 id="sidebar-app-name">SuratApp</h3>
+                </div>
+                <button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="sidebar-user">
+                <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
+                <div class="user-info">
+                    <h4 id="user-name">User Name</h4>
+                    <span class="badge badge-primary" id="user-role">Role</span>
+                </div>
+            </div>
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" onclick="navigate('dashboard')"><i class="fa-solid fa-home"></i> Dashboard</a>
                 <a href="#" class="nav-item" onclick="navigate('surat-masuk')"><i class="fa-solid fa-inbox"></i> Surat Masuk</a>
                 <a href="#" class="nav-item" onclick="navigate('surat-keluar')"><i class="fa-solid fa-paper-plane"></i> Surat Keluar</a>
+                <a href="#" class="nav-item" onclick="navigate('disposisi')"><i class="fa-solid fa-share-nodes"></i> Disposisi</a>
                 <div class="nav-divider">SPPK & PK</div>
                 <a href="#" class="nav-item" onclick="navigate('sppk')"><i class="fa-solid fa-file-contract"></i> Data SPPK</a>
                 <a href="#" class="nav-item" onclick="navigate('pk')"><i class="fa-solid fa-file-signature"></i> Data PK</a>
@@ -163,7 +190,9 @@
                 <a href="#" class="nav-item admin-only" onclick="navigate('laporan')"><i class="fa-solid fa-chart-pie"></i> Laporan</a>
                 <a href="#" class="nav-item admin-only" onclick="navigate('pengaturan')"><i class="fa-solid fa-gear"></i> Konfigurasi</a>
             </nav>
-            <div class="sidebar-footer"><button class="btn btn-outline w-100" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button></div>
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+            </div>
         </aside>
 
         <main class="main-content">
@@ -243,6 +272,32 @@
 
                 <!-- VIEW: PENGATURAN -->
                 <div id="view-pengaturan" class="view-section hidden admin-only">
+                    <!-- PENAMBAHAN MENU IDENTITAS -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div class="card-header"><h3>Identitas Aplikasi & Sistem Terpusat</h3></div>
+                        <div class="card-body">
+                            <form onsubmit="submitIdentitas(event)" id="form-config-identitas">
+                                <div class="form-grid">
+                                    <div class="input-group"><label>Nama Aplikasi Pendek</label><input type="text" name="AppName" required placeholder="Cth: SuratApp"></div>
+                                    <div class="input-group"><label>Nama Perusahaan / Organisasi</label><input type="text" name="CompanyName" required placeholder="Cth: BPD Kaltim Kaltara"></div>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="input-group"><label>URL Logo Aplikasi (Link Gambar)</label><input type="url" name="AppLogo" placeholder="https://link-ke-gambar.png"></div>
+                                    <div class="input-group">
+                                        <label>Tema UI Default</label>
+                                        <select name="DefaultTheme" required>
+                                            <option value="light">Light Mode (Terang)</option>
+                                            <option value="dark">Dark Mode (Gelap)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div style="background:var(--primary-light); padding:15px; border-radius:12px; font-size:0.85rem; color:var(--text-primary); margin-bottom:15px; border-left: 4px solid var(--primary);">
+                                    <strong>Rekomendasi:</strong> Gunakan logo berformat PNG transparan (aspek rasio kotak/persegi) dengan resolusi minimal 200x200 pixel agar terlihat tajam di semua layar.
+                                </div>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Terapkan Identitas Baru</button>
+                            </form>
+                        </div>
+                    </div>
                     <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Cabang</h3><button class="btn btn-primary btn-sm" onclick="openModalCabang()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Nama Cabang</th><th>Kode SM/SK</th><th>Kode SPPK/PK</th><th>Aksi</th></tr></thead><tbody id="tbody-cabang"></tbody></table></div></div>
                     <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Referensi PK</h3><button class="btn btn-primary btn-sm" onclick="openModalReferensiPK()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Kategori</th><th>Kode</th><th>Uraian / Deskripsi</th><th>Aksi</th></tr></thead><tbody id="tbody-referensi-pk"></tbody></table></div></div>
                     <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Jenis Surat</h3><button class="btn btn-primary btn-sm" onclick="openModalJenisSurat()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Kode</th><th>Nama Klasifikasi</th><th>Uraian / Tujuan</th><th>Aksi</th></tr></thead><tbody id="tbody-jenis-surat"></tbody></table></div></div>
