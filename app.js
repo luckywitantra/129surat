@@ -246,7 +246,24 @@ function populateCabangFilters() { let options = '<option value="">Semua Cabang<
 
 async function loadDataTabel(jenis) {
     const tbody = document.getElementById(`tbody-${jenis}`); if(!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--primary); padding:20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Menarik data...</td></tr>`;
+    
+    // TAMPILAN SKELETON LOADING (Menggantikan tulisan "Menarik data...")
+    let skeletonHtml = '';
+    for(let i=0; i<4; i++) {
+        skeletonHtml += `
+        <tr class="skeleton-tr">
+            <td>
+                <div class="skeleton-box" style="width: 70%; height: 18px; margin-bottom: 8px;"></div>
+                <div class="skeleton-box" style="width: 40%; height: 12px;"></div>
+            </td>
+            <td class="pc-only"><div class="skeleton-box" style="width: 60%; height: 14px;"></div></td>
+            <td class="pc-only"><div class="skeleton-box" style="width: 80%; height: 14px;"></div></td>
+            <td class="pc-only"><div class="skeleton-box" style="width: 50%; height: 22px; border-radius: 12px;"></div></td>
+            <td><div class="skeleton-box" style="width: 90px; height: 32px; border-radius: 10px; float: right;"></div></td>
+        </tr>`;
+    }
+    tbody.innerHTML = skeletonHtml;
+
     let act = '';
     if (jenis === 'surat-masuk' || jenis === 'disposisi') act = 'getSuratMasuk'; else if (jenis === 'surat-keluar') act = 'getSuratKeluar'; else if (jenis === 'sppk') act = 'getSPPK'; else if (jenis === 'pk') act = 'getPK'; else if (jenis === 'arsip') act = 'getArsip'; else if (jenis === 'jenis-surat') act = 'getJenisSurat'; else if (jenis === 'user') act = 'getUser'; else if (jenis === 'referensi-pk') act = 'getReferensiPK'; else if (jenis === 'cabang') act = 'getCabang';
 
@@ -261,8 +278,12 @@ async function loadDataTabel(jenis) {
                 if(jenis === 'pk') populatePKForm();
                 applyFilter(jenis); 
             } else { renderHTMLTabel(jenis, result.data, tbody); }
-        } else tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger);">${result.message}</td></tr>`;
-    } catch (error) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger);">Gagal memuat.</td></tr>`; }
+        } else {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--danger); padding:20px;">Gagal: ${result.message}</td></tr>`;
+        }
+    } catch (error) { 
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--danger); padding:20px;">Gagal terhubung ke server.</td></tr>`; 
+    }
 }
 
 function applyFilter(jenis, page = 1) {
@@ -315,7 +336,21 @@ function renderPagination(jenis, totalItems, page, rowsPerPage) {
 }
 
 function renderHTMLTabel(jenis, dataArray, tbody) {
-    if (!dataArray || dataArray.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding:20px;">Belum ada data tersedia.</td></tr>`; return; }
+    // BEAUTIFUL EMPTY STATE
+    if (!dataArray || dataArray.length === 0) { 
+        tbody.innerHTML = `
+        <tr>
+            <td colspan="8" style="padding: 0; background: transparent; border: none;">
+                <div class="empty-state">
+                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Kosong">
+                    <h4>Kotak Kosong</h4>
+                    <p>Wah, belum ada data atau tugas yang harus ditampilkan di sini.</p>
+                </div>
+            </td>
+        </tr>`; 
+        return; 
+    }
+    
     let html = '';
     if(jenis === 'jenis-surat') globalDataJenisSurat = [...dataArray]; 
     if(jenis === 'user') globalDataUser = [...dataArray]; 
@@ -454,20 +489,26 @@ function editData(jenis, id) {
 async function deleteData(actionName, id, tableRef) {
     if (tableRef === 'sppk') {
         const dataSPPK = storeData['sppk'].find(d => d.id === id);
-        if (dataSPPK && dataSPPK.status === 'Sudah PK') { showAlert('Akses Ditolak', 'SPPK ini sudah diterbitkan PK. Harap batalkan/hapus PK terlebih dahulu untuk menghapus data SPPK ini.', 'error'); return; }
+        if (dataSPPK && dataSPPK.status === 'Sudah PK') { 
+            showAlert('Akses Ditolak', 'SPPK ini sudah diterbitkan PK. Harap batalkan/hapus PK terlebih dahulu untuk menghapus data SPPK ini.', 'error'); 
+            return; 
+        }
     }
-    if(!confirm("Yakin ingin menyelesaikan perintah ini?")) return;
+    if(!confirm("Yakin ingin memproses perintah ini?")) return;
     try { 
         const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: actionName, payload: { id: id } }) }); 
         const result = await response.json(); 
         if (result.status === 'success') { 
-            showAlert('Berhasil', 'Tindakan selesai.', 'success'); 
+            
+            // GUNAKAN TOAST ALIH-ALIH SHOWALERT
+            showToast('Berhasil!', 'Tindakan telah selesai diproses.', 'success'); 
+            
             loadDataTabel(tableRef); 
             if(tableRef === 'pk') loadDataTabel('sppk'); 
             if(tableRef === 'sppk') loadDataTabel('surat-masuk'); 
             loadDashboardStats(); 
-        } else showAlert('Gagal', result.message, 'error'); 
-    } catch (e) { showAlert('Error', 'Gagal koneksi.', 'error'); }
+        } else showToast('Gagal', result.message, 'error'); 
+    } catch (e) { showToast('Koneksi Error', 'Gagal terhubung.', 'error'); }
 }
 
 const getBase64 = (file) => new Promise((resolve, reject) => { if (!file) return resolve(null); const r = new FileReader(); r.readAsDataURL(file); r.onload = () => resolve({ mimeType: file.type, filename: file.name, base64Data: r.result.split(',')[1] }); r.onerror = e => reject(e); });
@@ -478,12 +519,19 @@ async function sendFormData(action, payload, formEl, modalId, jenisMenuRef) {
         const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: action, payload: payload }) }); const result = await response.json();
         if (result.status === 'success') { 
             if(modalId) closeModal(modalId); 
-            showAlert('Berhasil', result.message, 'success'); 
+            
+            // GUNAKAN TOAST ALIH-ALIH SHOWALERT
+            showToast('Tersimpan!', result.message, 'success'); 
+            
             if(modalId) formEl.reset(); 
             if(jenisMenuRef) { if(Array.isArray(jenisMenuRef)) { jenisMenuRef.forEach(ref => loadDataTabel(ref)); } else { loadDataTabel(jenisMenuRef); } }
             if(jenisMenuRef && !['user','jenis-surat','referensi-pk','cabang'].includes(jenisMenuRef)) loadDashboardStats(); 
-        } else showAlert('Gagal', result.message, 'error');
-    } catch (error) { showAlert('Koneksi Gagal', 'Gagal mengirim data.', 'error'); } finally { btn.innerHTML = originalBtnHTML; btn.disabled = false; }
+        } else {
+            showToast('Gagal', result.message, 'error');
+        }
+    } catch (error) { 
+        showToast('Koneksi Terputus', 'Gagal mengirim data ke server.', 'error'); 
+    } finally { btn.innerHTML = originalBtnHTML; btn.disabled = false; }
 }
 
 async function submitCabang(e) { e.preventDefault(); const f = e.target; sendFormData('saveCabang', { id: f.elements['idCabang'].value, nama: f.elements['namaCabang'].value, kodeSM: f.elements['kodeSMSK'].value, kodePK: f.elements['kodePK'].value }, f, 'modal-cabang', 'cabang'); }
@@ -744,6 +792,36 @@ function viewDetail(jenis, id) {
     document.getElementById('detail-header-dynamic').innerHTML = headerHtml;
     document.getElementById('detail-content').innerHTML = html;
     openModal('modal-detail');
+}
+
+// ========================================================
+// --- FUNGSI TOAST NOTIFICATION (NON-BLOCKING) ---
+// ========================================================
+function showToast(title, message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = type === 'success' ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-triangle-exclamation"></i>';
+    
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-msg">${message}</div>
+        </div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Animasikan masuk
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // Otomatis hilang setelah 3.5 detik
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400); // Tunggu animasi selesai baru dihapus dari DOM
+    }, 3500);
 }
 
 
