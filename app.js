@@ -398,3 +398,85 @@ function handleLogin(e) {
 }
 function handleLogout() { currentUser = null; document.getElementById('main-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); document.getElementById('login-form').reset(); document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex'); }
 window.onload = () => { if (document.getElementById('theme-icon')) document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; };
+
+// ========================================================
+// --- UPGRADE UI/UX: SWIPE DOWN TO CLOSE MODAL (HP) ---
+// ========================================================
+
+let touchStartY = 0;
+let currentDeltaY = 0;
+let activeSwipeModal = null;
+let isSwiping = false;
+
+document.addEventListener('touchstart', (e) => {
+    // Hanya aktif di layar HP (lebar maksimal 768px)
+    if (window.innerWidth > 768) return;
+
+    // Cari apakah sentuhan terjadi di dalam modal card
+    const modal = e.target.closest('.modal-overlay:not(.hidden) .modal-card');
+    if (!modal) return;
+    
+    // Cek apakah pengguna sedang scroll ke bawah di dalam form
+    const form = modal.querySelector('form');
+    if (form && form.contains(e.target) && form.scrollTop > 0) {
+        return; // Biarkan pengguna men-scroll isi form
+    }
+
+    activeSwipeModal = modal;
+    touchStartY = e.touches[0].clientY;
+    isSwiping = true;
+    
+    // Matikan animasi transisi sementara agar modal mengikuti jari tanpa delay
+    activeSwipeModal.style.transition = 'none'; 
+}, {passive: true});
+
+document.addEventListener('touchmove', (e) => {
+    if (!isSwiping || !activeSwipeModal) return;
+    
+    const form = activeSwipeModal.querySelector('form');
+    // Jika pengguna mulai scroll form saat swipe, batalkan swipe
+    if (form && form.contains(e.target) && form.scrollTop > 0 && currentDeltaY <= 0) {
+        isSwiping = false;
+        activeSwipeModal.style.transform = '';
+        return;
+    }
+
+    const currentY = e.touches[0].clientY;
+    currentDeltaY = currentY - touchStartY;
+
+    // Hanya izinkan modal digeser ke arah BAWAH (currentDeltaY > 0)
+    if (currentDeltaY > 0) {
+        activeSwipeModal.style.transform = `translateY(${currentDeltaY}px)`;
+        // Cegah layar background ikut ter-scroll
+        if (e.cancelable) e.preventDefault(); 
+    }
+}, {passive: false});
+
+document.addEventListener('touchend', () => {
+    if (!isSwiping || !activeSwipeModal) return;
+    isSwiping = false;
+    
+    // Kembalikan efek transisi membal (bouncy)
+    activeSwipeModal.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    
+    // Jika ditarik ke bawah lebih dari 120 pixel, TUTUP modal
+    if (currentDeltaY > 120) { 
+        activeSwipeModal.style.transform = 'translateY(100%)';
+        const overlayId = activeSwipeModal.closest('.modal-overlay').id;
+        
+        setTimeout(() => {
+            closeModal(overlayId);
+            activeSwipeModal.style.transform = ''; // Reset posisi untuk dibuka lagi nanti
+        }, 300); // Tunggu animasi selesai
+    } else {
+        // Jika tarikan kurang dari 120 pixel, KEMBALIKAN (snap back) ke atas
+        activeSwipeModal.style.transform = 'translateY(0)';
+        setTimeout(() => {
+             if(activeSwipeModal) activeSwipeModal.style.transform = '';
+        }, 400);
+    }
+    
+    // Reset state
+    activeSwipeModal = null;
+    currentDeltaY = 0;
+});
