@@ -71,22 +71,21 @@ async function loadConfig() {
 function buildFilterUI(jenis) {
     const container = document.getElementById(`filter-${jenis}`); if(!container) return;
     
-    // Tambahan dropdown filter khusus
     let extraFilter = '';
     if (jenis === 'surat-masuk' || jenis === 'surat-keluar') {
-        extraFilter = `<select id="fil-jenis-surat-${jenis}" class="search-input sel-jenissurat-filter" onchange="applyFilter('${jenis}')"><option value="">Semua Jenis Surat</option></select>`;
+        extraFilter = `<select id="fil-jenis-surat-${jenis}" class="search-input sel-jenissurat-filter" onchange="applyFilter('${jenis}')"><option value="">Semua Jenis</option></select>`;
     } else if (jenis === 'arsip') {
         extraFilter = `<select id="fil-kategori-arsip" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Semua Kategori</option><option value="Surat Masuk">Surat Masuk</option><option value="Surat Keluar">Surat Keluar</option><option value="SPPK">SPPK</option><option value="PK">PK</option></select>`;
     }
 
     container.innerHTML = `
-        <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
-            <input type="text" id="search-${jenis}" class="search-input" placeholder="Cari nama / nomor..." onkeyup="applyFilter('${jenis}')" style="flex:1; min-width:200px;">
+        <div class="filter-container">
+            <input type="text" id="search-${jenis}" class="search-input" placeholder="Pencarian..." onkeyup="applyFilter('${jenis}')">
             ${extraFilter}
-            <select id="sort-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="newest">Tgl: Baru-Lama</option><option value="oldest">Tgl: Lama-Baru</option><option value="az">Abjad: A-Z</option><option value="za">Abjad: Z-A</option></select>
+            <select id="sort-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="newest">Baru - Lama</option><option value="oldest">Lama - Baru</option><option value="az">A - Z</option><option value="za">Z - A</option></select>
             <select id="fil-cabang-${jenis}" class="search-input sel-cabang-filter" onchange="applyFilter('${jenis}')"><option value="">Semua Cabang</option></select>
-            <select id="fil-bulan-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Semua Bulan</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">Mei</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Agu</option><option value="09">Sep</option><option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option></select>
-            <select id="fil-tahun-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select>
+            <select id="fil-bulan-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Bulan</option><option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option><option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option></select>
+            <select id="fil-tahun-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select>
         </div>`;
     
     populateCabangFilters();
