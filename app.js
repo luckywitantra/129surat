@@ -288,7 +288,7 @@ function renderHTMLTabel(jenis, dataArray, tbody) {
     if(jenis === 'referensi-pk') globalDataRefPK = [...dataArray];
 
     dataArray.forEach(item => {
-        let fileBtn = item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="btn-icon"><i class="fa-solid fa-file-pdf text-danger"></i></a>` : `<span style="opacity:0.3; font-size:0.8rem;">-No File-</span>`;
+        let fileBtn = item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="btn-icon" title="Unduh Berkas"><i class="fa-solid fa-file-pdf text-danger"></i></a>` : `<span style="opacity:0.3; font-size:0.8rem;">-No File-</span>`;
         let s = (item.status || "").toLowerCase(); let badge = 'warning';
         if(s.includes('selesai') || s.includes('terkirim') || s.includes('sudah') || s.includes('aktif') || s.includes('diterbitkan')) badge = 'success'; 
         if(s.includes('belum')) badge = 'danger'; 
@@ -296,22 +296,27 @@ function renderHTMLTabel(jenis, dataArray, tbody) {
 
         let editBtn = `<button class="btn-icon text-primary" title="Edit" onclick="editData('${jenis}', '${item.id}')"><i class="fa-solid fa-edit"></i></button>`;
         let delBtn = `<button class="btn-icon text-danger" title="Hapus" onclick="deleteData('delete${jenis.replace('-','')}', '${item.id}', '${jenis}')"><i class="fa-solid fa-trash"></i></button>`;
-        let timeBtn = item.debitur ? `<button class="btn-icon text-info" title="SLA Timeline" onclick="showTimeline('${item.debitur}')"><i class="fa-solid fa-clock-rotate-left"></i></button>` : '';
+        let timeBtn = item.debitur ? `<button class="btn-icon text-warning" title="SLA Timeline" onclick="showTimeline('${item.debitur}')"><i class="fa-solid fa-clock-rotate-left"></i></button>` : '';
+        
+        // TOMBOL LIHAT DETAIL (BARU)
+        let viewBtn = `<button class="btn-icon text-success" title="Lihat Detail Lengkap" onclick="viewDetail('${jenis}', '${item.id}')"><i class="fa-solid fa-eye"></i></button>`;
 
         if (jenis === 'cabang') html += `<tr><td><strong>${item.nama}</strong></td><td>${item.kodeSM}</td><td>${item.kodePK}</td><td>${editBtn} ${delBtn}</td></tr>`;
         else if (jenis === 'jenis-surat') html += `<tr><td><strong>${item.kode}</strong></td><td>${item.nama}</td><td>${item.uraian}</td><td>${editBtn} ${delBtn}</td></tr>`;
         else if (jenis === 'user') html += `<tr><td><strong>${item.username}</strong></td><td>${item.nama}</td><td>${item.role}</td><td>${item.jabatan}</td><td>${editBtn} ${delBtn}</td></tr>`;
         else if (jenis === 'referensi-pk') html += `<tr><td><span class="badge badge-primary">${item.kategori}</span></td><td><strong>${item.kode}</strong></td><td>${item.uraian}</td><td>${editBtn} ${delBtn}</td></tr>`;
-        else if (jenis === 'surat-masuk') html += `<tr><td><strong>${item.nomor}</strong></td><td>${item.tanggal}</td><td>${item.pengirim}<br><small>Cab: ${item.cabang}</small></td><td>${item.perihal}</td><td>${statusBadge}</td><td>${item.jenisSurat==='D1'?timeBtn:''} ${fileBtn} ${editBtn} ${delBtn}</td></tr>`;
-        else if (jenis === 'surat-keluar') html += `<tr><td><strong>${item.nomor}</strong></td><td>${item.tanggal}</td><td>${item.tujuan}<br><small>Cab: ${item.cabang}</small></td><td>${item.perihal}</td><td>${statusBadge}</td><td>${fileBtn} ${editBtn} ${delBtn}</td></tr>`;
-        else if (jenis === 'sppk') html += `<tr><td><strong>${item.nomorSPPK}</strong></td><td>${item.tanggal}</td><td>${item.debitur}<br><small>Cab: ${item.cabang}</small></td><td>Rp ${parseFloat(item.plafon||0).toLocaleString('id-ID')}</td><td>${statusBadge}</td><td>${timeBtn} ${fileBtn} ${editBtn} ${delBtn}</td></tr>`;
-        else if (jenis === 'pk') html += `<tr><td><strong>${item.nomorPK||'-'}</strong></td><td>${item.sppkInduk}</td><td>${item.tanggal}</td><td>${item.debitur}<br><small>Cab: ${item.cabang}</small></td><td>Rp ${parseFloat(item.plafon||0).toLocaleString('id-ID')}</td><td>${statusBadge}</td><td>${timeBtn} ${fileBtn} ${editBtn} ${delBtn}</td></tr>`;
-        else if (jenis === 'arsip') html += `<tr><td><span class="badge badge-primary">${item.kategori}</span></td><td><strong>${item.nomor||'-'}</strong></td><td>${item.tanggal}</td><td>${item.deskripsi}</td><td>${fileBtn}</td></tr>`;
+        
+        // PENAMBAHAN viewBtn PADA TRANSAKSI
+        else if (jenis === 'surat-masuk') html += `<tr><td><strong>${item.nomor}</strong></td><td>${item.tanggal}</td><td>${item.pengirim}<br><small>Cab: ${item.cabang}</small></td><td>${item.perihal}</td><td>${statusBadge}</td><td>${viewBtn} ${item.jenisSurat==='D1'?timeBtn:''} ${fileBtn} ${editBtn} ${delBtn}</td></tr>`;
+        else if (jenis === 'surat-keluar') html += `<tr><td><strong>${item.nomor}</strong></td><td>${item.tanggal}</td><td>${item.tujuan}<br><small>Cab: ${item.cabang}</small></td><td>${item.perihal}</td><td>${statusBadge}</td><td>${viewBtn} ${fileBtn} ${editBtn} ${delBtn}</td></tr>`;
+        else if (jenis === 'sppk') html += `<tr><td><strong>${item.nomorSPPK}</strong></td><td>${item.tanggal}</td><td>${item.debitur}<br><small>Cab: ${item.cabang}</small></td><td>${formatRupiah(item.plafon)}</td><td>${statusBadge}</td><td>${viewBtn} ${timeBtn} ${fileBtn} ${editBtn} ${delBtn}</td></tr>`;
+        else if (jenis === 'pk') html += `<tr><td><strong>${item.nomorPK||'-'}</strong></td><td>${item.sppkInduk}</td><td>${item.tanggal}</td><td>${item.debitur}<br><small>Cab: ${item.cabang}</small></td><td>${formatRupiah(item.plafon)}</td><td>${statusBadge}</td><td>${viewBtn} ${timeBtn} ${fileBtn} ${editBtn} ${delBtn}</td></tr>`;
+        else if (jenis === 'arsip') html += `<tr><td><span class="badge badge-primary">${item.kategori}</span></td><td><strong>${item.nomor||'-'}</strong></td><td>${item.tanggal}</td><td>${item.deskripsi}</td><td>${viewBtn} ${fileBtn}</td></tr>`;
         else if (jenis === 'disposisi') {
             let aksiBtn = '';
             if(currentUser && currentUser.role !== 'Staf') { aksiBtn = `<button class="btn-icon text-primary" title="Tugaskan (Disposisi)" onclick="openModalDisposisi('${item.id}')"><i class="fa-solid fa-share-nodes"></i></button>`; } 
-            else { aksiBtn = `<button class="btn-icon text-success" title="Tandai Selesai" onclick="deleteData('selesaikanTugas', '${item.id}', 'disposisi')"><i class="fa-solid fa-check"></i></button>`; }
-            html += `<tr><td><strong>${item.nomor}</strong></td><td>${item.tanggal}</td><td>${item.pengirim}</td><td>${item.perihal}<br><small class="text-warning">Pesan: ${item.pesanDisposisi || '-'}</small></td><td>${statusBadge}<br><small>Staf: <strong>${item.disposisiKe || '-'}</strong></small></td><td>${fileBtn} ${aksiBtn}</td></tr>`;
+            else { aksiBtn = `<button class="btn-icon text-info" title="Tandai Selesai" onclick="deleteData('selesaikanTugas', '${item.id}', 'disposisi')"><i class="fa-solid fa-check"></i></button>`; }
+            html += `<tr><td><strong>${item.nomor}</strong></td><td>${item.tanggal}</td><td>${item.pengirim}</td><td>${item.perihal}<br><small class="text-warning">Pesan: ${item.pesanDisposisi || '-'}</small></td><td>${statusBadge}<br><small>Staf: <strong>${item.disposisiKe || '-'}</strong></small></td><td>${viewBtn} ${fileBtn} ${aksiBtn}</td></tr>`;
         }
     });
     tbody.innerHTML = html;
@@ -494,6 +499,104 @@ function handleLogin(e) {
         } 
     });
 }
+
+// ========================================================
+// --- FUNGSI RENDER POPUP DETAIL PROFESIONAL ---
+// ========================================================
+function viewDetail(jenis, id) {
+    let targetJenis = jenis === 'disposisi' ? 'surat-masuk' : jenis;
+    const data = storeData[targetJenis].find(d => d.id === id);
+    if (!data) return;
+
+    let title = '';
+    let html = '<div class="detail-grid two-cols">';
+    
+    // Helper untuk membuat blok field detail
+    const addField = (label, value, isFullWidth = false, isHighlight = false) => {
+        const fwClass = isFullWidth ? 'style="grid-column: 1 / -1;"' : '';
+        const hlClass = isHighlight ? 'style="border-left-color: var(--warning); background: var(--warning-light);"' : '';
+        const displayValue = value ? value : '-';
+        html += `<div class="detail-item" ${fwClass} ${hlClass}><div class="detail-label">${label}</div><div class="detail-value">${displayValue}</div></div>`;
+    };
+
+    if (jenis === 'surat-masuk' || jenis === 'disposisi') {
+        title = 'Detail Surat Masuk';
+        addField('Nomor Surat', data.nomor);
+        addField('Tanggal Diterima', data.tanggal);
+        addField('Jenis Surat', data.jenisSurat);
+        addField('Sifat Surat', data.sifatSurat || 'Biasa');
+        
+        if(data.jenisSurat === 'D1') {
+            addField('Nama Debitur', data.pengirim, true);
+            addField('Nilai Plafon', formatRupiah(data.plafon));
+            addField('Jangka Waktu', data.jangkaWaktu ? data.jangkaWaktu + ' Bulan' : '-');
+            addField('Jenis Kredit', data.jenisKredit, true);
+        } else {
+            addField('Instansi Pengirim', data.pengirim, true);
+            addField('Perihal', data.perihal, true);
+        }
+        
+        addField('Cabang', data.cabang);
+        addField('Status Saat Ini', `<span class="badge badge-primary">${data.status}</span>`);
+        
+        if (data.disposisiKe) {
+            addField('Didisposisikan Kepada', data.disposisiKe, false, true);
+            addField('Pesan Instruksi', data.pesanDisposisi, false, true);
+        }
+    } else if (jenis === 'surat-keluar') {
+        title = 'Detail Surat Keluar';
+        addField('Nomor Surat Keluar', data.nomor);
+        addField('Tanggal Surat', data.tanggal);
+        addField('Instansi Tujuan', data.tujuan, true);
+        addField('Perihal', data.perihal, true);
+        addField('Jenis Surat', data.jenisSurat);
+        addField('Penandatangan', data.penandatangan);
+        addField('Status', `<span class="badge badge-primary">${data.status}</span>`);
+        addField('Cabang', data.cabang);
+    } else if (jenis === 'sppk') {
+        title = 'Detail SPPK';
+        addField('Nomor SPPK', data.nomorSPPK, true);
+        addField('Tanggal Diterbitkan', data.tanggal);
+        addField('Cabang Pemroses', data.cabang);
+        addField('Nama Debitur', data.debitur, true);
+        addField('Plafon Disetujui', formatRupiah(data.plafon));
+        addField('Jangka Waktu', data.jangkaWaktu ? data.jangkaWaktu + ' Bulan' : '-');
+        addField('Jenis Kredit', data.jenisKredit);
+        addField('Status', `<span class="badge badge-primary">${data.status}</span>`);
+    } else if (jenis === 'pk') {
+        title = 'Detail Perjanjian Kredit (PK)';
+        addField('Nomor PK', data.nomorPK || 'Draft/Pending', true);
+        addField('No. SPPK Induk', data.sppkInduk);
+        addField('Tanggal PK', data.tanggal);
+        addField('Nama Debitur', data.debitur, true);
+        addField('Plafon Kredit', formatRupiah(data.plafon));
+        addField('Status', `<span class="badge badge-primary">${data.status}</span>`);
+        addField('Cabang', data.cabang);
+    } else if (jenis === 'arsip') {
+        title = 'Detail Arsip Sistem';
+        addField('Kategori Dokumen', `<span class="badge badge-primary">${data.kategori}</span>`);
+        addField('Tanggal Rekam', data.tanggal);
+        addField('Nomor Dokumen', data.nomor, true);
+        addField('Keterangan / Deskripsi', data.deskripsi, true);
+        addField('Cabang Asal', data.cabang);
+    }
+
+    html += '</div>';
+    
+    // Tambahkan Tombol Lihat Lampiran jika ada di bagian paling bawah grid
+    if (data.fileUrl) {
+        html += `<div style="margin-top: 20px; text-align: center;">
+                    <a href="${data.fileUrl}" target="_blank" class="btn btn-outline w-100" style="border-color: var(--danger); color: var(--danger);">
+                        <i class="fa-solid fa-file-pdf"></i> Buka File Dokumen Asli
+                    </a>
+                 </div>`;
+    }
+
+    document.getElementById('detail-title').innerHTML = `<i class="fa-solid fa-file-lines text-primary"></i> ${title}`;
+    document.getElementById('detail-content').innerHTML = html;
+    openModal('modal-detail');
+}
+
 function handleLogout() { currentUser = null; document.getElementById('main-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); document.getElementById('login-form').reset(); document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex'); }
 window.onload = () => { if (document.getElementById('theme-icon')) document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; };
 
