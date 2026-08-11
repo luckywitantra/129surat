@@ -388,49 +388,120 @@
                 </div>
 
                 <!-- VIEW: PENGATURAN -->
-                <div id="view-pengaturan" class="view-section hidden admin-only">
-                    <div class="card" style="margin-bottom: 20px;">
-                        <div class="card-header"><h3>Identitas Aplikasi & Sistem Terpusat</h3></div>
-                        <div class="card-body">
-                            <form onsubmit="submitIdentitas(event)" id="form-config-identitas">
-                                <div class="form-grid">
-                                    <div class="input-group"><label>Nama Aplikasi Pendek</label><input type="text" name="AppName" required placeholder="Cth: SuratApp"></div>
-                                    <div class="input-group"><label>Nama Perusahaan / Organisasi</label><input type="text" name="CompanyName" required placeholder="Cth: BPD Kaltim Kaltara"></div>
-                                </div>
-                                <div class="form-grid">
-                                    <div class="input-group"><label>URL Logo Aplikasi (Link Gambar)</label><input type="url" name="AppLogo" placeholder="https://link-ke-gambar.png"></div>
-                                    <div class="input-group">
-                                        <label>Tema UI Default</label>
-                                        <select name="DefaultTheme" required><option value="light">Light Mode (Terang)</option><option value="dark">Dark Mode (Gelap)</option></select>
+                <!-- VIEW: PENGATURAN / KONFIGURASI -->
+                <div id="view-pengaturan" class="view-section hidden">
+                    
+                    <!-- GRID 2 KOLOM UNTUK FORM KONFIGURASI -->
+                    <div class="settings-grid">
+                        
+                        <!-- KOLOM 1: IDENTITAS APLIKASI -->
+                        <div class="card config-card">
+                            <div class="card-header"><h3><i class="fa-solid fa-building text-primary"></i> Identitas Aplikasi</h3></div>
+                            <div class="card-body">
+                                <form id="form-config-identitas" onsubmit="submitIdentitas(event)">
+                                    <div class="form-grid">
+                                        <div class="input-group">
+                                            <label>Nama Aplikasi</label>
+                                            <input type="text" name="AppName" required placeholder="Cth: SuratApp">
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Nama Instansi</label>
+                                            <input type="text" name="CompanyName" required placeholder="Cth: Bank BPD">
+                                        </div>
                                     </div>
-                                </div>
-                                <div style="background:var(--primary-light); padding:15px; border-radius:12px; font-size:0.85rem; color:var(--text-primary); margin-bottom:15px; border-left: 4px solid var(--primary);">
-                                    <strong>Rekomendasi:</strong> Gunakan logo berformat PNG transparan (aspek rasio persegi) dengan resolusi min 200x200 pixel agar terlihat tajam.
-                                </div>
-                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Terapkan Identitas Baru</button>
-                            </form>
+                                    <div class="input-group">
+                                        <label>URL Logo Aplikasi (Link Gambar)</label>
+                                        <input type="text" name="AppLogo" placeholder="https://...">
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Tema UI Bawaan Default</label>
+                                        <select name="DefaultTheme">
+                                            <option value="light">☀️ Terang (Light Mode)</option>
+                                            <option value="dark">🌙 Gelap (Dark Mode)</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100" style="margin-top: 10px;"><i class="fa-solid fa-save"></i> Simpan Identitas</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- KOLOM 2: FORMAT PENOMORAN -->
+                        <div class="card config-card">
+                            <div class="card-header"><h3><i class="fa-solid fa-hashtag text-warning"></i> Format Penomoran Otomatis</h3></div>
+                            <div class="card-body">
+                                <form id="form-config" onsubmit="submitConfig(event)">
+                                    <div class="form-grid">
+                                        <div class="input-group">
+                                            <label>Format Surat Masuk</label>
+                                            <input type="text" name="FormatSM" required>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Format Surat Keluar</label>
+                                            <input type="text" name="FormatSK" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="input-group">
+                                            <label>Format SPPK</label>
+                                            <input type="text" name="FormatSPPK" required>
+                                        </div>
+                                        <div class="input-group">
+                                            <label>Format PK</label>
+                                            <input type="text" name="FormatPK" required>
+                                        </div>
+                                    </div>
+                                    <div style="background: var(--bg-main); padding: 12px; border-radius: 10px; margin-bottom: 15px;">
+                                        <span style="font-size: 0.7rem; font-weight: 800; color: var(--primary);">PANDUAN VARIABEL:</span>
+                                        <p style="font-size: 0.7rem; margin: 5px 0 0; color: var(--text-secondary);">Gunakan kode ini di dalam format: <strong>{URUT}</strong>, <strong>{JENIS}</strong>, <strong>{CABANG_SMSK}</strong>, <strong>{CABANG_PK}</strong>, <strong>{BULAN_ROMAWI}</strong>, <strong>{TAHUN}</strong>, <strong>{KODE1}</strong></p>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning w-100"><i class="fa-solid fa-save"></i> Simpan Format Penomoran</button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div> <!-- End Settings Grid -->
+
+                    <!-- SHORTCUT MASTER DATA -->
+                    <h3 class="nav-divider" style="margin-top: 25px; margin-bottom: 15px;">Manajemen Data Master</h3>
+                    <div class="master-data-actions">
+                        <div class="stat-card blue" onclick="openModalCabang()">
+                            <div class="stat-icon"><i class="fa-solid fa-code-branch"></i></div>
+                            <div class="stat-details"><h4>Cabang</h4><p>Data Cabang</p></div>
+                        </div>
+                        <div class="stat-card green" onclick="openModalUser()">
+                            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                            <div class="stat-details"><h4>Pengguna</h4><p>Kelola Staf</p></div>
+                        </div>
+                        <div class="stat-card purple" onclick="openModalJenisSurat()">
+                            <div class="stat-icon"><i class="fa-solid fa-tags"></i></div>
+                            <div class="stat-details"><h4>Jenis Surat</h4><p>Kode Klasifikasi</p></div>
+                        </div>
+                        <div class="stat-card orange" onclick="openModalReferensiPK()">
+                            <div class="stat-icon"><i class="fa-solid fa-list"></i></div>
+                            <div class="stat-details"><h4>Referensi PK</h4><p>Kode Golongan</p></div>
                         </div>
                     </div>
 
-                    <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Cabang</h3><button class="btn btn-primary btn-sm" onclick="openModalCabang()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Nama Cabang</th><th>Kode SM/SK</th><th>Kode SPPK/PK</th><th>Aksi</th></tr></thead><tbody id="tbody-cabang"></tbody></table></div></div>
-                    <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Referensi PK</h3><button class="btn btn-primary btn-sm" onclick="openModalReferensiPK()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Kategori</th><th>Kode</th><th>Uraian / Deskripsi</th><th>Aksi</th></tr></thead><tbody id="tbody-referensi-pk"></tbody></table></div></div>
-                    <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Jenis Surat</h3><button class="btn btn-primary btn-sm" onclick="openModalJenisSurat()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Kode</th><th>Nama Klasifikasi</th><th>Uraian / Tujuan</th><th>Aksi</th></tr></thead><tbody id="tbody-jenis-surat"></tbody></table></div></div>
-                    <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Pengguna</h3><button class="btn btn-primary btn-sm" onclick="openModalUser()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Username</th><th>Nama Lengkap</th><th>Role</th><th>Jabatan</th><th>Aksi</th></tr></thead><tbody id="tbody-user"></tbody></table></div></div>
-                    
-                    <div class="card">
-                        <div class="card-header"><h3>Format Dasar Penomoran Sistem</h3></div>
-                        <div class="card-body">
-                            <form onsubmit="submitConfig(event)" id="form-config">
-                                <div class="form-grid">
-                                    <div class="input-group"><label>Format Surat Masuk</label><input type="text" name="FormatSM" required></div>
-                                    <div class="input-group"><label>Format Surat Keluar</label><input type="text" name="FormatSK" required></div>
-                                    <div class="input-group"><label>Format SPPK</label><input type="text" name="FormatSPPK" required></div>
-                                    <div class="input-group"><label>Format PK</label><input type="text" name="FormatPK" required></div>
-                                </div>
-                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan Format Dasar</button>
-                            </form>
+                    <!-- TABEL DATA MASTER (Akan dirender otomatis oleh JS ke sini) -->
+                    <div class="form-grid" style="grid-template-columns: 1fr; gap: 20px;">
+                        <div class="card">
+                            <div class="card-header"><h3>Data Cabang</h3></div>
+                            <div class="table-responsive"><table class="modern-table"><thead><tr><th>Nama Cabang</th><th>Kode SMSK</th><th>Kode PK</th><th>Aksi</th></tr></thead><tbody id="tbody-cabang"></tbody></table></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h3>Data Pengguna (Staf/Admin)</h3></div>
+                            <div class="table-responsive"><table class="modern-table"><thead><tr><th>Username</th><th>Nama Lengkap</th><th>Role</th><th>Jabatan</th><th>Aksi</th></tr></thead><tbody id="tbody-user"></tbody></table></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h3>Data Jenis Surat</h3></div>
+                            <div class="table-responsive"><table class="modern-table"><thead><tr><th>Kode</th><th>Nama Jenis</th><th>Keterangan / Uraian</th><th>Aksi</th></tr></thead><tbody id="tbody-jenis-surat"></tbody></table></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h3>Data Referensi PK</h3></div>
+                            <div class="table-responsive"><table class="modern-table"><thead><tr><th>Kategori</th><th>Kode</th><th>Uraian / Deskripsi</th><th>Aksi</th></tr></thead><tbody id="tbody-referensi-pk"></tbody></table></div>
                         </div>
                     </div>
+
                 </div>
 
             </div>
