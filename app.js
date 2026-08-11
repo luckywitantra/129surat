@@ -501,98 +501,110 @@ function handleLogin(e) {
 }
 
 // ========================================================
-// --- FUNGSI RENDER POPUP DETAIL PROFESIONAL ---
+// --- FUNGSI RENDER POPUP DETAIL ULTRA MODERN ---
 // ========================================================
 function viewDetail(jenis, id) {
     let targetJenis = jenis === 'disposisi' ? 'surat-masuk' : jenis;
     const data = storeData[targetJenis].find(d => d.id === id);
     if (!data) return;
 
-    let title = '';
-    let html = '<div class="detail-grid two-cols">';
+    let headerTitle = '';
+    let headerSubtitle = '';
+    let badgeStatus = data.status || '-';
+
+    let html = '<div class="modern-detail-grid">';
     
-    // Helper untuk membuat blok field detail
-    const addField = (label, value, isFullWidth = false, isHighlight = false) => {
-        const fwClass = isFullWidth ? 'style="grid-column: 1 / -1;"' : '';
-        const hlClass = isHighlight ? 'style="border-left-color: var(--warning); background: var(--warning-light);"' : '';
+    // Fungsi Pembangun Mini-Card dengan Ikon
+    const addCard = (label, value, icon = 'fa-circle-dot', isFull = false, isHighlight = false) => {
+        const fwClass = isFull ? 'full-width' : '';
+        const hlClass = isHighlight ? 'highlight' : '';
         const displayValue = value ? value : '-';
-        html += `<div class="detail-item" ${fwClass} ${hlClass}><div class="detail-label">${label}</div><div class="detail-value">${displayValue}</div></div>`;
+        html += `
+        <div class="modern-detail-card ${fwClass} ${hlClass}">
+            <div class="modern-detail-label"><i class="fa-solid ${icon}"></i> ${label}</div>
+            <div class="modern-detail-value">${displayValue}</div>
+        </div>`;
     };
 
     if (jenis === 'surat-masuk' || jenis === 'disposisi') {
-        title = 'Detail Surat Masuk';
-        addField('Nomor Surat', data.nomor);
-        addField('Tanggal Diterima', data.tanggal);
-        addField('Jenis Surat', data.jenisSurat);
-        addField('Sifat Surat', data.sifatSurat || 'Biasa');
+        headerTitle = data.nomor;
+        headerSubtitle = data.jenisSurat === 'D1' ? 'Pengajuan Kredit Baru (D1)' : 'Dokumen Surat Masuk';
+        
+        addCard('Tanggal Diterima', data.tanggal, 'fa-calendar-day');
+        addCard('Sifat Surat', data.sifatSurat || 'Biasa', 'fa-bolt');
         
         if(data.jenisSurat === 'D1') {
-            addField('Nama Debitur', data.pengirim, true);
-            addField('Nilai Plafon', formatRupiah(data.plafon));
-            addField('Jangka Waktu', data.jangkaWaktu ? data.jangkaWaktu + ' Bulan' : '-');
-            addField('Jenis Kredit', data.jenisKredit, true);
+            addCard('Nama Debitur', data.pengirim, 'fa-user-tie', true);
+            addCard('Nilai Plafon', formatRupiah(data.plafon), 'fa-money-bill-wave', false, true);
+            addCard('Jangka Waktu', data.jangkaWaktu ? data.jangkaWaktu + ' Bulan' : '-', 'fa-stopwatch');
+            addCard('Jenis Kredit', data.jenisKredit, 'fa-credit-card', true);
         } else {
-            addField('Instansi Pengirim', data.pengirim, true);
-            addField('Perihal', data.perihal, true);
+            addCard('Instansi Pengirim', data.pengirim, 'fa-building', true);
+            addCard('Perihal', data.perihal, 'fa-envelope-open-text', true);
         }
-        
-        addField('Cabang', data.cabang);
-        addField('Status Saat Ini', `<span class="badge badge-primary">${data.status}</span>`);
+        addCard('Cabang Tujuan', data.cabang, 'fa-code-branch');
         
         if (data.disposisiKe) {
-            addField('Didisposisikan Kepada', data.disposisiKe, false, true);
-            addField('Pesan Instruksi', data.pesanDisposisi, false, true);
+            addCard('Ditugaskan Kepada', data.disposisiKe, 'fa-user-check', true, true);
+            addCard('Pesan Instruksi', data.pesanDisposisi, 'fa-comment-dots', true, true);
         }
     } else if (jenis === 'surat-keluar') {
-        title = 'Detail Surat Keluar';
-        addField('Nomor Surat Keluar', data.nomor);
-        addField('Tanggal Surat', data.tanggal);
-        addField('Instansi Tujuan', data.tujuan, true);
-        addField('Perihal', data.perihal, true);
-        addField('Jenis Surat', data.jenisSurat);
-        addField('Penandatangan', data.penandatangan);
-        addField('Status', `<span class="badge badge-primary">${data.status}</span>`);
-        addField('Cabang', data.cabang);
+        headerTitle = data.nomor;
+        headerSubtitle = 'Dokumen Surat Keluar';
+        addCard('Tanggal Surat', data.tanggal, 'fa-calendar-day');
+        addCard('Sifat Surat', data.sifat, 'fa-bolt');
+        addCard('Instansi Tujuan', data.tujuan, 'fa-building', true);
+        addCard('Perihal', data.perihal, 'fa-envelope-open-text', true);
+        addCard('Penandatangan', data.penandatangan, 'fa-pen-nib');
+        addCard('Cabang Asal', data.cabang, 'fa-code-branch');
     } else if (jenis === 'sppk') {
-        title = 'Detail SPPK';
-        addField('Nomor SPPK', data.nomorSPPK, true);
-        addField('Tanggal Diterbitkan', data.tanggal);
-        addField('Cabang Pemroses', data.cabang);
-        addField('Nama Debitur', data.debitur, true);
-        addField('Plafon Disetujui', formatRupiah(data.plafon));
-        addField('Jangka Waktu', data.jangkaWaktu ? data.jangkaWaktu + ' Bulan' : '-');
-        addField('Jenis Kredit', data.jenisKredit);
-        addField('Status', `<span class="badge badge-primary">${data.status}</span>`);
+        headerTitle = data.nomorSPPK;
+        headerSubtitle = 'Surat Pemberitahuan Persetujuan Kredit (SPPK)';
+        addCard('Tanggal Diterbitkan', data.tanggal, 'fa-calendar-day');
+        addCard('Cabang Pemroses', data.cabang, 'fa-code-branch');
+        addCard('Nama Debitur', data.debitur, 'fa-user-tie', true);
+        addCard('Plafon Disetujui', formatRupiah(data.plafon), 'fa-money-bill-wave', false, true);
+        addCard('Jangka Waktu', data.jangkaWaktu ? data.jangkaWaktu + ' Bulan' : '-', 'fa-stopwatch');
+        addCard('Jenis Kredit', data.jenisKredit, 'fa-credit-card', true);
     } else if (jenis === 'pk') {
-        title = 'Detail Perjanjian Kredit (PK)';
-        addField('Nomor PK', data.nomorPK || 'Draft/Pending', true);
-        addField('No. SPPK Induk', data.sppkInduk);
-        addField('Tanggal PK', data.tanggal);
-        addField('Nama Debitur', data.debitur, true);
-        addField('Plafon Kredit', formatRupiah(data.plafon));
-        addField('Status', `<span class="badge badge-primary">${data.status}</span>`);
-        addField('Cabang', data.cabang);
+        headerTitle = data.nomorPK || 'DRAFT / PENDING';
+        headerSubtitle = 'Perjanjian Kredit (PK)';
+        addCard('No. SPPK Induk', data.sppkInduk, 'fa-file-contract', true);
+        addCard('Tanggal PK', data.tanggal, 'fa-calendar-day');
+        addCard('Cabang Pemroses', data.cabang, 'fa-code-branch');
+        addCard('Nama Debitur', data.debitur, 'fa-user-tie', true);
+        addCard('Plafon Kredit', formatRupiah(data.plafon), 'fa-money-bill-wave', true, true);
     } else if (jenis === 'arsip') {
-        title = 'Detail Arsip Sistem';
-        addField('Kategori Dokumen', `<span class="badge badge-primary">${data.kategori}</span>`);
-        addField('Tanggal Rekam', data.tanggal);
-        addField('Nomor Dokumen', data.nomor, true);
-        addField('Keterangan / Deskripsi', data.deskripsi, true);
-        addField('Cabang Asal', data.cabang);
+        headerTitle = data.nomor;
+        headerSubtitle = `Arsip Sistem: ${data.kategori}`;
+        addCard('Tanggal Rekam', data.tanggal, 'fa-calendar-day');
+        addCard('Cabang Asal', data.cabang, 'fa-code-branch');
+        addCard('Keterangan / Deskripsi', data.deskripsi, 'fa-quote-left', true);
     }
 
     html += '</div>';
     
-    // Tambahkan Tombol Lihat Lampiran jika ada di bagian paling bawah grid
+    // Tampilan Tombol File PDF Ekstra Menonjol
     if (data.fileUrl) {
-        html += `<div style="margin-top: 20px; text-align: center;">
-                    <a href="${data.fileUrl}" target="_blank" class="btn btn-outline w-100" style="border-color: var(--danger); color: var(--danger);">
-                        <i class="fa-solid fa-file-pdf"></i> Buka File Dokumen Asli
-                    </a>
-                 </div>`;
+        html += `
+        <div style="margin-top: 25px; padding-top: 25px; border-top: 1px dashed var(--border-color); text-align: center;">
+            <a href="${data.fileUrl}" target="_blank" class="btn w-100" style="background: var(--danger-light); color: var(--danger); font-size: 1.05rem; padding: 15px; border-radius: 16px; box-shadow: 0 5px 15px rgba(220, 38, 38, 0.1);">
+                <i class="fa-solid fa-file-pdf"></i> Lihat Dokumen Asli
+            </a>
+        </div>`;
     }
 
-    document.getElementById('detail-title').innerHTML = `<i class="fa-solid fa-file-lines text-primary"></i> ${title}`;
+    // Pembangun Blok Header Dinamis Berwarna Sesuai Status
+    let sBadgeColor = badgeStatus.toLowerCase().includes('belum') ? 'var(--danger)' : (badgeStatus.toLowerCase().includes('diproses') ? 'var(--warning)' : 'var(--success)');
+    
+    let headerHtml = `
+    <div class="detail-header-hero">
+        <span class="badge" style="background: ${sBadgeColor}; border:none; margin-bottom: 12px; display: inline-block;">${badgeStatus}</span>
+        <p style="margin: 0 0 5px; color: rgba(255,255,255,0.8); font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">${headerSubtitle}</p>
+        <h2>${headerTitle}</h2>
+    </div>`;
+
+    document.getElementById('detail-header-dynamic').innerHTML = headerHtml;
     document.getElementById('detail-content').innerHTML = html;
     openModal('modal-detail');
 }
