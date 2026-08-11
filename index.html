@@ -203,10 +203,22 @@
                 <h2 id="login-app-name">SuratApp</h2>
                 <p id="login-company-name">Sistem Manajemen Terpadu</p>
             </div>
+            <!-- FORM LOGIN TERBARU -->
             <form id="login-form" onsubmit="handleLogin(event)">
-                <div class="input-group"><label>Username</label><input type="text" id="login-username" required value="admin"></div>
-                <div class="input-group"><label>Role</label><select id="login-role"><option value="Admin">Admin</option><option value="Pejabat">Pejabat</option><option value="Staf">Staf</option></select></div>
-                <button type="submit" class="btn btn-primary w-100">Masuk Aplikasi <i class="fa-solid fa-arrow-right"></i></button>
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" required placeholder="MASUKKAN USERNAME" autocomplete="off" style="font-weight: 800; letter-spacing: 1px;">
+                </div>
+                <div class="input-group" style="position: relative;">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required placeholder="MASUKKAN KATA SANDI" autocomplete="off" style="padding-right: 45px; font-weight: 800; letter-spacing: 1px;">
+                    <span onclick="togglePassword()" style="position: absolute; right: 15px; top: 38px; cursor: pointer; color: var(--primary); padding: 5px;">
+                        <i class="fa-solid fa-eye" id="eye-icon"></i>
+                    </span>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" style="margin-top: 10px; padding: 14px; font-size: 1.05rem;">
+                    <i class="fa-solid fa-shield-halved"></i> Masuk Sistem
+                </button>
             </form>
         </div>
     </div>
