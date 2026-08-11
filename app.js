@@ -350,19 +350,7 @@ function openModalUser() {
     openModal('modal-user'); 
 }
 
-// Ganti bagian "else if (jenis === 'user')" di dalam fungsi editData()
-    } else if (jenis === 'user') {
-        const data = globalDataUser.find(d => d.id === id); if(!data) return;
-        document.getElementById('idUser').value = data.id; 
-        document.getElementById('namaLengkap').value = data.nama; 
-        document.getElementById('usernameLogin').value = data.username; 
-        document.getElementById('roleUser').value = data.role; 
-        document.getElementById('jabatanUser').value = data.jabatan; 
-        document.getElementById('passwordUser').value = data.password || ''; // Isi dengan password lama
-        document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit User'; 
-        openModal('modal-user');
-    }
-
+   
 function openModalReferensiPK() { document.getElementById('idRefPK').value = ''; document.getElementById('kodeRefPK').value = ''; document.getElementById('descRefPK').value = ''; document.getElementById('title-referensi-pk').innerHTML = '<i class="fa-solid fa-list text-primary"></i> Tambah Referensi PK'; openModal('modal-referensi-pk'); }
 function openModalSM() { document.getElementById('idSuratMasuk').value=''; document.getElementById('title-sm').innerHTML='<i class="fa-solid fa-inbox text-primary"></i> Tambah Surat Masuk'; toggleD1Fields(); openModal('modal-surat-masuk'); }
 function openModalSK() { document.getElementById('idSuratKeluar').value=''; document.getElementById('title-sk').innerHTML='<i class="fa-solid fa-paper-plane text-success"></i> Buat Surat Keluar'; openModal('modal-surat-keluar'); }
@@ -411,9 +399,17 @@ function editData(jenis, id) {
     } else if (jenis === 'jenis-surat') {
         const data = globalDataJenisSurat.find(d => d.id === id); if(!data) return;
         document.getElementById('idJenisSurat').value = data.id; document.getElementById('kodeJenis').value = data.kode; document.getElementById('namaJenis').value = data.nama; document.getElementById('uraianJenis').value = data.uraian; document.getElementById('title-jenis-surat').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Jenis Surat'; openModal('modal-jenis-surat');
-    } else if (jenis === 'user') {
+     } else if (jenis === 'user') {
         const data = globalDataUser.find(d => d.id === id); if(!data) return;
-        document.getElementById('idUser').value = data.id; document.getElementById('namaLengkap').value = data.nama; document.getElementById('usernameLogin').value = data.username; document.getElementById('roleUser').value = data.role; document.getElementById('jabatanUser').value = data.jabatan; document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit User'; openModal('modal-user');
+        document.getElementById('idUser').value = data.id; 
+        document.getElementById('namaLengkap').value = data.nama; 
+        document.getElementById('usernameLogin').value = data.username; 
+        document.getElementById('roleUser').value = data.role; 
+        document.getElementById('jabatanUser').value = data.jabatan; 
+        document.getElementById('passwordUser').value = data.password || ''; // Isi dengan password lama
+        document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit User'; 
+        openModal('modal-user');
+    
     } else if (jenis === 'referensi-pk') {
         const data = globalDataRefPK.find(d => d.id === id); if(!data) return;
         document.getElementById('idRefPK').value = data.id; document.getElementById('katRefPK').value = data.kategori; document.getElementById('kodeRefPK').value = data.kode; document.getElementById('descRefPK').value = data.uraian; document.getElementById('title-referensi-pk').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Referensi PK'; openModal('modal-referensi-pk');
