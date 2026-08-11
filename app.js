@@ -67,21 +67,41 @@ async function loadConfig() {
     try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getConfig' }) }); const result = await response.json(); if (result.status === 'success') { const form = document.getElementById('form-config'); for(let key in result.data) { if(form.elements[key]) form.elements[key].value = result.data[key]; } } } catch (e) { console.error(e); }
 }
 
+// GANTI FUNGSI INI
 function buildFilterUI(jenis) {
     const container = document.getElementById(`filter-${jenis}`); if(!container) return;
+    
+    // Tambahan dropdown filter khusus
+    let extraFilter = '';
+    if (jenis === 'surat-masuk' || jenis === 'surat-keluar') {
+        extraFilter = `<select id="fil-jenis-surat-${jenis}" class="search-input sel-jenissurat-filter" onchange="applyFilter('${jenis}')"><option value="">Semua Jenis Surat</option></select>`;
+    } else if (jenis === 'arsip') {
+        extraFilter = `<select id="fil-kategori-arsip" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Semua Kategori</option><option value="Surat Masuk">Surat Masuk</option><option value="Surat Keluar">Surat Keluar</option><option value="SPPK">SPPK</option><option value="PK">PK</option></select>`;
+    }
+
     container.innerHTML = `
         <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
             <input type="text" id="search-${jenis}" class="search-input" placeholder="Cari nama / nomor..." onkeyup="applyFilter('${jenis}')" style="flex:1; min-width:200px;">
-            <select id="sort-${jenis}" class="search-input" onchange="applyFilter('${jenis}')">
-                <option value="newest">Tanggal (Baru - Lama)</option><option value="oldest">Tanggal (Lama - Baru)</option>
-                <option value="az">Abjad (A - Z)</option><option value="za">Abjad (Z - A)</option>
-            </select>
+            ${extraFilter}
+            <select id="sort-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="newest">Tgl: Baru-Lama</option><option value="oldest">Tgl: Lama-Baru</option><option value="az">Abjad: A-Z</option><option value="za">Abjad: Z-A</option></select>
             <select id="fil-cabang-${jenis}" class="search-input sel-cabang-filter" onchange="applyFilter('${jenis}')"><option value="">Semua Cabang</option></select>
-            <select id="fil-tahun-${jenis}" class="search-input" onchange="applyFilter('${jenis}')">
-                <option value="">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option>
-            </select>
+            <select id="fil-bulan-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Semua Bulan</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">Mei</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Agu</option><option value="09">Sep</option><option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option></select>
+            <select id="fil-tahun-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select>
         </div>`;
+    
     populateCabangFilters();
+    if (jenis === 'surat-masuk' || jenis === 'surat-keluar') populateJenisSuratFilters();
+}
+
+// TAMBAHKAN FUNGSI INI DI BAWAH buildFilterUI
+function populateJenisSuratFilters() {
+    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getJenisSurat' }) }).then(res => res.json()).then(result => { 
+        if(result.status === 'success') { 
+            let options = '<option value="">Semua Jenis Surat</option>';
+            result.data.forEach(j => options += `<option value="${j.kode}">${j.kode} - ${j.nama}</option>`); 
+            document.querySelectorAll('.sel-jenissurat-filter').forEach(el => { el.innerHTML = options; }); 
+        } 
+    });
 }
 
 function populateCabangFilters() {
@@ -112,6 +132,7 @@ async function loadDataTabel(jenis) {
     } catch (error) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger);">Gagal memuat.</td></tr>`; }
 }
 
+// GANTI FUNGSI INI
 function applyFilter(jenis) {
     if(!storeData[jenis]) return;
     let data = [...storeData[jenis]]; const tbody = document.getElementById(`tbody-${jenis}`); if(!tbody) return;
@@ -121,21 +142,32 @@ function applyFilter(jenis) {
         const sortVal = document.getElementById(`sort-${jenis}`) ? document.getElementById(`sort-${jenis}`).value : 'newest';
         const cabVal = document.getElementById(`fil-cabang-${jenis}`) ? document.getElementById(`fil-cabang-${jenis}`).value : '';
         const thnVal = document.getElementById(`fil-tahun-${jenis}`) ? document.getElementById(`fil-tahun-${jenis}`).value : '';
+        const blnVal = document.getElementById(`fil-bulan-${jenis}`) ? document.getElementById(`fil-bulan-${jenis}`).value : '';
+        const jnsVal = document.getElementById(`fil-jenis-surat-${jenis}`) ? document.getElementById(`fil-jenis-surat-${jenis}`).value : '';
+        const katVal = document.getElementById(`fil-kategori-arsip`) ? document.getElementById(`fil-kategori-arsip`).value : '';
 
         data = data.filter(item => {
-            let textMatch = true, cabMatch = true, thnMatch = true;
-            let textTarget = (item.nomor||item.nomorSPPK||item.nomorPK||'') + " " + (item.pengirim||item.tujuan||item.debitur||item.deskripsi||'');
-            if(searchVal) textMatch = textTarget.toLowerCase().includes(searchVal);
-            if(cabVal && item.cabang) cabMatch = item.cabang.includes(cabVal) || item.cabang === cabVal;
-            if(item.tanggal && thnVal) { const d = new Date(item.tanggal); thnMatch = d.getFullYear().toString() === thnVal; }
-            return textMatch && cabMatch && thnMatch;
+            let mTxt = true, mCb = true, mThn = true, mBln = true, mJns = true, mKat = true;
+            let target = (item.nomor||item.nomorSPPK||item.nomorPK||'') + " " + (item.pengirim||item.tujuan||item.debitur||item.deskripsi||'');
+            
+            if(searchVal) mTxt = target.toLowerCase().includes(searchVal);
+            if(cabVal && item.cabang) mCb = item.cabang.includes(cabVal) || item.cabang === cabVal;
+            if(jnsVal && item.jenisSurat) mJns = item.jenisSurat === jnsVal;
+            if(katVal && item.kategori) mKat = item.kategori === katVal;
+
+            if(item.tanggal) { 
+                const d = new Date(item.tanggal); 
+                if(thnVal) mThn = d.getFullYear().toString() === thnVal; 
+                if(blnVal) mBln = ("0"+(d.getMonth()+1)).slice(-2) === blnVal;
+            }
+            return mTxt && mCb && mThn && mBln && mJns && mKat;
         });
 
         data.sort((a, b) => {
             let da = new Date(a.tanggal), db = new Date(b.tanggal);
-            let textA = (a.pengirim||a.tujuan||a.debitur||a.deskripsi||'').toLowerCase(); let textB = (b.pengirim||b.tujuan||b.debitur||b.deskripsi||'').toLowerCase();
+            let txtA = (a.pengirim||a.tujuan||a.debitur||a.deskripsi||'').toLowerCase(); let txtB = (b.pengirim||b.tujuan||b.debitur||b.deskripsi||'').toLowerCase();
             if(sortVal === 'newest') return db - da; if(sortVal === 'oldest') return da - db;
-            if(sortVal === 'az') return textA.localeCompare(textB); if(sortVal === 'za') return textB.localeCompare(textA);
+            if(sortVal === 'az') return txtA.localeCompare(textB); if(sortVal === 'za') return textB.localeCompare(textA);
         });
     }
 
@@ -220,8 +252,33 @@ function openModalPK() { document.getElementById('idPK').value=''; document.getE
 // ==========================================
 // --- EDIT ROUTER ---
 // ==========================================
+// GANTI FUNGSI INI
 function editData(jenis, id) {
-    if(jenis === 'cabang') {
+    if (jenis === 'sppk') {
+        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
+        // VALIDASI: SPPK yang sudah di-PK tidak boleh diedit
+        if (data.status === 'Sudah PK') {
+            showAlert('Akses Ditolak', 'SPPK ini sudah diterbitkan PK. Harap batalkan / hapus PK terlebih dahulu untuk mengubah data SPPK ini.', 'error');
+            return;
+        }
+        document.getElementById('idSPPK').value = data.id; document.querySelector('#modal-sppk select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodePK; document.querySelector('#modal-sppk input[name="tanggalSPPK"]').value = data.tanggal; document.querySelector('#modal-sppk input[name="namaDebitur"]').value = data.debitur; document.querySelector('#modal-sppk input[name="plafon"]').value = data.plafon; document.querySelector('#modal-sppk input[name="jangkaWaktu"]').value = data.jangkaWaktu; document.querySelector('#modal-sppk select[name="jenisKredit"]').value = data.jenisKredit;
+        document.getElementById('title-sppk').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit SPPK'; openModal('modal-sppk');
+    } 
+    // ... [Hanya timpa bagian 'sppk' saja atau paste fungsi lain yang tidak berubah]
+    else if(jenis === 'surat-masuk') {
+        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
+        document.getElementById('idSuratMasuk').value = data.id; document.querySelector('#modal-surat-masuk select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodePK; document.querySelector('#modal-surat-masuk input[name="tanggalSurat"]').value = data.tanggal; document.querySelector('#modal-surat-masuk select[name="jenisSurat"]').value = data.jenisSurat; toggleD1Fields();
+        if(data.jenisSurat === 'D1') { document.getElementById('sm-nama-debitur').value = data.pengirim; document.getElementById('sm-plafon').value = data.plafon; document.getElementById('sm-jangkawaktu').value = data.jangkaWaktu; document.getElementById('sm-jeniskredit').value = data.jenisKredit; } else { document.getElementById('sm-pengirim').value = data.pengirim; document.getElementById('sm-perihal').value = data.perihal; }
+        document.getElementById('title-sm').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit Surat Masuk'; openModal('modal-surat-masuk');
+    } else if (jenis === 'surat-keluar') {
+        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
+        document.getElementById('idSuratKeluar').value = data.id; document.querySelector('#modal-surat-keluar select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodePK; document.querySelector('#modal-surat-keluar select[name="jenisSurat"]').value = data.jenisSurat; document.querySelector('#modal-surat-keluar input[name="tujuan"]').value = data.tujuan; document.querySelector('#modal-surat-keluar input[name="perihal"]').value = data.perihal;
+        document.getElementById('title-sk').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit Surat Keluar'; openModal('modal-surat-keluar');
+    } else if (jenis === 'pk') {
+        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
+        document.getElementById('idPK').value = data.id; populatePKForm(); setTimeout(() => { document.querySelector('#modal-pk select[name="nomorSPPK"]').value = data.sppkInduk; document.getElementById('pk-nama-debitur').value = data.debitur; document.getElementById('pk-plafon').value = data.plafon; document.querySelector('#modal-pk select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodePK; }, 500);
+        document.getElementById('title-pk').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit PK'; openModal('modal-pk');
+    } else if (jenis === 'cabang') {
         const data = storeData['cabang'].find(d => d.id === id); if(!data) return;
         document.getElementById('idCabang').value = data.id; document.getElementById('namaCabang').value = data.nama; document.getElementById('kodeSMSK').value = data.kodeSM; document.getElementById('kodePK').value = data.kodePK; document.getElementById('title-cabang').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Cabang'; openModal('modal-cabang');
     } else if (jenis === 'jenis-surat') {
@@ -233,27 +290,20 @@ function editData(jenis, id) {
     } else if (jenis === 'referensi-pk') {
         const data = globalDataRefPK.find(d => d.id === id); if(!data) return;
         document.getElementById('idRefPK').value = data.id; document.getElementById('katRefPK').value = data.kategori; document.getElementById('kodeRefPK').value = data.kode; document.getElementById('descRefPK').value = data.uraian; document.getElementById('title-referensi-pk').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Referensi PK'; openModal('modal-referensi-pk');
-    } else if(jenis === 'surat-masuk') {
-        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
-        document.getElementById('idSuratMasuk').value = data.id; document.querySelector('#modal-surat-masuk select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodePK; document.querySelector('#modal-surat-masuk input[name="tanggalSurat"]').value = data.tanggal; document.querySelector('#modal-surat-masuk select[name="jenisSurat"]').value = data.jenisSurat; toggleD1Fields();
-        if(data.jenisSurat === 'D1') { document.getElementById('sm-nama-debitur').value = data.pengirim; document.getElementById('sm-plafon').value = data.plafon; document.getElementById('sm-jangkawaktu').value = data.jangkaWaktu; document.getElementById('sm-jeniskredit').value = data.jenisKredit; } else { document.getElementById('sm-pengirim').value = data.pengirim; document.getElementById('sm-perihal').value = data.perihal; }
-        document.getElementById('title-sm').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit Surat Masuk'; openModal('modal-surat-masuk');
-    } else if (jenis === 'surat-keluar') {
-        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
-        document.getElementById('idSuratKeluar').value = data.id; document.querySelector('#modal-surat-keluar select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodePK; document.querySelector('#modal-surat-keluar select[name="jenisSurat"]').value = data.jenisSurat; document.querySelector('#modal-surat-keluar input[name="tujuan"]').value = data.tujuan; document.querySelector('#modal-surat-keluar input[name="perihal"]').value = data.perihal;
-        document.getElementById('title-sk').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit Surat Keluar'; openModal('modal-surat-keluar');
-    } else if (jenis === 'sppk') {
-        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
-        document.getElementById('idSPPK').value = data.id; document.querySelector('#modal-sppk select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodePK; document.querySelector('#modal-sppk input[name="tanggalSPPK"]').value = data.tanggal; document.querySelector('#modal-sppk input[name="namaDebitur"]').value = data.debitur; document.querySelector('#modal-sppk input[name="plafon"]').value = data.plafon; document.querySelector('#modal-sppk input[name="jangkaWaktu"]').value = data.jangkaWaktu; document.querySelector('#modal-sppk select[name="jenisKredit"]').value = data.jenisKredit;
-        document.getElementById('title-sppk').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit SPPK'; openModal('modal-sppk');
-    } else if (jenis === 'pk') {
-        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
-        document.getElementById('idPK').value = data.id; populatePKForm(); setTimeout(() => { document.querySelector('#modal-pk select[name="nomorSPPK"]').value = data.sppkInduk; document.getElementById('pk-nama-debitur').value = data.debitur; document.getElementById('pk-plafon').value = data.plafon; document.querySelector('#modal-pk select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodePK; }, 500);
-        document.getElementById('title-pk').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit PK'; openModal('modal-pk');
     }
 }
 
+// GANTI FUNGSI INI
 async function deleteData(actionName, id, tableRef) {
+    // VALIDASI: SPPK yang sudah di-PK tidak boleh dihapus
+    if (tableRef === 'sppk') {
+        const dataSPPK = storeData['sppk'].find(d => d.id === id);
+        if (dataSPPK && dataSPPK.status === 'Sudah PK') {
+            showAlert('Akses Ditolak', 'SPPK ini sudah diterbitkan PK. Harap batalkan / hapus PK terlebih dahulu untuk menghapus data SPPK ini.', 'error');
+            return;
+        }
+    }
+
     if(!confirm("Yakin ingin menghapus data ini?")) return;
     try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: actionName, payload: { id: id } }) }); const result = await response.json(); if (result.status === 'success') { showAlert('Dihapus', 'Data berhasil dihapus.', 'success'); loadDataTabel(tableRef); loadDashboardStats(); } else showAlert('Gagal', result.message, 'error'); } catch (e) { showAlert('Error', 'Gagal koneksi.', 'error'); }
 }
