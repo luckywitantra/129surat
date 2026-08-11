@@ -741,3 +741,58 @@ html { font-size: 14px; } /* Mengecilkan ukuran standar dari 16px ke 14px */
     }
     .card-header .btn-primary i { font-size: 1.25rem !important; }
 }
+
+/* ========================================================
+   TATA LETAK MENU KONFIGURASI / SETTINGS (RESPONSIF)
+   ======================================================== */
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Default 1 kolom untuk HP */
+    gap: 20px;
+    max-width: 1200px; /* Membatasi agar form tidak selebar layar penuh di PC raksasa */
+    margin: 0 auto; /* Posisi di tengah */
+}
+
+/* Di layar Laptop/PC, otomatis belah menjadi 2 kolom Kiri Kanan */
+@media (min-width: 992px) {
+    .settings-grid {
+        grid-template-columns: 1fr 1fr;
+        align-items: start; /* Mencegah kolom melar tingginya jika sebelah lebih panjang */
+    }
+}
+
+/* Merampingkan inputan khusus di dalam kartu konfigurasi */
+.config-card { margin-bottom: 0; }
+.config-card .input-group { margin-bottom: 12px; }
+.config-card .input-group input, 
+.config-card .input-group select {
+    padding: 10px 14px; 
+    font-size: 0.85rem;
+}
+
+/* Kartu Shortcut Master Data (Ramping & Pendek) */
+.master-data-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+    max-width: 1200px;
+    margin-left: auto; margin-right: auto;
+}
+.master-data-actions .stat-card {
+    padding: 12px 18px;
+    gap: 12px;
+    min-height: auto;
+}
+.master-data-actions .stat-card::after { display: none; } /* Hilangkan bulatan besar di background agar ringkas */
+.master-data-actions .stat-icon {
+    width: 38px; height: 38px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+}
+.master-data-actions .stat-details h4 {
+    margin: 0; font-size: 1rem; color: white;
+}
+.master-data-actions .stat-details p {
+    font-size: 0.75rem; margin: 0; font-weight: 600; opacity: 0.9;
+}
