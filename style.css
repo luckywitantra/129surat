@@ -615,73 +615,72 @@ p { color: var(--text-secondary); line-height: 1.6; }
 }
 
 /* ========================================================
-   POPUP DETAIL PROFESIONAL & TOMBOL CLOSE PRESISI
+   REVAMP POPUP DETAIL: ULTRA MODERN & EYE-CATCHING
    ======================================================== */
-/* Tombol Silang Presisi Tinggi */
-.btn-close-modal {
-    position: absolute;
-    top: 20px;
-    right: 25px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--bg-card);
-    border: 2px solid var(--border-color);
-    color: var(--text-secondary);
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    z-index: 10;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+.detail-header-hero {
+    padding: 40px 30px 25px;
+    background: var(--primary-gradient);
+    color: white;
+    position: relative;
+    border-radius: 30px 30px 0 0;
 }
-.btn-close-modal:hover {
-    background: var(--danger-light);
-    color: var(--danger);
-    border-color: var(--danger-light);
-    transform: rotate(90deg) scale(1.1);
+/* Efek Cahaya Lingkaran di Sudut Kanan Atas Header */
+.detail-header-hero::after {
+    content: ''; position: absolute; right: -30px; top: -50px; width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); border-radius: 50%;
 }
+.detail-header-hero h2 { margin: 0 0 10px; font-size: 1.7rem; color: white; letter-spacing: 0.5px; z-index: 2; position: relative; }
 
-/* Grid Tampilan Detail */
-.detail-grid {
+/* Tata Letak Kartu Detail */
+.modern-detail-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
 }
-.detail-item {
-    background: rgba(0, 0, 0, 0.02);
-    padding: 15px 18px;
-    border-radius: 14px;
-    border-left: 4px solid var(--primary);
+.modern-detail-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
     transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
-[data-theme="dark"] .detail-item { background: rgba(255, 255, 255, 0.03); }
-.detail-item:hover {
-    background: var(--primary-light);
-    transform: translateX(5px);
+.modern-detail-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+    border-color: var(--primary-light);
 }
-.detail-label {
+.modern-detail-label {
     font-size: 0.75rem;
+    color: var(--text-secondary);
     text-transform: uppercase;
     font-weight: 900;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
     letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 8px;
 }
-.detail-value {
-    font-size: 0.95rem;
+.modern-detail-label i { color: var(--primary); font-size: 0.95rem; }
+.modern-detail-value {
+    font-size: 1.05rem;
     font-weight: 800;
     color: var(--text-primary);
     word-break: break-word;
-    line-height: 1.5;
 }
 
-@media (min-width: 600px) {
-    .detail-grid.two-cols {
-        grid-template-columns: 1fr 1fr;
-    }
+/* Modifier untuk Kartu Penting (Plafon/Disposisi) */
+.modern-detail-card.highlight {
+    background: var(--warning-light);
+    border-color: #FCD34D;
+}
+.modern-detail-card.highlight .modern-detail-label i { color: var(--warning); }
+.modern-detail-card.full-width { grid-column: 1 / -1; }
+
+@media (max-width: 768px) {
+    .modern-detail-grid { grid-template-columns: 1fr; gap: 12px; }
+    .detail-header-hero { padding: 35px 25px 20px; }
+    .detail-header-hero h2 { font-size: 1.4rem; }
 }
 
 /* ========================================================
