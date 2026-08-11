@@ -340,7 +340,29 @@ function showTimeline(debitur) {
 
 function openModalCabang() { document.getElementById('idCabang').value = ''; document.getElementById('namaCabang').value = ''; document.getElementById('kodeSMSK').value = ''; document.getElementById('kodePK').value = ''; document.getElementById('title-cabang').innerHTML = '<i class="fa-solid fa-code-branch text-primary"></i> Tambah Cabang'; openModal('modal-cabang'); }
 function openModalJenisSurat() { document.getElementById('idJenisSurat').value = ''; document.getElementById('kodeJenis').value = ''; document.getElementById('namaJenis').value = ''; document.getElementById('uraianJenis').value = ''; document.getElementById('title-jenis-surat').innerHTML = '<i class="fa-solid fa-tags text-primary"></i> Tambah Jenis Surat'; openModal('modal-jenis-surat'); }
-function openModalUser() { document.getElementById('idUser').value = ''; document.getElementById('namaLengkap').value = ''; document.getElementById('usernameLogin').value = ''; document.getElementById('jabatanUser').value = ''; document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-user-plus text-primary"></i> Tambah User'; openModal('modal-user'); }
+function openModalUser() { 
+    document.getElementById('idUser').value = ''; 
+    document.getElementById('namaLengkap').value = ''; 
+    document.getElementById('usernameLogin').value = ''; 
+    document.getElementById('jabatanUser').value = ''; 
+    document.getElementById('passwordUser').value = ''; // Reset password
+    document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-user-plus text-primary"></i> Tambah User'; 
+    openModal('modal-user'); 
+}
+
+// Ganti bagian "else if (jenis === 'user')" di dalam fungsi editData()
+    } else if (jenis === 'user') {
+        const data = globalDataUser.find(d => d.id === id); if(!data) return;
+        document.getElementById('idUser').value = data.id; 
+        document.getElementById('namaLengkap').value = data.nama; 
+        document.getElementById('usernameLogin').value = data.username; 
+        document.getElementById('roleUser').value = data.role; 
+        document.getElementById('jabatanUser').value = data.jabatan; 
+        document.getElementById('passwordUser').value = data.password || ''; // Isi dengan password lama
+        document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit User'; 
+        openModal('modal-user');
+    }
+
 function openModalReferensiPK() { document.getElementById('idRefPK').value = ''; document.getElementById('kodeRefPK').value = ''; document.getElementById('descRefPK').value = ''; document.getElementById('title-referensi-pk').innerHTML = '<i class="fa-solid fa-list text-primary"></i> Tambah Referensi PK'; openModal('modal-referensi-pk'); }
 function openModalSM() { document.getElementById('idSuratMasuk').value=''; document.getElementById('title-sm').innerHTML='<i class="fa-solid fa-inbox text-primary"></i> Tambah Surat Masuk'; toggleD1Fields(); openModal('modal-surat-masuk'); }
 function openModalSK() { document.getElementById('idSuratKeluar').value=''; document.getElementById('title-sk').innerHTML='<i class="fa-solid fa-paper-plane text-success"></i> Buat Surat Keluar'; openModal('modal-surat-keluar'); }
@@ -435,7 +457,19 @@ async function sendFormData(action, payload, formEl, modalId, jenisMenuRef) {
 
 async function submitCabang(e) { e.preventDefault(); const f = e.target; sendFormData('saveCabang', { id: f.elements['idCabang'].value, nama: f.elements['namaCabang'].value, kodeSM: f.elements['kodeSMSK'].value, kodePK: f.elements['kodePK'].value }, f, 'modal-cabang', 'cabang'); }
 async function submitJenisSurat(e) { e.preventDefault(); const f = e.target; sendFormData('saveJenisSurat', { id: f.elements['idJenisSurat'].value, kode: f.elements['kodeJenis'].value, nama: f.elements['namaJenis'].value, uraian: f.elements['uraianJenis'].value }, f, 'modal-jenis-surat', 'jenis-surat'); }
-async function submitUser(e) { e.preventDefault(); const f = e.target; sendFormData('saveUser', { id: f.elements['idUser'].value, nama: f.elements['namaLengkap'].value, username: f.elements['usernameLogin'].value, role: f.elements['roleUser'].value, jabatan: f.elements['jabatanUser'].value }, f, 'modal-user', 'user'); }
+// Jangan lupa tambahkan parameter password ke dalam payload
+async function submitUser(e) { 
+    e.preventDefault(); const f = e.target; 
+    sendFormData('saveUser', { 
+        id: f.elements['idUser'].value, 
+        nama: f.elements['namaLengkap'].value, 
+        username: f.elements['usernameLogin'].value, 
+        role: f.elements['roleUser'].value, 
+        jabatan: f.elements['jabatanUser'].value,
+        password: f.elements['passwordUser'].value // Dikirim ke backend
+    }, f, 'modal-user', 'user'); 
+}
+
 async function submitReferensiPK(e) { e.preventDefault(); const f = e.target; sendFormData('saveReferensiPK', { id: f.elements['idRefPK'].value, kategori: f.elements['katRefPK'].value, kode: f.elements['kodeRefPK'].value, uraian: f.elements['descRefPK'].value }, f, 'modal-referensi-pk', 'referensi-pk'); }
 async function submitConfig(e) { e.preventDefault(); const form = e.target; const payload = {}; Array.from(form.elements).forEach(el => { if(el.name) payload[el.name] = el.value; }); sendFormData('saveConfig', payload, form, null, null); setTimeout(loadConfig, 1000); }
 async function submitIdentitas(e) { e.preventDefault(); const form = e.target; const payload = {}; Array.from(form.elements).forEach(el => { if(el.name) payload[el.name] = el.value; }); sendFormData('saveConfig', payload, form, null, null); setTimeout(loadConfig, 1000); }
@@ -490,6 +524,7 @@ function togglePassword() {
 }
 
 // LOGIKA LOGIN TERBARU (OTENTIKASI DATABASE)
+// LOGIKA LOGIN TERBARU (OTENTIKASI KETAT DATABASE)
 async function handleLogin(e) {
     e.preventDefault(); 
     const btn = e.target.querySelector('button[type="submit"]');
@@ -510,10 +545,8 @@ async function handleLogin(e) {
             const validUser = globalDataUser.find(u => u.username === inputUser);
             
             if (validUser) {
-                // CATATAN PENTING: Karena database Google Sheet Anda sebelumnya tidak memiliki kolom Password, 
-                // untuk sementara sistem ini mengizinkan login jika Password sama dengan Username, 
-                // atau menggunakan sandi bawaan pabrik '123456'.
-                if (inputPass === inputUser || inputPass === '123456') {
+                // KUNCI KEAMANAN: Membandingkan inputan dengan password asli dari database
+                if (inputPass === validUser.password) {
                     
                     currentUser = { username: validUser.username, role: validUser.role, nama: validUser.nama }; 
                     document.getElementById('user-name').innerText = currentUser.username; 
