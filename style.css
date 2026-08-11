@@ -454,95 +454,88 @@ p { color: var(--text-secondary); line-height: 1.6; }
    REVOLUSI UX MOBILE: TABEL MENJADI KARTU (CARD-BASED LIST)
    ======================================================== */
 @media (max-width: 768px) {
-    /* 1. Hilangkan header tabel karena tidak relevan di mode Kartu */
-    .modern-table thead { 
-        display: none; 
-    }
-    
-    /* 2. Ubah display tabel menjadi blok (menumpuk ke bawah) */
+    /* 1. Hilangkan header tabel & atur display menjadi blok/kartu */
+    .modern-table thead { display: none; }
     .modern-table, .modern-table tbody, .modern-table tr, .modern-table td { 
         display: block; 
         width: 100%; 
     }
     
-    /* 3. Desain Baris (tr) menjadi Kartu yang Eye-Catching */
+    /* 2. Desain Baris (tr) Utama sebagai Kartu */
     .modern-table tr {
-        background: var(--bg-card);
-        margin-bottom: 20px;
-        border-radius: 20px;
-        padding: 20px;
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.08); /* Bayangan lembut */
+        background: var(--bg-card) !important;
+        margin-bottom: 16px;
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.06);
         border: 1px solid var(--border-color);
         position: relative;
-        transition: transform 0.3s ease;
     }
     
-    .modern-table tr:active {
-        transform: scale(0.98); /* Efek ditekan */
-    }
-    
-    /* 4. Desain Sel (td) / Isi Konten */
+    /* 3. Reset warna latar dan padding tiap sel (td) agar bersih */
     .modern-table td {
-        padding: 6px 0;
+        background: transparent !important;
+        padding: 5px 0 !important;
         text-align: left;
         font-size: 0.9rem;
         border: none !important;
-        color: var(--text-secondary);
-        display: flex;
-        flex-direction: column;
+        color: var(--text-primary);
     }
     
-    /* 5. Kolom 1 (Nomor Dokumen) diubah menjadi JUDUL KARTU */
+    /* 4. Kolom 1 (Nomor Dokumen) -> Jadi Judul Kartu */
     .modern-table td:first-child {
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         color: var(--primary);
-        padding-bottom: 12px;
+        padding-bottom: 12px !important;
         margin-bottom: 10px;
         border-bottom: 1px dashed var(--border-color) !important;
-        padding-right: 90px; /* Memberi ruang agar teks tidak menabrak Badge Status */
+        padding-right: 120px !important; /* Mencegah teks tertutup badge status */
     }
+    .modern-table td:first-child strong { font-weight: 800; }
     
-    .modern-table td:first-child strong {
-        font-weight: 900;
-        letter-spacing: 0.5px;
-    }
-    
-    /* 6. Kolom Status (Kedua dari Bawah) dilayangkan ke POJOK KANAN ATAS */
+    /* 5. Kolom Status (Kedua dari Bawah) -> Mengapung di Pojok Kanan Atas */
     .modern-table td:nth-last-child(2) {
         position: absolute;
-        top: 20px;
-        right: 20px;
-        padding: 0;
-        text-align: right;
+        top: 16px;
+        right: 16px;
+        padding: 0 !important;
+        width: auto; /* Mencegah badge melar seperti blok pink sebelumnya */
     }
-    
     .modern-table td:nth-last-child(2) .badge {
-        font-size: 0.7rem;
-        padding: 6px 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        display: inline-block;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     }
     
-    /* 7. Kolom Aksi (Paling Bawah) disejajarkan rapi di BAWAH KARTU */
+    /* 6. Kolom Aksi (Tombol Edit/Hapus Paling Bawah) */
     .modern-table td:last-child {
         display: flex;
-        flex-direction: row; /* Berjejer ke samping */
+        flex-direction: row;
         justify-content: flex-end;
-        gap: 15px;
-        margin-top: 15px;
-        padding-top: 15px;
+        gap: 12px;
+        margin-top: 12px;
+        padding-top: 12px !important;
         border-top: 1px dashed var(--border-color) !important;
     }
     
-    .modern-table td:last-child .btn-icon {
-        width: 42px;
-        height: 42px;
-        font-size: 1.2rem;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    /* Mencegah background abu-abu saat kartu disentuh di HP */
+    .modern-table tbody tr:hover td { 
+        background: transparent !important; 
+        transform: none !important; 
     }
 
-    /* Penyesuaian agar hover di HP tidak mengubah background secara aneh */
-    .modern-table tbody tr:hover td { 
-        background: transparent; 
-        transform: none; 
+    /* 7. Perbaikan Posisi Tombol "+" (FAB) agar tidak terlalu bawah */
+    .card-header .btn-primary {
+        position: fixed; 
+        bottom: 35px; /* Dinaikkan sedikit agar tidak menabrak batas bawah HP */
+        right: 25px; 
+        width: 60px; 
+        height: 60px; 
+        border-radius: 50%;
+        font-size: 0; 
+        padding: 0; 
+        z-index: 999; 
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+        background: var(--primary-gradient);
     }
+    .card-header .btn-primary i { font-size: 1.5rem; margin: 0; color: white; }
 }
