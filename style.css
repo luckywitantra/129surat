@@ -76,17 +76,22 @@ p { color: var(--text-secondary); line-height: 1.6; }
     min-height: 100vh; 
     width: 100vw;
     display: flex; 
-    justify-content: center; 
-    align-items: center; 
+    /* Dihilangkan: justify-content & align-items dari sini agar layout main tidak hancur ke tengah */
     background: var(--bg-main);
 }
+
 #login-screen, #init-screen { 
     position: fixed; 
     top: 0; left: 0; 
     z-index: 9999; 
     background: var(--bg-gradient);
     flex-direction: column;
+    justify-content: center; /* Ditambahkan khusus di sini */
+    align-items: center; /* Ditambahkan khusus di sini */
+    width: 100%;
+    height: 100vh;
 }
+
 .login-card { 
     background: var(--bg-card); 
     backdrop-filter: blur(20px); 
@@ -103,6 +108,8 @@ p { color: var(--text-secondary); line-height: 1.6; }
 .login-header i { margin-bottom: 20px; color: var(--primary); }
 .login-header h2 { font-size: 1.8rem; margin-bottom: 5px; }
 .login-header p { font-size: 0.9rem; margin-bottom: 30px; }
+
+/* ... (Biarkan kode ke bawah tetap sama mulai dari tombol bouncy dll) */
 
 /* Tombol Membal (Bouncy) */
 .btn {
