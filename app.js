@@ -1,9 +1,13 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbxj7uQSzJJLESto_xbCuQAw1iDEn-1_jNX68MlwLjtnmJqFpTOtsq2eOpBDZjpz648Y/exec';
 
-let currentUser = null; let currentTheme = localStorage.getItem('theme') || 'light';
-let storeData = { 'surat-masuk': [], 'surat-keluar': [], 'sppk': [], 'pk': [], 'arsip': [], 'cabang': [], 'jenis-surat': [], 'referensi-pk': [], 'user': [] };
-document.documentElement.setAttribute('data-theme', currentTheme);
+let currentUser = null; 
+let currentTheme = localStorage.getItem('theme') || 'light';
+let storeData = { 'surat-masuk': [], 'surat-keluar': [], 'sppk': [], 'pk': [], 'arsip': [], 'cabang': [] };
+let globalDataJenisSurat = []; 
+let globalDataUser = []; 
+let globalDataRefPK = [];
 
+document.documentElement.setAttribute('data-theme', currentTheme);
 document.addEventListener('DOMContentLoaded', () => { initSystem(); });
 
 async function initSystem() {
@@ -12,7 +16,7 @@ async function initSystem() {
         const result = await response.json();
         if(result.status === 'success') { setTimeout(() => { document.getElementById('init-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); }, 800); } 
         else showAlert('Error Sistem', result.message, 'error');
-    } catch (error) { setTimeout(() => { document.getElementById('init-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); showAlert('Offline', 'Tanpa koneksi backend.', 'info'); }, 1000); }
+    } catch (error) { setTimeout(() => { document.getElementById('init-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); showAlert('Mode Offline', 'UI berjalan tanpa koneksi backend.', 'info'); }, 1000); }
 }
 
 function toggleTheme() { currentTheme = currentTheme === 'light' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', currentTheme); localStorage.setItem('theme', currentTheme); document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; }
@@ -27,7 +31,7 @@ function showAlert(title, message, type) {
     document.getElementById('custom-alert').classList.remove('hidden');
 }
 
-// TOGGLE D1
+// TOGGLE D1 FIELDS (SURAT MASUK)
 function toggleD1Fields() {
     const jenis = document.getElementById('select-jenis-sm').value;
     const normal = document.getElementById('sm-normal-fields'), d1 = document.getElementById('sm-d1-fields');
@@ -52,25 +56,38 @@ function navigate(page) {
     else if (page === 'pengaturan') { loadDataTabel('cabang'); loadDataTabel('referensi-pk'); loadDataTabel('jenis-surat'); loadDataTabel('user'); loadConfig(); }
     else if (['surat-masuk', 'surat-keluar', 'sppk', 'pk', 'arsip'].includes(page)) { buildFilterUI(page); loadDataTabel(page); }
     
-    const titles = { 'dashboard': 'Dashboard', 'surat-masuk': 'Surat Masuk', 'surat-keluar': 'Surat Keluar', 'sppk': 'Data SPPK', 'pk': 'Data PK', 'arsip': 'Arsip Dokumen', 'laporan': 'Laporan', 'pengaturan': 'Pengaturan Sistem' }; document.getElementById('page-title').innerText = titles[page] || 'Aplikasi';
+    const titles = { 'dashboard': 'Dashboard', 'surat-masuk': 'Surat Masuk', 'surat-keluar': 'Surat Keluar', 'sppk': 'Data SPPK', 'pk': 'Data PK', 'arsip': 'Arsip Dokumen', 'laporan': 'Pusat Laporan', 'pengaturan': 'Pengaturan Sistem' }; document.getElementById('page-title').innerText = titles[page] || 'Aplikasi';
 }
 
-async function loadConfig() { try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getConfig' }) }); const result = await response.json(); if (result.status === 'success') { const form = document.getElementById('form-config'); for(let key in result.data) { if(form.elements[key]) form.elements[key].value = result.data[key]; } } } catch (e) { console.error(e); } }
-async function loadDashboardStats() { try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboardStats' }) }); const result = await response.json(); if (result.status === 'success') { document.getElementById('stat-sm').innerText = result.data.sm; document.getElementById('stat-sk').innerText = result.data.sk; document.getElementById('stat-sppk').innerText = result.data.sppk; document.getElementById('stat-pk').innerText = result.data.pk; } } catch (e) { console.error(e); } }
+async function loadDashboardStats() {
+    try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboardStats' }) }); const result = await response.json(); if (result.status === 'success') { document.getElementById('stat-sm').innerText = result.data.sm; document.getElementById('stat-sk').innerText = result.data.sk; document.getElementById('stat-sppk').innerText = result.data.sppk; document.getElementById('stat-pk').innerText = result.data.pk; } } catch (e) { console.error(e); }
+}
+
+async function loadConfig() {
+    try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getConfig' }) }); const result = await response.json(); if (result.status === 'success') { const form = document.getElementById('form-config'); for(let key in result.data) { if(form.elements[key]) form.elements[key].value = result.data[key]; } } } catch (e) { console.error(e); }
+}
 
 function buildFilterUI(jenis) {
     const container = document.getElementById(`filter-${jenis}`); if(!container) return;
     container.innerHTML = `
         <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
-            <input type="text" id="search-${jenis}" class="search-input" placeholder="Cari..." onkeyup="applyFilter('${jenis}')" style="flex:1; min-width:200px;">
-            <select id="sort-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="newest">Tgl: Baru-Lama</option><option value="oldest">Tgl: Lama-Baru</option><option value="az">Abjad: A-Z</option><option value="za">Abjad: Z-A</option></select>
+            <input type="text" id="search-${jenis}" class="search-input" placeholder="Cari nama / nomor..." onkeyup="applyFilter('${jenis}')" style="flex:1; min-width:200px;">
+            <select id="sort-${jenis}" class="search-input" onchange="applyFilter('${jenis}')">
+                <option value="newest">Tanggal (Baru - Lama)</option><option value="oldest">Tanggal (Lama - Baru)</option>
+                <option value="az">Abjad (A - Z)</option><option value="za">Abjad (Z - A)</option>
+            </select>
             <select id="fil-cabang-${jenis}" class="search-input sel-cabang-filter" onchange="applyFilter('${jenis}')"><option value="">Semua Cabang</option></select>
-            <select id="fil-bulan-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Semua Bulan</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">Mei</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Agu</option><option value="09">Sep</option><option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option></select>
-            <select id="fil-tahun-${jenis}" class="search-input" onchange="applyFilter('${jenis}')"><option value="">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select>
+            <select id="fil-tahun-${jenis}" class="search-input" onchange="applyFilter('${jenis}')">
+                <option value="">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option>
+            </select>
         </div>`;
     populateCabangFilters();
 }
-function populateCabangFilters() { let ops = '<option value="">Semua Cabang</option>'; storeData['cabang'].forEach(c => ops += `<option value="${c.kodeSM}">${c.nama}</option>`); document.querySelectorAll('.sel-cabang-filter').forEach(el => { el.innerHTML = ops; }); }
+
+function populateCabangFilters() {
+    let options = '<option value="">Semua Cabang</option>'; storeData['cabang'].forEach(c => options += `<option value="${c.kodeSM}">${c.nama}</option>`);
+    document.querySelectorAll('.sel-cabang-filter').forEach(el => { el.innerHTML = options; });
+}
 
 async function loadDataTabel(jenis) {
     const tbody = document.getElementById(`tbody-${jenis}`); if(!tbody) return;
@@ -80,50 +97,71 @@ async function loadDataTabel(jenis) {
     if (jenis === 'surat-masuk') act = 'getSuratMasuk'; else if (jenis === 'surat-keluar') act = 'getSuratKeluar'; else if (jenis === 'sppk') act = 'getSPPK'; else if (jenis === 'pk') act = 'getPK'; else if (jenis === 'arsip') act = 'getArsip'; else if (jenis === 'jenis-surat') act = 'getJenisSurat'; else if (jenis === 'user') act = 'getUser'; else if (jenis === 'referensi-pk') act = 'getReferensiPK'; else if (jenis === 'cabang') act = 'getCabang';
 
     try {
-        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: act }) }); const result = await response.json();
-        if (result.status === 'success') { storeData[jenis] = result.data; if(jenis === 'cabang') populateCabangFilters(); if(jenis === 'pk') populatePKForm(); applyFilter(jenis); } 
-        else tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger);">${result.message}</td></tr>`;
+        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: act }) });
+        const result = await response.json();
+        if (result.status === 'success') {
+            if(['surat-masuk','surat-keluar','sppk','pk','arsip','cabang'].includes(jenis)) {
+                storeData[jenis] = result.data;
+                if(jenis === 'cabang') populateCabangFilters();
+                if(jenis === 'pk') populatePKForm();
+                applyFilter(jenis); 
+            } else {
+                renderHTMLTabel(jenis, result.data, tbody);
+            }
+        } else tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger);">${result.message}</td></tr>`;
     } catch (error) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger);">Gagal memuat.</td></tr>`; }
 }
 
 function applyFilter(jenis) {
-    if(!storeData[jenis]) return; let data = [...storeData[jenis]]; const tbody = document.getElementById(`tbody-${jenis}`); if(!tbody) return;
+    if(!storeData[jenis]) return;
+    let data = [...storeData[jenis]]; const tbody = document.getElementById(`tbody-${jenis}`); if(!tbody) return;
 
     if(['surat-masuk','surat-keluar','sppk','pk','arsip'].includes(jenis)) {
-        const sv = document.getElementById(`search-${jenis}`) ? document.getElementById(`search-${jenis}`).value.toLowerCase() : '';
-        const srt = document.getElementById(`sort-${jenis}`) ? document.getElementById(`sort-${jenis}`).value : 'newest';
-        const cb = document.getElementById(`fil-cabang-${jenis}`) ? document.getElementById(`fil-cabang-${jenis}`).value : '';
-        const bln = document.getElementById(`fil-bulan-${jenis}`) ? document.getElementById(`fil-bulan-${jenis}`).value : '';
-        const thn = document.getElementById(`fil-tahun-${jenis}`) ? document.getElementById(`fil-tahun-${jenis}`).value : '';
+        const searchVal = document.getElementById(`search-${jenis}`) ? document.getElementById(`search-${jenis}`).value.toLowerCase() : '';
+        const sortVal = document.getElementById(`sort-${jenis}`) ? document.getElementById(`sort-${jenis}`).value : 'newest';
+        const cabVal = document.getElementById(`fil-cabang-${jenis}`) ? document.getElementById(`fil-cabang-${jenis}`).value : '';
+        const thnVal = document.getElementById(`fil-tahun-${jenis}`) ? document.getElementById(`fil-tahun-${jenis}`).value : '';
 
         data = data.filter(item => {
-            let mTxt = true, mCb = true, mBln = true, mThn = true;
-            let target = (item.nomor||item.nomorSPPK||item.nomorPK||'') + " " + (item.pengirim||item.tujuan||item.debitur||item.deskripsi||'');
-            if(sv) mTxt = target.toLowerCase().includes(sv);
-            if(cb && item.cabang) mCb = item.cabang.includes(cb);
-            if(item.tanggal) { const d = new Date(item.tanggal); if(bln) mBln = ("0"+(d.getMonth()+1)).slice(-2) === bln; if(thn) mThn = d.getFullYear().toString() === thn; }
-            return mTxt && mCb && mBln && mThn;
+            let textMatch = true, cabMatch = true, thnMatch = true;
+            let textTarget = (item.nomor||item.nomorSPPK||item.nomorPK||'') + " " + (item.pengirim||item.tujuan||item.debitur||item.deskripsi||'');
+            if(searchVal) textMatch = textTarget.toLowerCase().includes(searchVal);
+            if(cabVal && item.cabang) cabMatch = item.cabang.includes(cabVal) || item.cabang === cabVal;
+            if(item.tanggal && thnVal) { const d = new Date(item.tanggal); thnMatch = d.getFullYear().toString() === thnVal; }
+            return textMatch && cabMatch && thnMatch;
         });
 
         data.sort((a, b) => {
             let da = new Date(a.tanggal), db = new Date(b.tanggal);
-            let txtA = (a.pengirim||a.tujuan||a.debitur||a.deskripsi||'').toLowerCase(); let txtB = (b.pengirim||b.tujuan||b.debitur||b.deskripsi||'').toLowerCase();
-            if(srt === 'newest') return db - da; if(srt === 'oldest') return da - db;
-            if(srt === 'az') return txtA.localeCompare(txtB); if(srt === 'za') return txtB.localeCompare(txtA);
+            let textA = (a.pengirim||a.tujuan||a.debitur||a.deskripsi||'').toLowerCase(); let textB = (b.pengirim||b.tujuan||b.debitur||b.deskripsi||'').toLowerCase();
+            if(sortVal === 'newest') return db - da; if(sortVal === 'oldest') return da - db;
+            if(sortVal === 'az') return textA.localeCompare(textB); if(sortVal === 'za') return textB.localeCompare(textA);
         });
     }
 
-    let html = '';
-    if (data.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding:20px;">Belum ada data tersedia.</td></tr>`; return; }
+    renderHTMLTabel(jenis, data, tbody);
+}
 
-    data.forEach(item => {
+function renderHTMLTabel(jenis, dataArray, tbody) {
+    if (!dataArray || dataArray.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding:20px;">Belum ada data tersedia.</td></tr>`; return; }
+    let html = '';
+    
+    if(jenis === 'jenis-surat') globalDataJenisSurat = [...dataArray]; 
+    if(jenis === 'user') globalDataUser = [...dataArray]; 
+    if(jenis === 'referensi-pk') globalDataRefPK = [...dataArray];
+
+    dataArray.forEach(item => {
         let fileBtn = item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="btn-icon"><i class="fa-solid fa-file-pdf text-danger"></i></a>` : `<span style="opacity:0.3; font-size:0.8rem;">-No File-</span>`;
-        let s = (item.status || "").toLowerCase(); let badge = 'warning'; if(s.includes('selesai')||s.includes('terkirim')||s.includes('sudah')||s.includes('aktif')) badge = 'success'; if(s.includes('belum')) badge = 'danger'; let statusBadge = `<span class="badge badge-${badge}">${item.status || '-'}</span>`;
+        let s = (item.status || "").toLowerCase(); let badge = 'warning';
+        if(s.includes('selesai') || s.includes('terkirim') || s.includes('sudah') || s.includes('aktif')) badge = 'success'; 
+        if(s.includes('belum')) badge = 'danger'; 
+        let statusBadge = `<span class="badge badge-${badge}">${item.status || '-'}</span>`;
 
         let editBtn = `<button class="btn-icon text-primary" title="Edit" onclick="editData('${jenis}', '${item.id}')"><i class="fa-solid fa-edit"></i></button>`;
         let delBtn = `<button class="btn-icon text-danger" title="Hapus" onclick="deleteData('delete${jenis.replace('-','')}', '${item.id}', '${jenis}')"><i class="fa-solid fa-trash"></i></button>`;
         let timeBtn = item.debitur ? `<button class="btn-icon text-info" title="SLA Timeline" onclick="showTimeline('${item.debitur}')"><i class="fa-solid fa-clock-rotate-left"></i></button>` : '';
 
+        // Tampilan Baris Tabel
         if (jenis === 'cabang') html += `<tr><td><strong>${item.nama}</strong></td><td>${item.kodeSM}</td><td>${item.kodePK}</td><td>${editBtn} ${delBtn}</td></tr>`;
         else if (jenis === 'jenis-surat') html += `<tr><td><strong>${item.kode}</strong></td><td>${item.nama}</td><td>${item.uraian}</td><td>${editBtn} ${delBtn}</td></tr>`;
         else if (jenis === 'user') html += `<tr><td><strong>${item.username}</strong></td><td>${item.nama}</td><td>${item.role}</td><td>${item.jabatan}</td><td>${editBtn} ${delBtn}</td></tr>`;
@@ -142,16 +180,29 @@ function showTimeline(debitur) {
     let tHtml = '';
     const smD1 = storeData['surat-masuk'].filter(d => d.jenisSurat === 'D1' && d.pengirim === debitur);
     smD1.forEach(d => { tHtml += `<div class="timeline-item"><div class="timeline-date">${d.tanggal}</div><div class="timeline-title">Surat Masuk (Pengajuan Kredit)</div><div class="timeline-desc">No: ${d.nomor}<br>Plafon: Rp ${parseFloat(d.plafon||0).toLocaleString('id-ID')}</div></div>`; });
+    
     const sppk = storeData['sppk'].filter(d => d.debitur === debitur);
     sppk.forEach(d => { tHtml += `<div class="timeline-item"><div class="timeline-date">${d.tanggal}</div><div class="timeline-title">SPPK Diterbitkan</div><div class="timeline-desc">No: ${d.nomorSPPK}<br>Plafon Disetujui: Rp ${parseFloat(d.plafon||0).toLocaleString('id-ID')}</div></div>`; });
+    
     const pk = storeData['pk'].filter(d => d.debitur === debitur);
     pk.forEach(d => { tHtml += `<div class="timeline-item"><div class="timeline-date">${d.tanggal}</div><div class="timeline-title">Perjanjian Kredit (PK) Selesai</div><div class="timeline-desc">No PK: ${d.nomorPK}<br>Status: Aktif</div></div>`; });
 
     if(tHtml === '') tHtml = '<p>Tidak ada riwayat untuk debitur ini.</p>';
-    document.getElementById('timeline-debitur').innerText = `Riwayat SLA: ${debitur}`; document.getElementById('timeline-content').innerHTML = tHtml; openModal('modal-timeline');
+    document.getElementById('timeline-debitur').innerText = `Riwayat SLA: ${debitur}`; 
+    document.getElementById('timeline-content').innerHTML = tHtml; 
+    openModal('modal-timeline');
 }
 
-// MODALS & FORMS
+// ==========================================
+// --- MODAL FORM OPENERS (MASTER DATA) ---
+// ==========================================
+
+function openModalCabang() { document.getElementById('idCabang').value = ''; document.getElementById('namaCabang').value = ''; document.getElementById('kodeSMSK').value = ''; document.getElementById('kodePK').value = ''; document.getElementById('title-cabang').innerHTML = '<i class="fa-solid fa-code-branch text-primary"></i> Tambah Cabang'; openModal('modal-cabang'); }
+function openModalJenisSurat() { document.getElementById('idJenisSurat').value = ''; document.getElementById('kodeJenis').value = ''; document.getElementById('namaJenis').value = ''; document.getElementById('uraianJenis').value = ''; document.getElementById('title-jenis-surat').innerHTML = '<i class="fa-solid fa-tags text-primary"></i> Tambah Jenis Surat'; openModal('modal-jenis-surat'); }
+function openModalUser() { document.getElementById('idUser').value = ''; document.getElementById('namaLengkap').value = ''; document.getElementById('usernameLogin').value = ''; document.getElementById('jabatanUser').value = ''; document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-user-plus text-primary"></i> Tambah User'; openModal('modal-user'); }
+function openModalReferensiPK() { document.getElementById('idRefPK').value = ''; document.getElementById('kodeRefPK').value = ''; document.getElementById('descRefPK').value = ''; document.getElementById('title-referensi-pk').innerHTML = '<i class="fa-solid fa-list text-primary"></i> Tambah Referensi PK'; openModal('modal-referensi-pk'); }
+
+// TRANSAKSI
 function openModalSM() { document.getElementById('idSuratMasuk').value=''; document.getElementById('title-sm').innerHTML='<i class="fa-solid fa-inbox text-primary"></i> Tambah Surat Masuk'; toggleD1Fields(); openModal('modal-surat-masuk'); }
 function openModalSK() { document.getElementById('idSuratKeluar').value=''; document.getElementById('title-sk').innerHTML='<i class="fa-solid fa-paper-plane text-success"></i> Buat Surat Keluar'; openModal('modal-surat-keluar'); }
 function openModalSPPK() { 
@@ -159,64 +210,94 @@ function openModalSPPK() {
     let ops = '<option value="">-- Manual / Pilih Sumber (D1) --</option>'; storeData['surat-masuk'].filter(d => d.jenisSurat==='D1').forEach(d => { ops += `<option value="${d.pengirim}">${d.nomor} - ${d.pengirim}</option>`; }); document.getElementById('sppk-sumber-d1').innerHTML = ops;
     openModal('modal-sppk'); 
 }
+
 function autofillSPPK() {
     const deb = document.getElementById('sppk-sumber-d1').value; const data = storeData['surat-masuk'].find(d => d.jenisSurat==='D1' && d.pengirim===deb);
     if(data) { document.getElementById('sppk-debitur').value = data.pengirim; document.getElementById('sppk-plafon').value = data.plafon; document.getElementById('sppk-jangkawaktu').value = data.jangkaWaktu; document.getElementById('sppk-jeniskredit').value = data.jenisKredit; }
 }
-
 function openModalPK() { document.getElementById('idPK').value=''; document.getElementById('title-pk').innerHTML='<i class="fa-solid fa-file-signature text-orange"></i> Terbitkan PK Baru'; populatePKForm(); openModal('modal-pk'); }
 
+// ==========================================
+// --- EDIT ROUTER ---
+// ==========================================
 function editData(jenis, id) {
-    const data = storeData[jenis].find(d => d.id === id); if(!data) return;
-    if(jenis === 'surat-masuk') {
+    if(jenis === 'cabang') {
+        const data = storeData['cabang'].find(d => d.id === id); if(!data) return;
+        document.getElementById('idCabang').value = data.id; document.getElementById('namaCabang').value = data.nama; document.getElementById('kodeSMSK').value = data.kodeSM; document.getElementById('kodePK').value = data.kodePK; document.getElementById('title-cabang').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Cabang'; openModal('modal-cabang');
+    } else if (jenis === 'jenis-surat') {
+        const data = globalDataJenisSurat.find(d => d.id === id); if(!data) return;
+        document.getElementById('idJenisSurat').value = data.id; document.getElementById('kodeJenis').value = data.kode; document.getElementById('namaJenis').value = data.nama; document.getElementById('uraianJenis').value = data.uraian; document.getElementById('title-jenis-surat').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Jenis Surat'; openModal('modal-jenis-surat');
+    } else if (jenis === 'user') {
+        const data = globalDataUser.find(d => d.id === id); if(!data) return;
+        document.getElementById('idUser').value = data.id; document.getElementById('namaLengkap').value = data.nama; document.getElementById('usernameLogin').value = data.username; document.getElementById('roleUser').value = data.role; document.getElementById('jabatanUser').value = data.jabatan; document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit User'; openModal('modal-user');
+    } else if (jenis === 'referensi-pk') {
+        const data = globalDataRefPK.find(d => d.id === id); if(!data) return;
+        document.getElementById('idRefPK').value = data.id; document.getElementById('katRefPK').value = data.kategori; document.getElementById('kodeRefPK').value = data.kode; document.getElementById('descRefPK').value = data.uraian; document.getElementById('title-referensi-pk').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Referensi PK'; openModal('modal-referensi-pk');
+    } else if(jenis === 'surat-masuk') {
+        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
         document.getElementById('idSuratMasuk').value = data.id; document.querySelector('#modal-surat-masuk select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodePK; document.querySelector('#modal-surat-masuk input[name="tanggalSurat"]').value = data.tanggal; document.querySelector('#modal-surat-masuk select[name="jenisSurat"]').value = data.jenisSurat; toggleD1Fields();
         if(data.jenisSurat === 'D1') { document.getElementById('sm-nama-debitur').value = data.pengirim; document.getElementById('sm-plafon').value = data.plafon; document.getElementById('sm-jangkawaktu').value = data.jangkaWaktu; document.getElementById('sm-jeniskredit').value = data.jenisKredit; } else { document.getElementById('sm-pengirim').value = data.pengirim; document.getElementById('sm-perihal').value = data.perihal; }
         document.getElementById('title-sm').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit Surat Masuk'; openModal('modal-surat-masuk');
     } else if (jenis === 'surat-keluar') {
+        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
         document.getElementById('idSuratKeluar').value = data.id; document.querySelector('#modal-surat-keluar select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodeSM===data.cabang)?.kodePK; document.querySelector('#modal-surat-keluar select[name="jenisSurat"]').value = data.jenisSurat; document.querySelector('#modal-surat-keluar input[name="tujuan"]').value = data.tujuan; document.querySelector('#modal-surat-keluar input[name="perihal"]').value = data.perihal;
         document.getElementById('title-sk').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit Surat Keluar'; openModal('modal-surat-keluar');
     } else if (jenis === 'sppk') {
+        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
         document.getElementById('idSPPK').value = data.id; document.querySelector('#modal-sppk select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodePK; document.querySelector('#modal-sppk input[name="tanggalSPPK"]').value = data.tanggal; document.querySelector('#modal-sppk input[name="namaDebitur"]').value = data.debitur; document.querySelector('#modal-sppk input[name="plafon"]').value = data.plafon; document.querySelector('#modal-sppk input[name="jangkaWaktu"]').value = data.jangkaWaktu; document.querySelector('#modal-sppk select[name="jenisKredit"]').value = data.jenisKredit;
         document.getElementById('title-sppk').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit SPPK'; openModal('modal-sppk');
     } else if (jenis === 'pk') {
+        const data = storeData[jenis].find(d => d.id === id); if(!data) return;
         document.getElementById('idPK').value = data.id; populatePKForm(); setTimeout(() => { document.querySelector('#modal-pk select[name="nomorSPPK"]').value = data.sppkInduk; document.getElementById('pk-nama-debitur').value = data.debitur; document.getElementById('pk-plafon').value = data.plafon; document.querySelector('#modal-pk select[name="pilihCabang"]').value = storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodeSM+"|"+storeData['cabang'].find(c=>c.kodePK===data.cabang)?.kodePK; }, 500);
         document.getElementById('title-pk').innerHTML='<i class="fa-solid fa-edit text-primary"></i> Edit PK'; openModal('modal-pk');
-    } else if (jenis === 'cabang') editCabang(id); else if (jenis === 'jenis-surat') editJenisSurat(id); else if (jenis === 'referensi-pk') editReferensiPK(id); else if (jenis === 'user') editUser(id);
+    }
 }
 
-async function deleteData(actionName, id, tableRef) { if(!confirm("Yakin ingin menghapus data ini?")) return; try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: actionName, payload: { id: id } }) }); const result = await response.json(); if (result.status === 'success') { showAlert('Dihapus', 'Data berhasil dihapus.', 'success'); loadDataTabel(tableRef); loadDashboardStats(); } else showAlert('Gagal', result.message, 'error'); } catch (e) { showAlert('Error', 'Gagal koneksi.', 'error'); } }
+async function deleteData(actionName, id, tableRef) {
+    if(!confirm("Yakin ingin menghapus data ini?")) return;
+    try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: actionName, payload: { id: id } }) }); const result = await response.json(); if (result.status === 'success') { showAlert('Dihapus', 'Data berhasil dihapus.', 'success'); loadDataTabel(tableRef); loadDashboardStats(); } else showAlert('Gagal', result.message, 'error'); } catch (e) { showAlert('Error', 'Gagal koneksi.', 'error'); }
+}
 
-// FORM SUBMISSIONS
+// ==========================================
+// --- FORM SUBMITTERS ---
+// ==========================================
+
 const getBase64 = (file) => new Promise((resolve, reject) => { if (!file) return resolve(null); const r = new FileReader(); r.readAsDataURL(file); r.onload = () => resolve({ mimeType: file.type, filename: file.name, base64Data: r.result.split(',')[1] }); r.onerror = e => reject(e); });
-async function sendFormData(action, payload, formEl, modalId, jenisMenuRef) { const btn = formEl.querySelector('button[type="submit"]'); const originalBtnHTML = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...'; btn.disabled = true; try { const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: action, payload: payload }) }); const result = await response.json(); if (result.status === 'success') { if(modalId) closeModal(modalId); showAlert('Berhasil', result.message, 'success'); if(modalId) formEl.reset(); if(jenisMenuRef) loadDataTabel(jenisMenuRef); if(jenisMenuRef && !['user','jenis-surat','referensi-pk','cabang'].includes(jenisMenuRef)) loadDashboardStats(); } else showAlert('Gagal', result.message, 'error'); } catch (error) { showAlert('Koneksi Gagal', 'Gagal mengirim data.', 'error'); } finally { btn.innerHTML = originalBtnHTML; btn.disabled = false; } }
 
-async function submitSuratMasuk(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); const isD1 = f.elements['jenisSurat'].value === 'D1'; sendFormData('upsertSuratMasuk', { id: f.elements['idSuratMasuk'].value, cabangSMSK: c[0], jenisSurat: f.elements['jenisSurat'].value, tanggalSurat: f.elements['tanggalSurat'].value, pengirim: isD1 ? f.elements['namaDebiturD1'].value : f.elements['pengirim'].value, sifatSurat: f.elements['sifatSurat'].value, perihal: isD1 ? 'Pengajuan Kredit Baru' : f.elements['perihal'].value, plafon: isD1 ? f.elements['plafonD1'].value : '', jangkaWaktu: isD1 ? f.elements['jangkaWaktuD1'].value : '', jenisKredit: isD1 ? f.elements['jenisKreditD1'].value : '', file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-masuk', 'surat-masuk'); }
-async function submitSuratKeluar(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertSuratKeluar', { id: f.elements['idSuratKeluar'].value, cabangSMSK: c[0], jenisSurat: f.elements['jenisSurat'].value, tujuan: f.elements['tujuan'].value, perihal: f.elements['perihal'].value, penandatangan: f.elements['penandatangan'].value, sifat: f.elements['sifat'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-keluar', 'surat-keluar'); }
-async function submitSPPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertSPPK', { id: f.elements['idSPPK'].value, cabangPK: c[1], tanggalSPPK: f.elements['tanggalSPPK'].value, namaDebitur: f.elements['namaDebitur'].value, jenisKredit: f.elements['jenisKredit'].value, plafon: f.elements['plafon'].value, jangkaWaktu: f.elements['jangkaWaktu'].value, tujuanKredit: f.elements['tujuanKredit'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-sppk', 'sppk'); }
-async function submitPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertPK', { id: f.elements['idPK'].value, cabangPK: c[1], nomorSPPK: f.elements['nomorSPPK'].value, tanggalPK: f.elements['tanggalPK'].value, namaDebitur: f.elements['namaDebitur'].value, plafon: f.elements['plafon'].value, golDebitur: f.elements['golDebitur'].value, jnsPenggunaan: f.elements['jnsPenggunaan'].value, klasKredit: f.elements['klasKredit'].value, sektorEko: f.elements['sektorEko'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-pk', 'pk'); }
-
-function populatePKForm() {
-    let options = '<option value="">Pilih SPPK...</option>'; storeData['sppk'].forEach(j => { if(j.status !== "Sudah PK") options += `<option value="${j.nomorSPPK}">${j.nomorSPPK} - ${j.debitur}</option>`; }); document.getElementById('select-sppk-induk').innerHTML = options;
-    document.getElementById('select-sppk-induk').onchange = function(e) { const sel = storeData['sppk'].find(x => x.nomorSPPK === e.target.value); if(sel) { document.getElementById('pk-nama-debitur').value = sel.debitur; document.getElementById('pk-plafon').value = sel.plafon; const cbSel = document.getElementById('pk-cabang'); Array.from(cbSel.options).forEach(opt => { if(opt.value.includes(sel.cabang)) cbSel.value = opt.value; }); } };
-    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getReferensiPK' }) }).then(res => res.json()).then(result => { if(result.status === 'success') { let opsGol = '<option value="">Pilih...</option>', opsJns = '<option value="">Pilih...</option>', opsKlas = '<option value="">Pilih...</option>', opsSek = '<option value="">Pilih...</option>'; result.data.forEach(j => { let txt = `<option value="${j.kode}">${j.kode} - ${j.uraian}</option>`; if(j.kategori === 'GolDebitur') opsGol += txt; else if(j.kategori === 'JnsPenggunaan') opsJns += txt; else if(j.kategori === 'KlasKredit') opsKlas += txt; else if(j.kategori === 'SektorEko') opsSek += txt; }); document.getElementById('sel-goldebitur').innerHTML = opsGol; document.getElementById('sel-jnspenggunaan').innerHTML = opsJns; document.getElementById('sel-klaskredit').innerHTML = opsKlas; document.getElementById('sel-sektoreko').innerHTML = opsSek; } });
+async function sendFormData(action, payload, formEl, modalId, jenisMenuRef) {
+    const btn = formEl.querySelector('button[type="submit"]'); const originalBtnHTML = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...'; btn.disabled = true;
+    try {
+        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: action, payload: payload }) }); const result = await response.json();
+        if (result.status === 'success') { if(modalId) closeModal(modalId); showAlert('Berhasil', result.message, 'success'); if(modalId) formEl.reset(); if(jenisMenuRef) loadDataTabel(jenisMenuRef); if(jenisMenuRef && !['user','jenis-surat','referensi-pk','cabang'].includes(jenisMenuRef)) loadDashboardStats(); } else showAlert('Gagal', result.message, 'error');
+    } catch (error) { showAlert('Koneksi Gagal', 'Gagal mengirim data.', 'error'); } finally { btn.innerHTML = originalBtnHTML; btn.disabled = false; }
 }
 
-// MASTER DATA
-function openModalCabang() { document.getElementById('idCabang').value = ''; document.getElementById('namaCabang').value = ''; document.getElementById('kodeSMSK').value = ''; document.getElementById('kodePK').value = ''; document.getElementById('title-cabang').innerHTML = '<i class="fa-solid fa-code-branch text-primary"></i> Tambah Cabang'; openModal('modal-cabang'); }
-function editCabang(id) { const data = storeData['cabang'].find(d => d.id === id); if(data) { document.getElementById('idCabang').value = data.id; document.getElementById('namaCabang').value = data.nama; document.getElementById('kodeSMSK').value = data.kodeSM; document.getElementById('kodePK').value = data.kodePK; document.getElementById('title-cabang').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Cabang'; openModal('modal-cabang'); } }
-function openModalJenisSurat() { document.getElementById('idJenisSurat').value = ''; document.getElementById('kodeJenis').value = ''; document.getElementById('namaJenis').value = ''; document.getElementById('uraianJenis').value = ''; document.getElementById('title-jenis-surat').innerHTML = '<i class="fa-solid fa-tags text-primary"></i> Tambah Jenis Surat'; openModal('modal-jenis-surat'); }
-function editJenisSurat(id) { const data = globalDataJenisSurat.find(d => d.id === id); if(data) { document.getElementById('idJenisSurat').value = data.id; document.getElementById('kodeJenis').value = data.kode; document.getElementById('namaJenis').value = data.nama; document.getElementById('uraianJenis').value = data.uraian; document.getElementById('title-jenis-surat').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Jenis Surat'; openModal('modal-jenis-surat'); } }
-function openModalUser() { document.getElementById('idUser').value = ''; document.getElementById('namaLengkap').value = ''; document.getElementById('usernameLogin').value = ''; document.getElementById('jabatanUser').value = ''; document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-user-plus text-primary"></i> Tambah User'; openModal('modal-user'); }
-function editUser(id) { const data = globalDataUser.find(d => d.id === id); if(data) { document.getElementById('idUser').value = data.id; document.getElementById('namaLengkap').value = data.nama; document.getElementById('usernameLogin').value = data.username; document.getElementById('roleUser').value = data.role; document.getElementById('jabatanUser').value = data.jabatan; document.getElementById('title-user').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit User'; openModal('modal-user'); } }
-function openModalReferensiPK() { document.getElementById('idRefPK').value = ''; document.getElementById('kodeRefPK').value = ''; document.getElementById('descRefPK').value = ''; document.getElementById('title-referensi-pk').innerHTML = '<i class="fa-solid fa-list text-primary"></i> Tambah Referensi PK'; openModal('modal-referensi-pk'); }
-function editReferensiPK(id) { const data = globalDataRefPK.find(d => d.id === id); if(data) { document.getElementById('idRefPK').value = data.id; document.getElementById('katRefPK').value = data.kategori; document.getElementById('kodeRefPK').value = data.kode; document.getElementById('descRefPK').value = data.uraian; document.getElementById('title-referensi-pk').innerHTML = '<i class="fa-solid fa-edit text-primary"></i> Edit Referensi PK'; openModal('modal-referensi-pk'); } }
+// Master Data Submits
 async function submitCabang(e) { e.preventDefault(); const f = e.target; sendFormData('saveCabang', { id: f.elements['idCabang'].value, nama: f.elements['namaCabang'].value, kodeSM: f.elements['kodeSMSK'].value, kodePK: f.elements['kodePK'].value }, f, 'modal-cabang', 'cabang'); }
 async function submitJenisSurat(e) { e.preventDefault(); const f = e.target; sendFormData('saveJenisSurat', { id: f.elements['idJenisSurat'].value, kode: f.elements['kodeJenis'].value, nama: f.elements['namaJenis'].value, uraian: f.elements['uraianJenis'].value }, f, 'modal-jenis-surat', 'jenis-surat'); }
 async function submitUser(e) { e.preventDefault(); const f = e.target; sendFormData('saveUser', { id: f.elements['idUser'].value, nama: f.elements['namaLengkap'].value, username: f.elements['usernameLogin'].value, role: f.elements['roleUser'].value, jabatan: f.elements['jabatanUser'].value }, f, 'modal-user', 'user'); }
 async function submitReferensiPK(e) { e.preventDefault(); const f = e.target; sendFormData('saveReferensiPK', { id: f.elements['idRefPK'].value, kategori: f.elements['katRefPK'].value, kode: f.elements['kodeRefPK'].value, uraian: f.elements['descRefPK'].value }, f, 'modal-referensi-pk', 'referensi-pk'); }
 async function submitConfig(e) { e.preventDefault(); const form = e.target; const payload = {}; Array.from(form.elements).forEach(el => { if(el.name) payload[el.name] = el.value; }); sendFormData('saveConfig', payload, form, null, null); setTimeout(loadConfig, 1000); }
 
-// EXPORT PDF & WA
+// Transaksi Submits
+async function submitSuratMasuk(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); const isD1 = f.elements['jenisSurat'].value === 'D1'; sendFormData('upsertSuratMasuk', { id: f.elements['idSuratMasuk'].value, cabangSMSK: c[0], jenisSurat: f.elements['jenisSurat'].value, tanggalSurat: f.elements['tanggalSurat'].value, pengirim: isD1 ? f.elements['namaDebiturD1'].value : f.elements['pengirim'].value, sifatSurat: f.elements['sifatSurat'].value, perihal: isD1 ? 'Pengajuan Kredit Baru' : f.elements['perihal'].value, plafon: isD1 ? f.elements['plafonD1'].value : '', jangkaWaktu: isD1 ? f.elements['jangkaWaktuD1'].value : '', jenisKredit: isD1 ? f.elements['jenisKreditD1'].value : '', file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-masuk', 'surat-masuk'); }
+async function submitSuratKeluar(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertSuratKeluar', { id: f.elements['idSuratKeluar'].value, cabangSMSK: c[0], jenisSurat: f.elements['jenisSurat'].value, tujuan: f.elements['tujuan'].value, perihal: f.elements['perihal'].value, penandatangan: f.elements['penandatangan'].value, sifat: f.elements['sifat'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-surat-keluar', 'surat-keluar'); }
+async function submitSPPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertSPPK', { id: f.elements['idSPPK'].value, cabangPK: c[1], tanggalSPPK: f.elements['tanggalSPPK'].value, namaDebitur: f.elements['namaDebitur'].value, jenisKredit: f.elements['jenisKredit'].value, plafon: f.elements['plafon'].value, jangkaWaktu: f.elements['jangkaWaktu'].value, tujuanKredit: f.elements['tujuanKredit'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-sppk', 'sppk'); }
+async function submitPK(e) { e.preventDefault(); const f = e.target; const fileData = f.elements['fileUpload'].files.length > 0 ? await getBase64(f.elements['fileUpload'].files[0]) : null; const c = f.elements['pilihCabang'].value.split('|'); sendFormData('upsertPK', { id: f.elements['idPK'].value, cabangPK: c[1], nomorSPPK: f.elements['nomorSPPK'].value, tanggalPK: f.elements['tanggalPK'].value, namaDebitur: f.elements['namaDebitur'].value, plafon: f.elements['plafon'].value, golDebitur: f.elements['golDebitur'].value, jnsPenggunaan: f.elements['jnsPenggunaan'].value, klasKredit: f.elements['klasKredit'].value, sektorEko: f.elements['sektorEko'].value, file: fileData, user: currentUser?currentUser.username:'Unknown' }, f, 'modal-pk', 'pk'); }
+
+function populatePKForm() {
+    let options = '<option value="">Pilih SPPK yang Disetujui...</option>'; storeData['sppk'].forEach(j => { if(j.status !== "Sudah PK") options += `<option value="${j.nomorSPPK}">${j.nomorSPPK} - ${j.debitur}</option>`; }); document.getElementById('select-sppk-induk').innerHTML = options;
+    document.getElementById('select-sppk-induk').onchange = function(e) { const sel = storeData['sppk'].find(x => x.nomorSPPK === e.target.value); if(sel) { document.getElementById('pk-nama-debitur').value = sel.debitur; document.getElementById('pk-plafon').value = sel.plafon; const cbSel = document.getElementById('pk-cabang'); Array.from(cbSel.options).forEach(opt => { if(opt.value.includes(sel.cabang)) cbSel.value = opt.value; }); } };
+    fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getReferensiPK' }) }).then(res => res.json()).then(result => {
+        if(result.status === 'success') {
+            let opsGol = '<option value="">Pilih...</option>', opsJns = '<option value="">Pilih...</option>', opsKlas = '<option value="">Pilih...</option>', opsSek = '<option value="">Pilih...</option>';
+            result.data.forEach(j => { let txt = `<option value="${j.kode}">${j.kode} - ${j.uraian}</option>`; if(j.kategori === 'GolDebitur') opsGol += txt; else if(j.kategori === 'JnsPenggunaan') opsJns += txt; else if(j.kategori === 'KlasKredit') opsKlas += txt; else if(j.kategori === 'SektorEko') opsSek += txt; });
+            document.getElementById('sel-goldebitur').innerHTML = opsGol; document.getElementById('sel-jnspenggunaan').innerHTML = opsJns; document.getElementById('sel-klaskredit').innerHTML = opsKlas; document.getElementById('sel-sektoreko').innerHTML = opsSek;
+        }
+    });
+}
+
+// ==== EXPORT PDF & WA ====
 function generateLaporanPDF() {
     const jenis = document.getElementById('lap-jenis').value; const cabang = document.getElementById('lap-cabang').value;
     let data = storeData[jenis] || []; if(cabang) data = data.filter(d => d.cabang === cabang || (d.cabang && d.cabang.includes(cabang)));
