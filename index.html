@@ -510,8 +510,14 @@
                                         </div>
                                     </div>
                                     <div class="input-group">
-                                        <label>URL Logo Aplikasi (Link Gambar)</label>
-                                        <input type="text" name="AppLogo" placeholder="https://...">
+                                        <label>Logo Aplikasi (Upload Gambar)</label>
+                                        <div class="file-drop-area" style="height: auto; padding: 15px 10px;">
+                                            <span class="file-msg" id="logo-preview-container">
+                                                <img id="preview-logo-img" src="" style="max-height: 45px; margin-bottom: 8px; display: none; border-radius: 8px;">
+                                                <span><i class="fa-solid fa-cloud-arrow-up"></i> Klik/Seret File Gambar (PNG/JPG)</span>
+                                            </span>
+                                            <input type="file" name="AppLogoFile" accept="image/png, image/jpeg" class="file-input-modern">
+                                        </div>
                                     </div>
                                     <div class="input-group">
                                         <label>Tema UI Bawaan Default</label>
