@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Manajemen Surat, SPPK & PK</title>
     <link rel="manifest" href="manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        .timeline-container { position: relative; padding: 20px 0; }
-        .timeline-item { position: relative; padding-left: 30px; margin-bottom: 20px; border-left: 2px solid var(--primary); }
-        .timeline-item::before { content: ''; position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
-        .timeline-date { font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; }
-        .timeline-title { font-size: 1.1rem; color: var(--text-primary); font-weight: 700; margin: 5px 0; }
-        .timeline-desc { font-size: 0.9rem; color: var(--text-secondary); }
-    </style>
 </head>
 <body>
-    <div id="custom-alert" class="modal-overlay hidden"><div class="modal-card alert-card"><div id="alert-icon" class="alert-icon"></div><h3 id="alert-title">Title</h3><p id="alert-message">Message</p><button class="btn btn-primary" onclick="closeAlert()">Tutup</button></div></div>
+    <!-- Alert Global -->
+    <div id="custom-alert" class="modal-overlay hidden">
+        <div class="modal-card alert-card">
+            <div id="alert-icon" class="alert-icon"></div>
+            <h3 id="alert-title">Title</h3>
+            <p id="alert-message">Message</p>
+            <button class="btn btn-primary" onclick="closeAlert()">Tutup</button>
+        </div>
+    </div>
 
     <!-- ==================== KUMPULAN MODAL ==================== -->
     <div id="modal-surat-masuk" class="modal-overlay hidden">
@@ -30,6 +30,8 @@
                 <div class="form-grid">
                     <div class="input-group"><label>Cabang</label><select name="pilihCabang" class="sel-cabang-global" required></select></div>
                     <div class="input-group"><label>Tanggal Surat</label><input type="date" name="tanggalSurat" required></div>
+                </div>
+                <div class="form-grid">
                     <div class="input-group"><label>Jenis Surat</label><select name="jenisSurat" id="select-jenis-sm" onchange="toggleD1Fields()" required></select></div>
                     <div class="input-group"><label>Sifat Surat</label><select name="sifatSurat" required><option value="Biasa">Biasa</option><option value="Penting">Penting</option><option value="Rahasia">Rahasia</option></select></div>
                 </div>
@@ -39,7 +41,7 @@
                     <div class="input-group"><label>Perihal</label><input type="text" name="perihal" id="sm-perihal" placeholder="Ringkasan isi surat..."></div>
                 </div>
 
-                <div id="sm-d1-fields" class="hidden" style="background:var(--primary-light); padding:15px; border-radius:8px; margin-bottom:15px;">
+                <div id="sm-d1-fields" class="hidden" style="background:var(--primary-light); padding:15px; border-radius:var(--radius-md); margin-bottom:15px; border-left: 4px solid var(--primary);">
                     <h4 style="margin-bottom:10px; color:var(--primary);"><i class="fa-solid fa-user-check"></i> Pengajuan Kredit (D1)</h4>
                     <div class="input-group"><label>Nama Debitur</label><input type="text" name="namaDebiturD1" id="sm-nama-debitur" placeholder="Nama Lengkap Pemohon"></div>
                     <div class="form-grid">
@@ -116,12 +118,12 @@
                     <div class="input-group"><label>No. SPPK Induk</label><select name="nomorSPPK" id="select-sppk-induk" required><option value="">Pilih SPPK...</option></select></div>
                 </div>
                 <div class="form-grid">
-                    <div class="input-group"><label>Nama Debitur</label><input type="text" name="namaDebitur" id="pk-nama-debitur" required readonly style="background:var(--bg-main);"></div>
-                    <div class="input-group"><label>Nilai Plafon (Rp)</label><input type="number" name="plafon" id="pk-plafon" required readonly style="background:var(--bg-main);"></div>
+                    <div class="input-group"><label>Nama Debitur (Auto)</label><input type="text" name="namaDebitur" id="pk-nama-debitur" required readonly style="background:var(--bg-main); opacity:0.8;"></div>
+                    <div class="input-group"><label>Nilai Plafon (Rp) (Auto)</label><input type="number" name="plafon" id="pk-plafon" required readonly style="background:var(--bg-main); opacity:0.8;"></div>
                 </div>
                 <div class="input-group"><label>Tanggal PK</label><input type="date" name="tanggalPK" required></div>
                 
-                <h4 style="margin:15px 0 10px; border-bottom:1px dashed var(--border-color); color:var(--primary);">Komponen Nomor PK</h4>
+                <h4 style="margin:15px 0 10px; border-bottom:1px dashed var(--border-color); color:var(--primary); font-size:0.95rem;">Komponen Nomor PK</h4>
                 <div class="form-grid">
                     <div class="input-group"><label>Golongan Debitur</label><select name="golDebitur" id="sel-goldebitur" required></select></div>
                     <div class="input-group"><label>Jenis Penggunaan</label><select name="jnsPenggunaan" id="sel-jnspenggunaan" required></select></div>
@@ -134,7 +136,7 @@
         </div>
     </div>
 
-    <!-- Modals Manajemen (Cabang, User, Jenis, Referensi PK) -->
+    <!-- Modals Manajemen -->
     <div id="modal-cabang" class="modal-overlay hidden"><div class="modal-card modal-form"><h3 id="title-cabang"><i class="fa-solid fa-code-branch text-primary"></i> Tambah Cabang</h3><form onsubmit="submitCabang(event)"><input type="hidden" name="idCabang" id="idCabang"><div class="input-group"><label>Nama Cabang</label><input type="text" name="namaCabang" id="namaCabang" required></div><div class="form-grid"><div class="input-group"><label>Kode Cabang (SM/SK)</label><input type="text" name="kodeSMSK" id="kodeSMSK" required></div><div class="input-group"><label>Kode Cabang (PK)</label><input type="text" name="kodePK" id="kodePK" required></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-cabang')">Batal</button><button type="submit" class="btn btn-primary">Simpan Cabang</button></div></form></div></div>
     <div id="modal-jenis-surat" class="modal-overlay hidden"><div class="modal-card modal-form"><h3 id="title-jenis-surat"><i class="fa-solid fa-tags text-primary"></i> Tambah Jenis Surat</h3><form onsubmit="submitJenisSurat(event)"><input type="hidden" name="idJenisSurat" id="idJenisSurat"><div class="form-grid"><div class="input-group"><label>Kode Surat</label><input type="text" name="kodeJenis" id="kodeJenis" required></div><div class="input-group"><label>Nama Klasifikasi</label><input type="text" name="namaJenis" id="namaJenis" required></div></div><div class="input-group"><label>Uraian</label><input type="text" name="uraianJenis" id="uraianJenis" required></div><div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-jenis-surat')">Batal</button><button type="submit" class="btn btn-primary">Simpan</button></div></form></div></div>
     <div id="modal-user" class="modal-overlay hidden"><div class="modal-card modal-form"><h3 id="title-user"><i class="fa-solid fa-user-plus text-primary"></i> Tambah User</h3><form onsubmit="submitUser(event)"><input type="hidden" name="idUser" id="idUser"><div class="form-grid"><div class="input-group"><label>Nama Lengkap</label><input type="text" name="namaLengkap" id="namaLengkap" required></div><div class="input-group"><label>Username</label><input type="text" name="usernameLogin" id="usernameLogin" required></div><div class="input-group"><label>Role</label><select name="roleUser" id="roleUser" required><option value="Admin">Admin</option><option value="Pejabat">Pejabat</option><option value="Staf">Staf</option></select></div><div class="input-group"><label>Jabatan</label><input type="text" name="jabatanUser" id="jabatanUser" required></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('modal-user')">Batal</button><button type="submit" class="btn btn-primary">Simpan User</button></div></form></div></div>
@@ -143,12 +145,12 @@
     <div id="modal-timeline" class="modal-overlay hidden"><div class="modal-card modal-form" style="max-width:500px!important;"><h3><i class="fa-solid fa-clock-rotate-left text-primary"></i> SLA Timeline History</h3><h4 id="timeline-debitur" style="color:var(--primary); margin-bottom:15px;"></h4><div id="timeline-content" class="timeline-container"></div><div class="modal-footer"><button class="btn btn-primary w-100" onclick="closeModal('modal-timeline')">Tutup</button></div></div></div>
     <!-- ==================== END MODAL ==================== -->
 
+    <!-- Layar Utama -->
     <div id="init-screen" class="screen-container"><div style="text-align: center;"><i class="fa-solid fa-circle-notch fa-spin fa-4x text-primary" style="margin-bottom: 20px;"></i><h2>Memuat Sistem...</h2></div></div>
     
-   <div id="login-screen" class="screen-container hidden">
+    <div id="login-screen" class="screen-container hidden">
         <div class="login-card">
             <div class="login-header">
-                <!-- ID logo dan nama diubah agar bisa dirender dinamis via JS -->
                 <img id="login-app-logo" src="https://cdn-icons-png.flaticon.com/512/3062/3062634.png" style="height:70px; margin-bottom:15px; object-fit:contain;">
                 <h2 id="login-app-name">SuratApp</h2>
                 <p id="login-company-name">Sistem Manajemen Terpadu</p>
@@ -160,21 +162,21 @@
             </form>
         </div>
     </div>
-    
+
     <div id="main-screen" class="screen-container hidden">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
-                    <img id="sidebar-app-logo" src="https://cdn-icons-png.flaticon.com/512/3062/3062634.png" alt="Logo">
-                    <h3 id="sidebar-app-name">SuratApp</h3>
+                    <img id="sidebar-app-logo" src="https://cdn-icons-png.flaticon.com/512/3062/3062634.png" alt="Logo" style="width:36px; height:36px; border-radius:8px;">
+                    <h3 id="sidebar-app-name" style="font-size:1.3rem; margin:0; color:var(--primary);">SuratApp</h3>
                 </div>
                 <button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="sidebar-user">
                 <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
                 <div class="user-info">
-                    <h4 id="user-name">User Name</h4>
-                    <span class="badge badge-primary" id="user-role">Role</span>
+                    <h4 id="user-name" style="margin:0; font-size:1.1rem;">User</h4>
+                    <span class="badge badge-primary" id="user-role" style="font-size:0.65rem;">Role</span>
                 </div>
             </div>
             <nav class="sidebar-nav">
@@ -191,14 +193,17 @@
                 <a href="#" class="nav-item admin-only" onclick="navigate('pengaturan')"><i class="fa-solid fa-gear"></i> Konfigurasi</a>
             </nav>
             <div class="sidebar-footer">
-                <button class="btn-logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+                <button class="btn-outline" onclick="handleLogout()" style="width:100%; border:none; background:var(--danger-light); color:var(--danger); font-weight:800; border-radius:12px; padding:12px;"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
             </div>
         </aside>
 
         <main class="main-content">
-            <header class="topbar"><button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button><h2 id="page-title" class="page-title">Dashboard</h2><div class="topbar-actions"><button class="btn-icon" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button></div></header>
+            <header class="topbar">
+                <button class="btn-icon mobile-only" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                <h2 id="page-title" class="page-title" style="margin:0; font-size:1.5rem;">Dashboard</h2>
+                <div class="topbar-actions"><button class="btn-icon" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i></button></div>
+            </header>
 
-           <!-- HANYA BAGIAN CONTENT AREA DARI index.html -->
             <div class="content-area" id="content-area">
                 
                 <!-- VIEW: DASHBOARD -->
@@ -211,18 +216,17 @@
                     </div>
                 </div>
 
-                <!-- VIEW: SURAT MASUK -->
+                <!-- VIEW TRANSAKSI DENGAN COMPACT FILTER -->
                 <div id="view-surat-masuk" class="view-section hidden">
                     <div class="card table-card">
                         <div class="card-header flex-between"><h3>Data Surat Masuk</h3><button class="btn btn-primary" onclick="openModalSM()"><i class="fa-solid fa-plus"></i> Tambah</button></div>
                         <div class="card-body">
-                            <div id="filter-surat-masuk"></div> <!-- Filter otomatis di-render ke sini -->
+                            <div id="filter-surat-masuk"></div> <!-- Filter HTML di-inject oleh JS ke div ini -->
                             <div class="table-responsive"><table class="modern-table"><thead><tr><th>No. Surat</th><th>Tgl Terima</th><th>Pengirim/Debitur</th><th>Perihal/Jenis</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbody-surat-masuk"><tr><td colspan="6" style="text-align: center;">Memuat data...</td></tr></tbody></table></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- LAKUKAN HAL YANG SAMA (Tambahkan <div class="card-body"> yang membungkus filter dan tabel) UNTUK VIEW SK, SPPK, PK, DAN ARSIP -->
                 <div id="view-surat-keluar" class="view-section hidden">
                     <div class="card table-card">
                         <div class="card-header flex-between"><h3>Data Surat Keluar</h3><button class="btn btn-primary" onclick="openModalSK()"><i class="fa-solid fa-plus"></i> Buat Surat</button></div>
@@ -262,17 +266,29 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div id="view-laporan" class="view-section hidden admin-only">
                     <div class="form-grid">
-                        <div class="card"><div class="card-header"><h3>Cetak / Ekspor PDF</h3></div><div class="card-body"><div class="input-group"><label>Data Laporan</label><select id="lap-jenis"><option value="surat-masuk">Surat Masuk</option><option value="surat-keluar">Surat Keluar</option><option value="sppk">Data SPPK</option><option value="pk">Data PK</option></select></div><div class="input-group"><label>Cabang</label><select id="lap-cabang" class="sel-cabang-filter"><option value="">Semua Cabang</option></select></div><button class="btn btn-primary w-100" onclick="generateLaporanPDF()"><i class="fa-solid fa-file-pdf"></i> Unduh PDF</button></div></div>
-                        <div class="card"><div class="card-header"><h3>WhatsApp Summary</h3></div><div class="card-body"><p>Hasilkan ringkasan otomatis yang siap di-forward ke pimpinan.</p><button class="btn btn-outline w-100" style="border-color:#25D366; color:#25D366; margin-top:15px;" onclick="generateLaporanWA()"><i class="fa-brands fa-whatsapp"></i> Copy Teks WA</button></div></div>
+                        <div class="card">
+                            <div class="card-header"><h3>Cetak / Ekspor PDF</h3></div>
+                            <div class="card-body">
+                                <div class="input-group"><label>Data Laporan</label><select id="lap-jenis"><option value="surat-masuk">Surat Masuk</option><option value="surat-keluar">Surat Keluar</option><option value="sppk">Data SPPK</option><option value="pk">Data PK</option></select></div>
+                                <div class="input-group"><label>Cabang</label><select id="lap-cabang" class="sel-cabang-filter"><option value="">Semua Cabang</option></select></div>
+                                <button class="btn btn-primary w-100" onclick="generateLaporanPDF()"><i class="fa-solid fa-file-pdf"></i> Unduh PDF</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h3>WhatsApp Summary</h3></div>
+                            <div class="card-body">
+                                <p style="margin-bottom: 20px;">Hasilkan ringkasan otomatis yang siap di-forward ke pimpinan.</p>
+                                <button class="btn btn-outline w-100" style="border-color:#25D366; color:#25D366;" onclick="generateLaporanWA()"><i class="fa-brands fa-whatsapp"></i> Copy Teks WA</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- VIEW: PENGATURAN -->
                 <div id="view-pengaturan" class="view-section hidden admin-only">
-                    <!-- PENAMBAHAN MENU IDENTITAS -->
                     <div class="card" style="margin-bottom: 20px;">
                         <div class="card-header"><h3>Identitas Aplikasi & Sistem Terpusat</h3></div>
                         <div class="card-body">
@@ -285,24 +301,36 @@
                                     <div class="input-group"><label>URL Logo Aplikasi (Link Gambar)</label><input type="url" name="AppLogo" placeholder="https://link-ke-gambar.png"></div>
                                     <div class="input-group">
                                         <label>Tema UI Default</label>
-                                        <select name="DefaultTheme" required>
-                                            <option value="light">Light Mode (Terang)</option>
-                                            <option value="dark">Dark Mode (Gelap)</option>
-                                        </select>
+                                        <select name="DefaultTheme" required><option value="light">Light Mode (Terang)</option><option value="dark">Dark Mode (Gelap)</option></select>
                                     </div>
                                 </div>
                                 <div style="background:var(--primary-light); padding:15px; border-radius:12px; font-size:0.85rem; color:var(--text-primary); margin-bottom:15px; border-left: 4px solid var(--primary);">
-                                    <strong>Rekomendasi:</strong> Gunakan logo berformat PNG transparan (aspek rasio kotak/persegi) dengan resolusi minimal 200x200 pixel agar terlihat tajam di semua layar.
+                                    <strong>Rekomendasi:</strong> Gunakan logo berformat PNG transparan (aspek rasio persegi) dengan resolusi min 200x200 pixel agar terlihat tajam.
                                 </div>
                                 <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Terapkan Identitas Baru</button>
                             </form>
                         </div>
                     </div>
+
                     <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Cabang</h3><button class="btn btn-primary btn-sm" onclick="openModalCabang()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Nama Cabang</th><th>Kode SM/SK</th><th>Kode SPPK/PK</th><th>Aksi</th></tr></thead><tbody id="tbody-cabang"></tbody></table></div></div>
                     <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Referensi PK</h3><button class="btn btn-primary btn-sm" onclick="openModalReferensiPK()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Kategori</th><th>Kode</th><th>Uraian / Deskripsi</th><th>Aksi</th></tr></thead><tbody id="tbody-referensi-pk"></tbody></table></div></div>
                     <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Jenis Surat</h3><button class="btn btn-primary btn-sm" onclick="openModalJenisSurat()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Kode</th><th>Nama Klasifikasi</th><th>Uraian / Tujuan</th><th>Aksi</th></tr></thead><tbody id="tbody-jenis-surat"></tbody></table></div></div>
                     <div class="card" style="margin-bottom: 20px;"><div class="card-header flex-between"><h3>Manajemen Pengguna</h3><button class="btn btn-primary btn-sm" onclick="openModalUser()"><i class="fa-solid fa-plus"></i> Tambah</button></div><div class="table-responsive"><table class="modern-table"><thead><tr><th>Username</th><th>Nama Lengkap</th><th>Role</th><th>Jabatan</th><th>Aksi</th></tr></thead><tbody id="tbody-user"></tbody></table></div></div>
-                    <div class="card"><div class="card-header"><h3>Format Dasar Penomoran Sistem</h3></div><div class="card-body"><form onsubmit="submitConfig(event)" id="form-config"><div class="form-grid"><div class="input-group"><label>Format Surat Masuk</label><input type="text" name="FormatSM" required></div><div class="input-group"><label>Format Surat Keluar</label><input type="text" name="FormatSK" required></div><div class="input-group"><label>Format SPPK</label><input type="text" name="FormatSPPK" required></div><div class="input-group"><label>Format PK</label><input type="text" name="FormatPK" required></div></div><button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan Format Dasar</button></form></div></div>
+                    
+                    <div class="card">
+                        <div class="card-header"><h3>Format Dasar Penomoran Sistem</h3></div>
+                        <div class="card-body">
+                            <form onsubmit="submitConfig(event)" id="form-config">
+                                <div class="form-grid">
+                                    <div class="input-group"><label>Format Surat Masuk</label><input type="text" name="FormatSM" required></div>
+                                    <div class="input-group"><label>Format Surat Keluar</label><input type="text" name="FormatSK" required></div>
+                                    <div class="input-group"><label>Format SPPK</label><input type="text" name="FormatSPPK" required></div>
+                                    <div class="input-group"><label>Format PK</label><input type="text" name="FormatPK" required></div>
+                                </div>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan Format Dasar</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
             </div>
