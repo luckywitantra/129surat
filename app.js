@@ -1,6 +1,8 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbxj7uQSzJJLESto_xbCuQAw1iDEn-1_jNX68MlwLjtnmJqFpTOtsq2eOpBDZjpz648Y/exec';
 
 let currentUser = null; 
+// TAMBAHKAN Variabel ini di baris paling atas (di bawah let currentUser = null;)
+let currentPage = {};
 let currentTheme = localStorage.getItem('theme') || 'light';
 let storeData = { 'surat-masuk': [], 'surat-keluar': [], 'sppk': [], 'pk': [], 'arsip': [], 'cabang': [] };
 let globalDataJenisSurat = []; 
@@ -66,33 +68,32 @@ function navigate(page) {
     const titles = { 'dashboard': 'Dashboard', 'surat-masuk': 'Surat Masuk', 'surat-keluar': 'Surat Keluar', 'sppk': 'Data SPPK', 'pk': 'Data PK', 'arsip': 'Arsip Dokumen', 'laporan': 'Pusat Laporan', 'pengaturan': 'Pengaturan Sistem' }; document.getElementById('page-title').innerText = titles[page] || 'Aplikasi';
 }
 
+// 1. GANTI FUNGSI loadDashboardStats dan TAMBAHKAN handleDashboardAction
 async function loadDashboardStats() {
     try { 
         const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboardStats' }) }); 
         const result = await response.json(); 
         if (result.status === 'success') { 
             const data = result.data;
-            // Update Kartu Utama
-            document.getElementById('stat-sm').innerText = data.sm; 
-            document.getElementById('stat-sk').innerText = data.sk; 
-            document.getElementById('stat-sppk').innerText = data.sppk; 
-            document.getElementById('stat-pk').innerText = data.pk; 
+            document.getElementById('stat-sm').innerText = data.sm; document.getElementById('stat-sk').innerText = data.sk; document.getElementById('stat-sppk').innerText = data.sppk; document.getElementById('stat-pk').innerText = data.pk; 
 
-            // Render Daftar Menunggu Tindakan (Pending SLA)
+            // Render Menunggu Tindakan (Clickable)
             const pendingList = document.getElementById('dash-pending-list');
             if (data.pending && data.pending.length > 0) {
                 let pHtml = '';
                 data.pending.forEach(p => {
                     let icon = p.type === 'D1' ? '<i class="fa-solid fa-user-clock text-warning"></i>' : '<i class="fa-solid fa-file-signature text-danger"></i>';
                     let bg = p.type === 'D1' ? 'var(--warning-light)' : 'var(--danger-light)';
-                    pHtml += `<li><div class="activity-icon" style="background:${bg}">${icon}</div><div class="activity-content"><h4>${p.title}</h4><p>${p.desc}</p></div><div class="activity-time">${formatDateShort(p.time)}</div></li>`;
+                    pHtml += `<li onclick="handleDashboardAction('${p.type}', '${p.ref}')" title="Klik untuk menindaklanjuti">
+                                <div class="activity-icon" style="background:${bg}">${icon}</div>
+                                <div class="activity-content"><h4>${p.title}</h4><p>${p.desc}</p></div>
+                                <div class="activity-time">${formatDateShort(p.time)}</div>
+                              </li>`;
                 });
                 pendingList.innerHTML = pHtml;
-            } else {
-                pendingList.innerHTML = '<li style="padding:30px 20px; justify-content:center; text-align:center;"><div style="color:var(--success);"><i class="fa-solid fa-check-circle fa-2x" style="margin-bottom:10px;"></i><br><strong>Sempurna!</strong><br><small style="color:var(--text-secondary)">Tidak ada dokumen yang mengantri.</small></div></li>';
-            }
+            } else { pendingList.innerHTML = '<li style="padding:30px 20px; justify-content:center; text-align:center;"><div style="color:var(--success);"><i class="fa-solid fa-check-circle fa-2x" style="margin-bottom:10px;"></i><br><strong>Sempurna!</strong><br><small style="color:var(--text-secondary)">Tidak ada dokumen yang mengantri.</small></div></li>'; }
 
-            // Render Aktivitas Terbaru
+            // Render Aktivitas Terbaru (Clickable)
             const recentList = document.getElementById('dash-recent-list');
             if (data.recent && data.recent.length > 0) {
                 let rHtml = '';
@@ -102,22 +103,45 @@ async function loadDashboardStats() {
                     else if(r.type === 'SK') { icon = '<i class="fa-solid fa-paper-plane text-success"></i>'; bg = 'var(--success-light)'; }
                     else if(r.type === 'SPPK') { icon = '<i class="fa-solid fa-file-contract text-primary"></i>'; bg = 'var(--primary-light)'; }
                     else if(r.type === 'PK') { icon = '<i class="fa-solid fa-handshake text-orange"></i>'; bg = 'var(--warning-light)'; }
-
-                    rHtml += `<li><div class="activity-icon" style="background:${bg}">${icon}</div><div class="activity-content"><h4>${r.title}</h4><p>${r.desc}</p></div><div class="activity-time">${formatDateShort(r.time)}</div></li>`;
+                    rHtml += `<li onclick="handleDashboardAction('${r.type}', '${r.ref}')" title="Lihat detail dokumen">
+                                <div class="activity-icon" style="background:${bg}">${icon}</div>
+                                <div class="activity-content"><h4>${r.title}</h4><p>${r.desc}</p></div>
+                                <div class="activity-time">${formatDateShort(r.time)}</div>
+                              </li>`;
                 });
                 recentList.innerHTML = rHtml;
-            } else {
-                recentList.innerHTML = '<li style="padding:20px; justify-content:center; color:var(--text-secondary);">Belum ada aktivitas.</li>';
-            }
+            } else { recentList.innerHTML = '<li style="padding:20px; justify-content:center; color:var(--text-secondary);">Belum ada aktivitas.</li>'; }
         } 
     } catch (e) { console.error(e); }
 }
 
-// Fungsi helper tambahan untuk format tanggal singkat
-function formatDateShort(dateStr) {
-    if(!dateStr) return '';
-    const d = new Date(dateStr);
-    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+function formatDateShort(dateStr) { if(!dateStr) return ''; const d = new Date(dateStr); return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`; }
+
+function handleDashboardAction(type, ref) {
+    if (type === 'D1') {
+        navigate('sppk');
+        setTimeout(() => {
+            openModalSPPK();
+            const selectD1 = document.getElementById('sppk-sumber-d1');
+            if(selectD1) { selectD1.value = ref; selectD1.dispatchEvent(new Event('change')); }
+        }, 800);
+    } else if (type === 'SPPK') {
+        navigate('pk');
+        setTimeout(() => {
+            openModalPK();
+            const selectSPPK = document.getElementById('select-sppk-induk');
+            if(selectSPPK) { selectSPPK.value = ref; selectSPPK.dispatchEvent(new Event('change')); }
+        }, 800);
+    } else {
+        let targetMap = { 'SM': 'surat-masuk', 'SK': 'surat-keluar', 'SPPK': 'sppk', 'PK': 'pk' };
+        if (targetMap[type]) {
+            navigate(targetMap[type]);
+            setTimeout(() => {
+                const searchBox = document.getElementById(`search-${targetMap[type]}`);
+                if(searchBox) { searchBox.value = ref; applyFilter(targetMap[type], 1); }
+            }, 600);
+        }
+    }
 }
 
 // GANTI fungsi loadConfig() dengan yang baru ini:
@@ -260,10 +284,11 @@ async function loadDataTabel(jenis) {
     } catch (error) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger);">Gagal memuat.</td></tr>`; }
 }
 
-// GANTI FUNGSI INI
-function applyFilter(jenis) {
+function applyFilter(jenis, page = 1) {
     if(!storeData[jenis]) return;
     let data = [...storeData[jenis]]; const tbody = document.getElementById(`tbody-${jenis}`); if(!tbody) return;
+
+    currentPage[jenis] = page; // Rekam posisi halaman saat ini
 
     if(['surat-masuk','surat-keluar','sppk','pk','arsip'].includes(jenis)) {
         const searchVal = document.getElementById(`search-${jenis}`) ? document.getElementById(`search-${jenis}`).value.toLowerCase() : '';
@@ -299,7 +324,48 @@ function applyFilter(jenis) {
         });
     }
 
-    renderHTMLTabel(jenis, data, tbody);
+    // Paginasi: Ambil hanya maksimal 10 baris per halaman
+    const rowsPerPage = 10;
+    const totalItems = data.length;
+    const startIndex = (page - 1) * rowsPerPage;
+    const paginatedData = data.slice(startIndex, startIndex + rowsPerPage);
+
+    // Render Data Terpotong & Menu Pagination
+    renderHTMLTabel(jenis, paginatedData, tbody);
+    if(['surat-masuk','surat-keluar','sppk','pk','arsip'].includes(jenis)) {
+        renderPagination(jenis, totalItems, page, rowsPerPage);
+    }
+}
+
+function renderPagination(jenis, totalItems, page, rowsPerPage) {
+    const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
+    let container = document.getElementById(`pagination-${jenis}`);
+    
+    // Jika elemen navigasi belum ada, injeksi ke dalam HTML di bawah tabel
+    if(!container) {
+        const tableResp = document.getElementById(`tbody-${jenis}`).closest('.table-responsive');
+        container = document.createElement('div');
+        container.id = `pagination-${jenis}`;
+        container.className = 'pagination-container';
+        tableResp.parentNode.insertBefore(container, tableResp.nextSibling);
+    }
+
+    // Jika kosong, sembunyikan informasi halamannya
+    if(totalItems === 0) {
+        container.innerHTML = ''; 
+        return;
+    }
+
+    container.innerHTML = `
+        <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:800;">
+            Menampilkan ${Math.min(totalItems, (page-1)*rowsPerPage + 1)} - ${Math.min(totalItems, page*rowsPerPage)} dari <span class="badge badge-primary">${totalItems}</span> total data
+        </span>
+        <div class="flex-gap">
+            <button class="btn btn-outline btn-sm" onclick="applyFilter('${jenis}', ${page - 1})" ${page === 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i> Sebelumnya</button>
+            <span style="font-weight:900; font-size:0.95rem; padding:0 10px; color:var(--primary);">Halaman ${page} / ${totalPages}</span>
+            <button class="btn btn-outline btn-sm" onclick="applyFilter('${jenis}', ${page + 1})" ${page === totalPages ? 'disabled' : ''}>Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    `;
 }
 
 function renderHTMLTabel(jenis, dataArray, tbody) {
