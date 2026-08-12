@@ -824,71 +824,6 @@ function showToast(title, message, type = 'success') {
     }, 3500);
 }
 
-
-function handleLogout() { currentUser = null; document.getElementById('main-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); document.getElementById('login-form').reset(); document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex'); }
-window.onload = () => { if (document.getElementById('theme-icon')) document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; };
-
-// SWIPE DOWN TO CLOSE MODAL (HP)
-let touchStartY = 0, currentDeltaY = 0, activeSwipeModal = null, isSwiping = false;
-document.addEventListener('touchstart', (e) => {
-    if (window.innerWidth > 768) return;
-    const modal = e.target.closest('.modal-overlay:not(.hidden) .modal-card'); if (!modal) return;
-    const form = modal.querySelector('form'); if (form && form.contains(e.target) && form.scrollTop > 0) return; 
-    activeSwipeModal = modal; touchStartY = e.touches[0].clientY; isSwiping = true; activeSwipeModal.style.transition = 'none'; 
-}, {passive: true});
-
-document.addEventListener('touchmove', (e) => {
-    if (!isSwiping || !activeSwipeModal) return;
-    const form = activeSwipeModal.querySelector('form');
-    if (form && form.contains(e.target) && form.scrollTop > 0 && currentDeltaY <= 0) { isSwiping = false; activeSwipeModal.style.transform = ''; return; }
-    const currentY = e.touches[0].clientY; currentDeltaY = currentY - touchStartY;
-    if (currentDeltaY > 0) { activeSwipeModal.style.transform = `translateY(${currentDeltaY}px)`; if (e.cancelable) e.preventDefault(); }
-}, {passive: false});
-
-document.addEventListener('touchend', () => {
-    if (!isSwiping || !activeSwipeModal) return;
-    isSwiping = false; activeSwipeModal.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-    if (currentDeltaY > 120) { 
-        activeSwipeModal.style.transform = 'translateY(100%)'; const overlayId = activeSwipeModal.closest('.modal-overlay').id;
-        setTimeout(() => { closeModal(overlayId); activeSwipeModal.style.transform = ''; }, 300); 
-    } else { activeSwipeModal.style.transform = 'translateY(0)'; setTimeout(() => { if(activeSwipeModal) activeSwipeModal.style.transform = ''; }, 400); }
-    activeSwipeModal = null; currentDeltaY = 0;
-});
-
-// ========================================================
-// --- INTERAKSI FILE UPLOAD MODERN (DROPZONE) ---
-// ========================================================
-document.addEventListener('change', function(e) {
-    if (e.target.classList.contains('file-input-modern')) {
-        const fileMsgEl = e.target.previousElementSibling;
-        if (e.target.files && e.target.files.length > 0) {
-            const fileName = e.target.files[0].name;
-            
-            // Cek apakah yang diupload adalah gambar (Logo) atau PDF (Dokumen)
-            if (e.target.accept && e.target.accept.includes('image')) {
-                const reader = new FileReader();
-                reader.onload = function(e_read) {
-                    fileMsgEl.innerHTML = `<img src="${e_read.target.result}" style="max-height: 45px; margin-bottom: 8px; border-radius: 8px;"> <span style="color: var(--text-primary); margin-top: 5px;">${fileName}</span>`;
-                }
-                reader.readAsDataURL(e.target.files[0]);
-            } else {
-                fileMsgEl.innerHTML = `<i class="fa-solid fa-file-pdf text-danger" style="font-size: 2.5rem;"></i> <span style="color: var(--text-primary); margin-top: 5px;">${fileName}</span>`;
-            }
-            e.target.parentElement.style.background = 'var(--success-light)';
-            e.target.parentElement.style.borderColor = 'var(--success)';
-        } else {
-            // Logika reset
-            if (e.target.accept && e.target.accept.includes('image')) {
-                fileMsgEl.innerHTML = `<img id="preview-logo-img" src="" style="max-height: 45px; margin-bottom: 8px; display: none; border-radius: 8px;"><span><i class="fa-solid fa-cloud-arrow-up"></i> Klik/Seret File Gambar (PNG/JPG)</span>`;
-            } else {
-                fileMsgEl.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Klik atau Seret File PDF Anda ke Sini`;
-            }
-            e.target.parentElement.style.background = 'var(--primary-light)';
-            e.target.parentElement.style.borderColor = 'var(--primary)';
-        }
-    }
-});
-
 // ========================================================
 // --- MESIN DATA ANALYTICS & EKSPOR LAPORAN (SUPERAPP) ---
 // ========================================================
@@ -1131,3 +1066,70 @@ function cetakLaporanPDF() {
         // Optional: printWin.close(); 
     }, 1000);
 }
+
+
+function handleLogout() { currentUser = null; document.getElementById('main-screen').classList.add('hidden'); document.getElementById('login-screen').classList.remove('hidden'); document.getElementById('login-form').reset(); document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex'); }
+window.onload = () => { if (document.getElementById('theme-icon')) document.getElementById('theme-icon').className = currentTheme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'; };
+
+// SWIPE DOWN TO CLOSE MODAL (HP)
+let touchStartY = 0, currentDeltaY = 0, activeSwipeModal = null, isSwiping = false;
+document.addEventListener('touchstart', (e) => {
+    if (window.innerWidth > 768) return;
+    const modal = e.target.closest('.modal-overlay:not(.hidden) .modal-card'); if (!modal) return;
+    const form = modal.querySelector('form'); if (form && form.contains(e.target) && form.scrollTop > 0) return; 
+    activeSwipeModal = modal; touchStartY = e.touches[0].clientY; isSwiping = true; activeSwipeModal.style.transition = 'none'; 
+}, {passive: true});
+
+document.addEventListener('touchmove', (e) => {
+    if (!isSwiping || !activeSwipeModal) return;
+    const form = activeSwipeModal.querySelector('form');
+    if (form && form.contains(e.target) && form.scrollTop > 0 && currentDeltaY <= 0) { isSwiping = false; activeSwipeModal.style.transform = ''; return; }
+    const currentY = e.touches[0].clientY; currentDeltaY = currentY - touchStartY;
+    if (currentDeltaY > 0) { activeSwipeModal.style.transform = `translateY(${currentDeltaY}px)`; if (e.cancelable) e.preventDefault(); }
+}, {passive: false});
+
+document.addEventListener('touchend', () => {
+    if (!isSwiping || !activeSwipeModal) return;
+    isSwiping = false; activeSwipeModal.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    if (currentDeltaY > 120) { 
+        activeSwipeModal.style.transform = 'translateY(100%)'; const overlayId = activeSwipeModal.closest('.modal-overlay').id;
+        setTimeout(() => { closeModal(overlayId); activeSwipeModal.style.transform = ''; }, 300); 
+    } else { activeSwipeModal.style.transform = 'translateY(0)'; setTimeout(() => { if(activeSwipeModal) activeSwipeModal.style.transform = ''; }, 400); }
+    activeSwipeModal = null; currentDeltaY = 0;
+});
+
+// ========================================================
+// --- INTERAKSI FILE UPLOAD MODERN (DROPZONE) ---
+// ========================================================
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('file-input-modern')) {
+        const fileMsgEl = e.target.previousElementSibling;
+        if (e.target.files && e.target.files.length > 0) {
+            const fileName = e.target.files[0].name;
+            
+            // Cek apakah yang diupload adalah gambar (Logo) atau PDF (Dokumen)
+            if (e.target.accept && e.target.accept.includes('image')) {
+                const reader = new FileReader();
+                reader.onload = function(e_read) {
+                    fileMsgEl.innerHTML = `<img src="${e_read.target.result}" style="max-height: 45px; margin-bottom: 8px; border-radius: 8px;"> <span style="color: var(--text-primary); margin-top: 5px;">${fileName}</span>`;
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            } else {
+                fileMsgEl.innerHTML = `<i class="fa-solid fa-file-pdf text-danger" style="font-size: 2.5rem;"></i> <span style="color: var(--text-primary); margin-top: 5px;">${fileName}</span>`;
+            }
+            e.target.parentElement.style.background = 'var(--success-light)';
+            e.target.parentElement.style.borderColor = 'var(--success)';
+        } else {
+            // Logika reset
+            if (e.target.accept && e.target.accept.includes('image')) {
+                fileMsgEl.innerHTML = `<img id="preview-logo-img" src="" style="max-height: 45px; margin-bottom: 8px; display: none; border-radius: 8px;"><span><i class="fa-solid fa-cloud-arrow-up"></i> Klik/Seret File Gambar (PNG/JPG)</span>`;
+            } else {
+                fileMsgEl.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Klik atau Seret File PDF Anda ke Sini`;
+            }
+            e.target.parentElement.style.background = 'var(--primary-light)';
+            e.target.parentElement.style.borderColor = 'var(--primary)';
+        }
+    }
+});
+
+
