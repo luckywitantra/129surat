@@ -888,3 +888,246 @@ document.addEventListener('change', function(e) {
         }
     }
 });
+
+// ========================================================
+// --- MESIN DATA ANALYTICS & EKSPOR LAPORAN (SUPERAPP) ---
+// ========================================================
+
+// 1. Tarik Data Terbaru secara Global untuk Laporan
+async function sinkronisasiLaporan() {
+    showToast('Sinkronisasi...', 'Menarik seluruh data transaksi terbaru...', 'info');
+    try {
+        await Promise.all([
+            loadDataTabel('surat-masuk'),
+            loadDataTabel('surat-keluar'),
+            loadDataTabel('sppk'),
+            loadDataTabel('pk')
+        ]);
+        generateLaporanAnalytics();
+        showToast('Sinkronisasi Berhasil', 'Data Laporan sudah 100% mutakhir.', 'success');
+    } catch (e) {
+        showToast('Gagal', 'Terjadi kesalahan jaringan.', 'error');
+    }
+}
+
+// 2. Fungsi Ekstraksi & Filter Data Berdasarkan Bulan/Tahun
+function getFilteredLaporanData() {
+    const bulan = document.getElementById('lap-bulan').value;
+    const tahun = document.getElementById('lap-tahun').value;
+    let result = { sm: [], sk: [], sppk: [], pk: [] };
+    
+    // Fungsi Penyaring (Filter Engine)
+    const filterData = (item) => {
+        if (!item.tanggal) return false;
+        const dateObj = new Date(item.tanggal);
+        const itemBulan = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const itemTahun = String(dateObj.getFullYear());
+        return (bulan === 'all' || itemBulan === bulan) && (tahun === 'all' || itemTahun === tahun);
+    };
+
+    if(storeData['surat-masuk']) result.sm = storeData['surat-masuk'].filter(filterData);
+    if(storeData['surat-keluar']) result.sk = storeData['surat-keluar'].filter(filterData);
+    if(storeData['sppk']) result.sppk = storeData['sppk'].filter(filterData);
+    if(storeData['pk']) result.pk = storeData['pk'].filter(filterData);
+
+    return result;
+}
+
+// 3. Proses Kalkulasi Angka & Render Tampilan
+function generateLaporanAnalytics() {
+    const data = getFilteredLaporanData();
+    
+    // Hitung Total Uang
+    let totalPlafonSPPK = data.sppk.reduce((sum, item) => sum + (parseFloat(item.plafon.replace(/[^0-9]/g, '')) || 0), 0);
+    let totalPlafonPK = data.pk.reduce((sum, item) => sum + (parseFloat(item.plafon.replace(/[^0-9]/g, '')) || 0), 0);
+
+    // Update Kartu Statistik di Layar
+    const gridHtml = `
+        <div class="stat-card blue" style="min-height: 120px;">
+            <div class="stat-icon"><i class="fa-solid fa-inbox"></i></div>
+            <div class="stat-details"><h3>${data.sm.length}</h3><p>Surat Masuk</p></div>
+        </div>
+        <div class="stat-card green" style="min-height: 120px;">
+            <div class="stat-icon"><i class="fa-solid fa-paper-plane"></i></div>
+            <div class="stat-details"><h3>${data.sk.length}</h3><p>Surat Keluar</p></div>
+        </div>
+        <div class="stat-card orange" style="min-height: 120px;">
+            <div class="stat-icon"><i class="fa-solid fa-file-signature"></i></div>
+            <div class="stat-details"><h3>${data.sppk.length}</h3><p>SPPK Diterbitkan<br><small style="font-weight:900; color:#FFFBEB;">Rp ${totalPlafonSPPK.toLocaleString('id-ID')}</small></p></div>
+        </div>
+        <div class="stat-card purple" style="min-height: 120px;">
+            <div class="stat-icon"><i class="fa-solid fa-handshake"></i></div>
+            <div class="stat-details"><h3>${data.pk.length}</h3><p>PK Aktif<br><small style="font-weight:900; color:#EFF6FF;">Rp ${totalPlafonPK.toLocaleString('id-ID')}</small></p></div>
+        </div>
+    `;
+    document.getElementById('lap-analytics-grid').innerHTML = gridHtml;
+
+    // Generate Format Teks WhatsApp
+    let namaBulan = document.getElementById('lap-bulan').options[document.getElementById('lap-bulan').selectedIndex].text;
+    let textTahun = document.getElementById('lap-tahun').value === 'all' ? 'Sepanjang Waktu' : document.getElementById('lap-tahun').value;
+    let periodeTeks = document.getElementById('lap-bulan').value === 'all' ? textTahun : `${namaBulan.replace(/[0-9 -]/g, '')} ${textTahun}`;
+
+    const waText = `*LAPORAN REKAPITULASI DOKUMEN & KREDIT*
+🏢 Cabang: Utama / Pusat
+🗓 Periode: ${periodeTeks}
+
+*📊 RINGKASAN AKTIVITAS SURAT:*
+- 📥 Surat Masuk: *${data.sm.length} Dokumen*
+- 📤 Surat Keluar: *${data.sk.length} Dokumen*
+- 📝 SPPK Diterbitkan: *${data.sppk.length} Nasabah*
+- 🤝 Perjanjian Kredit (PK): *${data.pk.length} Kontrak*
+
+*💰 TOTAL PLAFON KREDIT:*
+- 🟡 Total Plafon SPPK: *Rp ${totalPlafonSPPK.toLocaleString('id-ID')}*
+- 🔴 Total Plafon PK (Final): *Rp ${totalPlafonPK.toLocaleString('id-ID')}*
+
+_Laporan otomatis dihasilkan oleh Sistem Manajemen Terpadu pada ${new Date().toLocaleString('id-ID')}_`;
+
+    document.getElementById('wa-preview').innerText = waText;
+}
+
+// 4. Aksi: Salin ke Clipboard
+function copyFormatWA() {
+    const text = document.getElementById('wa-preview').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Disalin!', 'Format pesan WhatsApp berhasil disalin ke Clipboard.', 'success');
+    }).catch(err => {
+        showToast('Gagal', 'Tidak dapat menyalin teks. Silakan blok teks dan salin manual.', 'error');
+    });
+}
+
+// 5. Aksi: Mesin Pembuat PDF (Print Window Native)
+function cetakLaporanPDF() {
+    const data = getFilteredLaporanData();
+    const appName = document.title.split('-')[0] || 'Sistem Laporan';
+    const logoSrc = document.getElementById('sidebar-app-logo') ? document.getElementById('sidebar-app-logo').src : '';
+    
+    let namaBulan = document.getElementById('lap-bulan').options[document.getElementById('lap-bulan').selectedIndex].text;
+    let textTahun = document.getElementById('lap-tahun').value === 'all' ? 'Sepanjang Waktu' : document.getElementById('lap-tahun').value;
+    let periodeTeks = document.getElementById('lap-bulan').value === 'all' ? textTahun : `${namaBulan.replace(/[0-9 -]/g, '')} ${textTahun}`;
+
+    let totalPlafonSPPK = data.sppk.reduce((sum, item) => sum + (parseFloat(item.plafon.replace(/[^0-9]/g, '')) || 0), 0);
+    let totalPlafonPK = data.pk.reduce((sum, item) => sum + (parseFloat(item.plafon.replace(/[^0-9]/g, '')) || 0), 0);
+
+    // Buka Jendela Kosong
+    let printWin = window.open('', '_blank', 'width=1000,height=800');
+    
+    // Suntikkan CSS & HTML Murni untuk Kertas A4
+    let html = `
+    <html>
+    <head>
+        <title>Cetak Laporan - ${periodeTeks}</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+            body { font-family: 'Roboto', sans-serif; color: #111; padding: 0; margin: 0; }
+            .cetak-container { max-width: 100%; padding: 30px 40px; margin: auto; }
+            
+            /* Kop Surat Perbankan */
+            .kop-surat { display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #111; padding-bottom: 15px; margin-bottom: 30px; position: relative; }
+            .kop-surat img { width: 70px; position: absolute; left: 0; }
+            .kop-text { text-align: center; }
+            .kop-text h1 { margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; color: #0F172A; }
+            .kop-text p { margin: 5px 0 0; font-size: 13px; color: #475569; letter-spacing: 0.5px; }
+            
+            /* Ringkasan Eksekutif */
+            .summary-box { background: #F8FAFC; border: 2px solid #E2E8F0; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+            .summary-box h3 { margin: 0 0 15px; color: #1E3A8A; font-size: 18px; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; }
+            .summary-grid { display: flex; justify-content: space-between; flex-wrap: wrap; }
+            .sum-item { width: 48%; margin-bottom: 10px; font-size: 14px; }
+            .sum-item strong { color: #0F172A; display: inline-block; width: 150px; }
+            
+            /* Tabel Data */
+            h4 { color: #0F172A; font-size: 16px; margin: 25px 0 10px; background: #F1F5F9; padding: 8px 12px; border-left: 4px solid #2563EB; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 11px; }
+            th, td { border: 1px solid #CBD5E1; padding: 8px 10px; text-align: left; }
+            th { background-color: #0F172A; color: #FFFFFF; font-weight: bold; text-transform: uppercase; }
+            tr:nth-child(even) { background-color: #F8FAFC; }
+            
+            /* Tanda Tangan */
+            .ttd-section { margin-top: 50px; text-align: right; font-size: 14px; }
+            .ttd-box { display: inline-block; text-align: center; width: 250px; }
+            .ttd-box .nama { margin-top: 80px; font-weight: bold; text-decoration: underline; }
+            
+            @media print {
+                @page { size: A4 portrait; margin: 15mm; }
+                body { padding: 0; background: white; }
+                .cetak-container { padding: 0; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="cetak-container">
+            <!-- Kop Surat -->
+            <div class="kop-surat">
+                ${logoSrc ? `<img src="${logoSrc}" alt="Logo">` : ''}
+                <div class="kop-text">
+                    <h1>LAPORAN REKAPITULASI DOKUMEN</h1>
+                    <p>SISTEM MANAJEMEN TERPADU - ${appName.toUpperCase()}</p>
+                </div>
+            </div>
+
+            <!-- Ringkasan Eksekutif -->
+            <div class="summary-box">
+                <h3>Ringkasan Eksekutif - Periode: ${periodeTeks}</h3>
+                <div class="summary-grid">
+                    <div class="sum-item"><strong>Total Surat Masuk</strong>: ${data.sm.length} Dokumen</div>
+                    <div class="sum-item"><strong>Total Surat Keluar</strong>: ${data.sk.length} Dokumen</div>
+                    <div class="sum-item"><strong>Total Penerbitan SPPK</strong>: ${data.sppk.length} Nasabah</div>
+                    <div class="sum-item"><strong>Total Kontrak PK</strong>: ${data.pk.length} Perjanjian Aktif</div>
+                    <div class="sum-item" style="color: #D97706; font-size:16px; margin-top:10px;"><strong>Akumulasi Plafon SPPK</strong>: Rp ${totalPlafonSPPK.toLocaleString('id-ID')}</div>
+                    <div class="sum-item" style="color: #BE123C; font-size:16px; margin-top:10px;"><strong>Akumulasi Plafon PK</strong>: Rp ${totalPlafonPK.toLocaleString('id-ID')}</div>
+                </div>
+            </div>
+
+            <!-- Tabel SPPK -->
+            <h4>Daftar Persetujuan Kredit (SPPK)</h4>
+            <table>
+                <thead><tr><th>No. SPPK</th><th>Tanggal</th><th>Nama Debitur</th><th>Jenis Kredit</th><th>Plafon (Rp)</th><th>Status</th></tr></thead>
+                <tbody>
+                    ${data.sppk.length > 0 ? data.sppk.map(d => `<tr><td>${d.nomorSPPK}</td><td>${d.tanggal}</td><td>${d.debitur}</td><td>${d.jenisKredit}</td><td>${d.plafon}</td><td>${d.status}</td></tr>`).join('') : '<tr><td colspan="6" style="text-align:center;">Nihil / Tidak ada data pada periode ini</td></tr>'}
+                </tbody>
+            </table>
+
+            <!-- Tabel PK -->
+            <h4>Daftar Perjanjian Kredit (PK)</h4>
+            <table>
+                <thead><tr><th>No. PK</th><th>Tanggal PK</th><th>No. SPPK Induk</th><th>Nama Debitur</th><th>Plafon Final (Rp)</th><th>Cabang</th></tr></thead>
+                <tbody>
+                    ${data.pk.length > 0 ? data.pk.map(d => `<tr><td>${d.nomorPK || 'Draft'}</td><td>${d.tanggal}</td><td>${d.sppkInduk}</td><td>${d.debitur}</td><td>${d.plafon}</td><td>${d.cabang}</td></tr>`).join('') : '<tr><td colspan="6" style="text-align:center;">Nihil / Tidak ada data pada periode ini</td></tr>'}
+                </tbody>
+            </table>
+
+            <!-- Tabel Surat Masuk -->
+            <h4>Daftar Surat Masuk</h4>
+            <table>
+                <thead><tr><th>No. Surat</th><th>Tanggal Terima</th><th>Pengirim</th><th>Perihal / Tujuan</th></tr></thead>
+                <tbody>
+                    ${data.sm.length > 0 ? data.sm.map(d => `<tr><td>${d.nomor}</td><td>${d.tanggal}</td><td>${d.pengirim}</td><td>${d.perihal}</td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;">Nihil</td></tr>'}
+                </tbody>
+            </table>
+
+            <div class="ttd-section">
+                <div class="ttd-box">
+                    <div>Dicetak secara sistem pada,</div>
+                    <div>${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</div>
+                    <div class="nama">Administrator Sistem</div>
+                    <div>( ......................................... )</div>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    // Tulis dokumen, fokuskan, dan jalankan perintah Print Browser
+    printWin.document.open();
+    printWin.document.write(html);
+    printWin.document.close();
+    
+    // Memberikan waktu jeda agar logo termuat sebelum dialog print terbuka
+    setTimeout(() => {
+        printWin.focus();
+        printWin.print();
+        // Optional: printWin.close(); 
+    }, 1000);
+}
