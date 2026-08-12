@@ -469,26 +469,72 @@
                     </div>
                 </div>
 
-                <div id="view-laporan" class="view-section hidden admin-only">
-                    <div class="form-grid">
-                        <div class="card">
-                            <div class="card-header"><h3>Cetak / Ekspor PDF</h3></div>
-                            <div class="card-body">
-                                <div class="input-group"><label>Data Laporan</label><select id="lap-jenis"><option value="surat-masuk">Surat Masuk</option><option value="surat-keluar">Surat Keluar</option><option value="sppk">Data SPPK</option><option value="pk">Data PK</option></select></div>
-                                <div class="input-group"><label>Cabang</label><select id="lap-cabang" class="sel-cabang-filter"><option value="">Semua Cabang</option></select></div>
-                                <button class="btn btn-primary w-100" onclick="generateLaporanPDF()"><i class="fa-solid fa-file-pdf"></i> Unduh PDF</button>
-                            </div>
+                <!-- VIEW: LAPORAN (DATA ANALYTICS & EKSPOR) -->
+                <div id="view-laporan" class="view-section hidden">
+                    <div class="card">
+                        <div class="card-header" style="background: linear-gradient(135deg, #0F172A 0%, #334155 100%); border-radius: var(--radius-md) var(--radius-md) 0 0;">
+                            <h3 style="color: white; margin: 0;"><i class="fa-solid fa-chart-pie"></i> Data Analytics & Ekspor Laporan</h3>
                         </div>
-                        <div class="card">
-                            <div class="card-header"><h3>WhatsApp Summary</h3></div>
-                            <div class="card-body">
-                                <p style="margin-bottom: 20px;">Hasilkan ringkasan otomatis yang siap di-forward ke pimpinan.</p>
-                                <button class="btn btn-outline w-100" style="border-color:#25D366; color:#25D366;" onclick="generateLaporanWA()"><i class="fa-brands fa-whatsapp"></i> Copy Teks WA</button>
+                        <div class="card-body" style="padding: 25px;">
+                            
+                            <!-- 1. Filter Engine -->
+                            <div class="filter-container" style="background: rgba(0,0,0,0.02); padding: 15px 20px; border-radius: 20px; margin-bottom: 25px;">
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; width: 100%;">
+                                    <span style="font-weight: 900; color: var(--text-secondary); text-transform: uppercase; font-size: 0.8rem;"><i class="fa-solid fa-filter"></i> Periode:</span>
+                                    <select id="lap-bulan" class="search-input" onchange="generateLaporanAnalytics()">
+                                        <option value="all">📅 Sepanjang Waktu (Semua Bulan)</option>
+                                        <option value="01">01 - Januari</option> <option value="02">02 - Februari</option>
+                                        <option value="03">03 - Maret</option> <option value="04">04 - April</option>
+                                        <option value="05">05 - Mei</option> <option value="06">06 - Juni</option>
+                                        <option value="07">07 - Juli</option> <option value="08">08 - Agustus</option>
+                                        <option value="09">09 - September</option> <option value="10">10 - Oktober</option>
+                                        <option value="11">11 - November</option> <option value="12">12 - Desember</option>
+                                    </select>
+                                    <select id="lap-tahun" class="search-input" onchange="generateLaporanAnalytics()">
+                                        <option value="all">🗓️ Semua Tahun</option>
+                                        <option value="2026" selected>2026</option>
+                                        <option value="2027">2027</option>
+                                    </select>
+                                    <button class="btn btn-primary" onclick="sinkronisasiLaporan()" style="border-radius: 100px; padding: 10px 20px; flex-shrink: 0;">
+                                        <i class="fa-solid fa-rotate"></i> Tarik Data Terbaru
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 2. Kartu Ringkasan (Analytics Grid) -->
+                            <div class="stats-grid" id="lap-analytics-grid" style="margin-bottom: 30px;">
+                                <!-- Akan disuntikkan secara dinamis oleh JavaScript -->
+                            </div>
+
+                            <!-- 3. Mesin Ekspor (PDF & WhatsApp) -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; border-top: 1px dashed var(--border-color); padding-top: 30px;">
+                                
+                                <!-- Box Ekspor PDF -->
+                                <div style="padding: 25px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-main); transition: var(--transition);" class="hover-shadow">
+                                    <h4 style="margin: 0 0 10px; color: var(--text-primary); font-size: 1.15rem;"><i class="fa-solid fa-file-pdf text-danger"></i> Cetak Dokumen Resmi (PDF)</h4>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 25px; line-height: 1.6;">Sistem akan menghasilkan laporan tabel lengkap ber-Kop Surat yang siap dicetak untuk lampiran rapat direksi atau diarsipkan.</p>
+                                    <button class="btn btn-outline w-100" onclick="cetakLaporanPDF()" style="border-color: var(--danger); color: var(--danger); font-size: 1rem; padding: 14px;">
+                                        <i class="fa-solid fa-print"></i> Generate Laporan PDF
+                                    </button>
+                                </div>
+                                
+                                <!-- Box Format WhatsApp -->
+                                <div style="padding: 25px; border-radius: 20px; border: 1px solid var(--success); background: var(--success-light); position: relative; overflow: hidden;">
+                                    <div style="position: absolute; right: -20px; top: -20px; opacity: 0.1; font-size: 8rem; color: var(--success); pointer-events: none;"><i class="fa-brands fa-whatsapp"></i></div>
+                                    <h4 style="margin: 0 0 15px; color: var(--success); font-size: 1.15rem; position: relative; z-index: 2;"><i class="fa-brands fa-whatsapp"></i> Broadcast WhatsApp</h4>
+                                    
+                                    <!-- Kotak Preview Teks -->
+                                    <pre id="wa-preview" style="height: 140px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; background: rgba(255,255,255,0.7); padding: 15px; border-radius: 12px; border: 1px dashed rgba(5, 150, 105, 0.3); margin-bottom: 20px; white-space: pre-wrap; color: #1f2937; position: relative; z-index: 2; line-height: 1.5;"></pre>
+                                    
+                                    <button class="btn btn-success w-100" onclick="copyFormatWA()" style="position: relative; z-index: 2; font-size: 1rem; padding: 14px; box-shadow: 0 8px 15px rgba(5, 150, 105, 0.2);">
+                                        <i class="fa-solid fa-copy"></i> Salin Pesan ke Clipboard
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- VIEW: PENGATURAN -->
                 <!-- VIEW: PENGATURAN / KONFIGURASI -->
                 <div id="view-pengaturan" class="view-section hidden">
